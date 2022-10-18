@@ -26,9 +26,6 @@ You will will see the output from usage(): \sa GrowthLoop::usage()
 
 ## Documentation
 
-The introductionary presentation is in [GENERAL_DESCRIPTION.md](GENERAL_DESCRIPTION.md).
-
-
 The Reference Guide for the CrownDensity will be based on comments and other information
 available in the software. Extraction of the comments, rendition of the software content and 
 architecture, generation of the structure of the document and formatting the document to html 

@@ -420,7 +420,7 @@ int main(int argc, char** argv)
 
   // Create an instance of intialization class for tree and initialize the
   // global tree created above
-   InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,QUIET);
+   InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,VERBOSE);
   init_pine1.initialize(pine1);
 
   //    Tämä on hack ---------------------------------------!

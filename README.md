@@ -21,7 +21,7 @@ To remove all compilation work type `make distclean`.
 
 Command line options and their short documentation can be obtained by running the program
 without any parameters: <CODE> ./crowndens </CODE>
-You will will see the output from usage(): \sa GrowthLoop::usage()
+You will will see the output from usage(): \sa Usage()
 
 
 ## Documentation

@@ -2,7 +2,7 @@
 CrownDensity simulates growth of one Scots pine tree growing in a gap of a homogeneous forest. The density of the surrounding forest is input from file stemsha.fun. CrownDensity uses the code of project LignumForest for tree growth.
 
 ## Compilation
-This project must reside under *lignum-core* directory. That means first clone lignum-core repository and then in lignum-core clone [CrownDensity] (https://github.com/lignumsystem/CrownDensity.git). You will of course need to have also LignumForest in lignum-core.
+This project must reside under *lignum-core* directory. That means first clone lignum-core repository and then in lignum-core clone [CrownDensity](https://github.com/lignumsystem/CrownDensity.git). You will of course need to have also LignumForest in lignum-core.
 
 To compile CrownDensity (and lignum-core) type:
 

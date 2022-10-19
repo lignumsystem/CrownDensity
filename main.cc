@@ -199,11 +199,12 @@ int main(int argc, char** argv)
 
   //The heartwood build up starts at age hw_start
   clarg.clear();
-  if (ParseCommandLine(argc,argv,"-hw", clarg))
-    if(clarg.length() > 0)
+  if (ParseCommandLine(argc,argv,"-hw", clarg)) {
+    if(clarg.length() > 0) {
       hw_start = atof(clarg.c_str());
-  cout  << "HW " << clarg << " "  << hw_start <<endl;
-
+      cout  << "HW " << clarg << " "  << hw_start <<endl;
+    }
+  }
 
   //Initialize ran3 with some negative integer
   ran3_seed = -3924678;
@@ -420,9 +421,11 @@ int main(int argc, char** argv)
 
   // Create an instance of intialization class for tree and initialize the
   // global tree created above
-   InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,VERBOSE);
+
+  InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,VERBOSE);
   init_pine1.initialize(pine1);
 
+  
   //    Tämä on hack ---------------------------------------!
   tax_share = GetValue(pine1, LGPq);   
 
@@ -1200,7 +1203,7 @@ int main(int argc, char** argv)
     LGMVisualization viz;
     viz.InitVisualization(argc,argv);
     // textures 512x512
-    viz.AddCfTree(pine1, "Manty.bmp", "neulaset5.tga");
+    viz.AddCfTree(pine1, "pine_texture.png", "needle.tga");
     float th = (float)GetValue(pine1,LGAH);
     cout << th << endl;
     //viz.ResetCameraPosition(th);

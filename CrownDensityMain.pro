@@ -6,9 +6,12 @@ CONFIG += qt
 QT += xml
 TEMPLATE = app
 TARGET = crowndens 
-INCLUDEPATH += . include ../c++adt/include ../stl-lignum/include ../Firmament/include ../stl-voxelspace/include ../LEngine/include ../Pine ../XMLTree  ../Graphics ../LignumForest/include 
+INCLUDEPATH += . /opt/local/include include ../c++adt/include ../stl-lignum/include ../Firmament/include ../stl-voxelspace/include ../LEngine/include ../Pine ../XMLTree  ../Graphics
+INCLUDEPATH += ../LignumForest ../LignumForest/include 
 DEPENDPATH += $$INCLUDEPATH
-LIBS += -L../c++adt/lib -L../stl-lignum/lib -L../Firmament/lib -L../LEngine/lib -L../stl-voxelspace/lib -lsky -lL -lvoxel -lLGM  -lcxxadt 
+LIBS += -L/opt/local/lib -L../c++adt/lib -L../stl-lignum/lib -L../Firmament/lib -L../LEngine/lib -L../stl-voxelspace/lib
+LIBS += -lsky -lL -lvoxel -lLGM  -lcxxadt
+LIBS += -lhdf5_cpp -lhdf5 -lz -ldl -lm
 # Input
 unix{
    system(../LEngine/bin/l2c pine-em98.L pine-em98.cpp){
@@ -37,7 +40,7 @@ HEADERS +=
 #           include/SomeFunctors.h include/RadiationCrownDens.h \
 #           include/Space.h include/Palubicki_functors.h include/ByBranches.h
            
-SOURCES +=  main.cc \
+SOURCES +=  main.cc globalvariables.cc\
            ../LignumForest/branchfunctor.cc \
            ../LignumForest/src/metabolism.cc src/radiation.cc \
            ../LignumForest/src/space.cc

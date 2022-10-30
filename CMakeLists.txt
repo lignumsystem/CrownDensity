@@ -25,32 +25,6 @@ src/radiation.cc
 ../LignumForest/src/space.cc
 )
 
-# add_library(sky STATIC IMPORTED GLOBAL)
-# add_library(L STATIC IMPORTED GLOBAL)
-# add_library(voxel STATIC IMPORTED GLOBAL)
-# add_library(LGM STATIC IMPORTED GLOBAL)
-# add_library(cxxadt STATIC IMPORTED GLOBAL)
-
-# add_directory("${CMAKE_CURRENT_LIST_DIR}/../Firmament")
-# add_directory("${CMAKE_CURRENT_LIST_DIR}/../stl-lignum")
-# add_directory("${CMAKE_CURRENT_LIST_DIR}/../stl-voxelspace")
-# add_directory("${CMAKE_CURRENT_LIST_DIR}/../LEngine")
-
-# include_directories(${CMAKE_CURRENT_LIST_DIR}
-# ${CMAKE_CURRENT_LIST_DIR}/include
-# ${CMAKE_CURRENT_LIST_DIR}/../LignumForest
-# ${CMAKE_CURRENT_LIST_DIR}/../LignumForest/include
-# ${CMAKE_CURRENT_LIST_DIR}/../c++adt/include
-# ${CMAKE_CURRENT_LIST_DIR}/../Firmament/include
-# ${CMAKE_CURRENT_LIST_DIR}/../stl-lignum/include
-# ${CMAKE_CURRENT_LIST_DIR}/../stl-voxelspace/include
-# ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
-# ${CMAKE_CURRENT_LIST_DIR}/../Graphics
-# ${CMAKE_CURRENT_LIST_DIR}/../Pine
-# ${CMAKE_CURRENT_LIST_DIR}/../XMLTree
-# /opt/local/include
-# )
-
 add_custom_command(
 OUTPUT ${CMAKE_CURRENT_LIST_DIR}/pine-em98.cpp
 DEPENDS ${CMAKE_CURRENT_LIST_DIR}/pine-em98.L l2c
@@ -66,5 +40,8 @@ ${CMAKE_CURRENT_LIST_DIR}/../Pine
 ${CMAKE_CURRENT_LIST_DIR}/../XMLTree
 ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
 )
-target_link_libraries(crowndens HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore GLUT::GLUT OpenGL::GLU OpenGL::GL  Visual L voxel sky LGM cxxadt)
-install(TARGETS l2c DESTINATION "${CMAKE_CURRENT_LIST_DIR}/")
+target_link_libraries(crowndens HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore
+GLUT::GLUT OpenGL::GLU OpenGL::GL
+Visual L voxel sky LGM cxxadt
+)
+install(TARGETS crowndens DESTINATION "${CMAKE_CURRENT_LIST_DIR}")

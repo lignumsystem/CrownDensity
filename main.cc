@@ -7,7 +7,10 @@
 #include <sstream>
 #include <Lignum.h>
 #include <Bisection.h>
+#include <GrowthLoop.h> ///<From ../LignumForest/
 #include <Shading.h>
+//From LignumForest project
+#include <TreeDataAfterGrowth.h>
 //XML file 
 #include <XMLTree.h>
 //Include the implementation of the tree segment and bud
@@ -124,7 +127,6 @@ int main(int argc, char** argv)
   double hw_start = 0.0;//the age for heartwood formation
 
 
-
   //========================================================================
   //Read command line arguments
 
@@ -134,7 +136,12 @@ int main(int argc, char** argv)
   }
 
   //Check possible command line arguments
-
+  //Results will be in an HDF5 file
+  if (CheckCommandLine(argc,argv,"-hdf5") == false){
+    cout << "No mandatory hdf5 file" <<endl;
+    exit(0);
+  }
+  
   string clarg;
   if (ParseCommandLine(argc,argv,"-iter", clarg)){
     iterations = atoi(clarg.c_str());
@@ -479,7 +486,26 @@ int main(int argc, char** argv)
 
   double Db_previous = 0.0;
   double Db_current = 0.0;
-
+  ///GrowthLoop here is only to collect data for HDF5 files
+  typedef GrowthLoop<ScotsPineTree,ScotsPineSegment,ScotsPineBud,Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData> > ScotsPineGrowthLoop;
+  ScotsPineGrowthLoop gloop;
+  gloop.parseCommandLine(argc,argv);
+  vector<ScotsPineTree*>& treev = const_cast<vector<ScotsPineTree*>&>(gloop.getTrees());
+  treev.clear();
+  ///One tree during the simulation
+  treev.push_back(&pine1);
+  gloop.resizeTreeDataMatrix();
+  ///Initial data
+  gloop.collectDataAfterGrowth(0,false);
+  ///HDF5 file initialization
+  string hdf5fname;
+  ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
+  LGMHDF5File hdf5_file(hdf5fname);
+  LGMHDF5File hdf5_trees(TREEXML_PREFIX+hdf5fname);
+  hdf5_file.createGroup(PGROUP);///< Paramaters
+  hdf5_file.createGroup(TFGROUP);///< Tree functions (Found in MetaFile.txt)
+  hdf5_file.createGroup(AFGROUP);///< All functions (*.fun files found)
+  hdf5_trees.createGroup(TXMLGROUP);///< Tree in xml format
   for (int iter = 0; iter < iterations; iter++)
   {
     cout << "Iter: " << iter << endl;
@@ -584,6 +610,9 @@ int main(int argc, char** argv)
 
     pine1.respiration();
 
+    //As in LignumForest collect data before growth after respiration
+    gloop.collectDataBeforeGrowth(pine1,0);
+
     //To print  consistent P and  respirations we must  collect masses
     //now before senescense and new growth
     double wroot = GetValue(pine1,TreeWr);  //root mass
@@ -598,7 +627,7 @@ int main(int argc, char** argv)
 
     //TreeAging takes care of senescence in segments (above ground part)
     ForEach(pine1,TreeAging<ScotsPineSegment,ScotsPineBud>()); 
-
+    
     //Root mortality
     SetValue(pine1,TreeWr, 
 	     GetValue(pine1,TreeWr)-GetValue(pine1,LGPsr)*GetValue(pine1,TreeWr));
@@ -609,6 +638,10 @@ int main(int argc, char** argv)
     //growth
     LGMdouble ws1 = 0.0;
     ws1 = Accumulate(pine1,ws1,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+
+    //As in LignumForest update `ws_after_senescence` vector
+    UpdateSapwoodAfterSenescence(gloop,ws1,0);
+    
     //Uncomment  ForEach  if you  want  to  follow  for each  segment:
     //Radiation   intercepted    and   absorbed;   photosynthesis   and
     //Respiration;  sapwood and foliage  masses; sapwood  an heartwood
@@ -1086,14 +1119,44 @@ int main(int argc, char** argv)
     LGMdouble initial = 0.0;
     PropagateUp(pine1,initial,set_rue);
    }
-   
-
+   ///As in LignumForest Collect data to HDF5 files after growth 
+   gloop.collectDataAfterGrowth(iter+1);
+   CreateTreeXMLDataSet(gloop,hdf5_trees,TXMLGROUP,gloop.getWriteInterval());
   }   // END OF ITERATION END OF ITERATION END OF ITERATION END OF ITERATION
 
   
 //Clean up.
   cout << "Growth end" << endl;
-
+  cout << "GROWTH DONE " << "NUMBER OF TREES " << gloop.getNumberOfTrees() << endl;
+  ///Unlike in LignumForest no need for clean up
+  ///gloop.cleanUp();
+  /// **Collect HDF5 data**
+  ///
+  /// **Year by year, tree by tree data**
+  TMatrix3D<double>& hdf5_data = gloop.getHDF5TreeData();
+  hdf5_file.createDataSet(TREE_DATA_DATASET_NAME,hdf5_data.rows(),hdf5_data.cols(),hdf5_data.zdim(),hdf5_data);
+  hdf5_file.createColumnNames(TREE_DATA_DATASET_NAME,TREE_DATA_COLUMN_ATTRIBUTE_NAME,TREE_DATA_COLUMN_NAMES);
+  /// **Parameters used**  
+  TMatrix2D<double> hdf5_tree_param_data = gloop.getHDF5TreeParameterData();
+  hdf5_file.createDataSet(PGROUP+TREE_PARAMETER_DATASET_NAME,hdf5_tree_param_data.rows(),hdf5_tree_param_data.cols(),
+			  hdf5_tree_param_data);
+  hdf5_file.createColumnNames(PGROUP+TREE_PARAMETER_DATASET_NAME,TREE_PARAMETER_ATTRIBUTE_NAME,TREE_PARAMETER_NAMES);
+  /// **Functions known in a tree**
+  for (unsigned int i=0; i < FN_V.size();i++){ 
+    TMatrix2D<double> hdf5_tree_fn_data = gloop.getHDF5TreeFunctionData(FN_V[i]);
+    hdf5_file.createDataSet(TFGROUP+FNA_STR[i],hdf5_tree_fn_data.rows(),hdf5_tree_fn_data.cols(),hdf5_tree_fn_data);
+    hdf5_file.createColumnNames(TFGROUP+FNA_STR[i],TREE_FN_ATTRIBUTE_NAME,TREE_FN_COLUMN_NAMES);
+  }
+  /// **All functions used**
+  hdf5_file.createFnDataSetsFromDir("*.fun",AFGROUP,TREE_FN_ATTRIBUTE_NAME,TREE_FN_COLUMN_NAMES);
+   /// **Command line**
+  vector<string> c_vec;
+  std::copy( argv, argv+argc,back_inserter(c_vec));
+  ostringstream cline;
+  copy(c_vec.begin(),c_vec.end(),ostream_iterator<string>(cline, " "));
+  hdf5_file.createDataSet(COMMAND_LINE_DATASET_NAME,cline.str());
+  hdf5_file.close();
+  cout << "DATA SAVED TO HDF5 FILES AND SIMULATION DONE" <<endl;
   //Close result file if was open
   if(toFile)
     ff.close();

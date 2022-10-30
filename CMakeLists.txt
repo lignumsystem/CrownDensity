@@ -67,4 +67,4 @@ ${CMAKE_CURRENT_LIST_DIR}/../XMLTree
 ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
 )
 target_link_libraries(crowndens HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore GLUT::GLUT OpenGL::GLU OpenGL::GL  Visual L voxel sky LGM cxxadt)
-
+install(TARGETS l2c DESTINATION "${CMAKE_CURRENT_LIST_DIR}/")

@@ -81,7 +81,7 @@ bool is_bud_view_function = false;   // and if it is in use
 // [Usagex]
 void Usage()
 {
-  cout << "Usage:  ./crowndens  -iter <value>  -metafile <file>" <<endl;
+  cout << "Usage:  ./crowndens  <iter>  <metafile>" <<endl;
   cout << "-numParts <parts> -hw <hw_start>" <<endl;
   cout << "[-toFile <Filename>] [-xml <filename>]" <<endl;
   cout << "[-fipdistrib <filename>] [-writeInterval interval]" << endl;
@@ -134,6 +134,10 @@ int main(int argc, char** argv)
     Usage();
     return 0;
   }
+  else{
+    iterations = atoi(argv[1]);
+    metafile = string(argv[2]);  ///<`-metafile`, file containing actual parameter files etc.
+  }
 
   //Check possible command line arguments
   //Results will be in an HDF5 file
@@ -143,16 +147,7 @@ int main(int argc, char** argv)
   }
   
   string clarg;
-  if (ParseCommandLine(argc,argv,"-iter", clarg)){
-    iterations = atoi(clarg.c_str());
-  }
-  
-  ///+ `-metafile`, file containing actual parameter files etc.
-  clarg.clear();
-  if (ParseCommandLine(argc,argv,"-metafile", clarg)){
-    metafile = clarg;
-  }
-
+ 
   bool toFile = ParseCommandLine(argc,argv,"-toFile", clarg);
   ofstream ff(clarg.c_str() , ofstream::trunc);
   if(!ff)

@@ -46,6 +46,8 @@ ParametricCurve toptax("toptax.fun"); ///<function to adjust resource distn amon
 
 int growthloop_ebh_mode = 0;          ///<This global variable is needed e.g. in bybranches.cc
 
+LGMdouble max_rueqin;
+
 // VoxelSpace for space occupancy
 Firmament dummy_firm;
 VoxelSpace space_occupancy(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
@@ -479,7 +481,27 @@ int main(int argc, char** argv)
   {
     cout << "Iter: " << iter << endl;
 
-    //tree age and height to L-system through these global variables
+       if(iter == 20) {
+	 is_adhoc = true;
+	 //	 SetValue(pine1, LGPLmin, 0.04);
+	 	 is_bud_view_function = true;
+		 //	 	 space0 = true;
+        }
+    // ParametricCurve fgo1;
+    // if(iter == 20) {
+    //   ParametricCurve apu("fgo1.fun");
+    //   fgo1 = apu;
+    //   SetFunction(pine1, fgo1, SPFGO);
+    // }
+    // ParametricCurve fip1;
+    // if(iter == 20) {
+    //   ParametricCurve apu("fip1.fun");
+    //   fip1 = apu;
+    //   SetFunction(pine1, fip1, LGMIP);
+    // }
+    
+
+    //Tree age and height to L-system through these global variables
     L_age = GetValue(pine1,LGAage);
     L_H =  GetValue(pine1,LGAH);
 
@@ -518,7 +540,9 @@ int main(int argc, char** argv)
     //================================================================
     //Radiation calculations
 
-    LGMdouble k_forest = K(PI_VALUE/2.0);
+    //    LGMdouble k_forest = K(PI_VALUE/2.0);
+    LGMdouble k_forest = 0.11;
+
     LGMdouble Hcb = 0.0;
     LGMdouble treeAf = 0.0;
     treeAf = Accumulate(pine1,treeAf,CollectFoliageArea<
@@ -571,6 +595,11 @@ int main(int argc, char** argv)
       ForEach(pine1,Rad);
     }
     cerr << "CalculateTreeLight end " << endl;
+
+    // If rue*Qin is used in fip, its max value needs to be set
+
+    LGMdouble ini_maxr = 0.0;
+    max_rueqin = Accumulate(pine1,ini_maxr, FindMaxRueQin());
  
     //===============================================================================
     // Photosynthesis and allocation
@@ -676,17 +705,23 @@ int main(int argc, char** argv)
 	  v2 *= EBH_reduction_parameter;
 	  v3 *= EBH_reduction_parameter;
 	  v6 *= EBH_reduction_parameter;
-	
+
+	 // if(EBH_reduction_parameter < 1.0) {
+ 	 //    if(v1 < ebh_final_value) v1 = ebh_final_value;
+ 	 //    if(v2 < ebh_final_value) v2 = ebh_final_value;
+ 	 //    if(v3 < ebh_final_value) v3 = ebh_final_value;
+ 	 //    if(v6 < ebh_final_value) v6 = ebh_final_value;
+ 	 //  } else {
+ 	 //    if(v1 > ebh_final_value) v1 = ebh_final_value;
+ 	 //    if(v2 > ebh_final_value) v2 = ebh_final_value;
+ 	 //    if(v3 > ebh_final_value) v3 = ebh_final_value;
+ 	 //    if(v6 > ebh_final_value) v6 = ebh_final_value;
+ 	 //  }
 	 if(EBH_reduction_parameter < 1.0) {
- 	    if(v1 < ebh_final_value) v1 = ebh_final_value;
- 	    if(v2 < ebh_final_value) v2 = ebh_final_value;
- 	    if(v3 < ebh_final_value) v3 = ebh_final_value;
- 	    if(v6 < ebh_final_value) v6 = ebh_final_value;
- 	  } else {
- 	    if(v1 > ebh_final_value) v1 = ebh_final_value;
- 	    if(v2 > ebh_final_value) v2 = ebh_final_value;
- 	    if(v3 > ebh_final_value) v3 = ebh_final_value;
- 	    if(v6 > ebh_final_value) v6 = ebh_final_value;
+ 	    if(v1 < 0.52) v1 = 0.52;
+ 	    if(v2 < 0.51) v2 = 0.51;
+ 	    if(v3 < 0.503) v3 = 0.503;
+ 	    if(v6 < 0.505) v6 = 0.505;
  	  }
 
 	  vector<double> lfo = lambda_fun.getVector();
@@ -1073,6 +1108,7 @@ int main(int argc, char** argv)
 
     //Set radiation use efficiency in new segments as a function of shadiness
     //experienced by mother segment
+    
    if(growthloop_is_radiation_use_efficiency) {   //rue = 1 == no effect by default
     SetRadiationUseEfficiency<ScotsPineSegment,ScotsPineBud>
       set_rue(GetFirmament(pine1).diffuseBallSensor(),

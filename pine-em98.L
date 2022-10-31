@@ -126,11 +126,11 @@ B(data,omega,l):
     //     << " FM " << data.fm << " fnbuds.fun " << nbuds <<endl; 
 
     if(fipbud(data.ip) == 0.0) nbuds = 0;
-    if (nbuds == 1 || nbuds == 2){
-      if (fipbud(data.ip) < 0.6){
-        nbuds = 0;
-      }
-    }
+//    if (nbuds == 1 || nbuds == 2){
+//      if (fipbud(data.ip) < 0.6){
+//        nbuds = 0;
+//      }
+//    }
 
 //    tiheysmodifikaatio
       if (is_bud_view_function) {

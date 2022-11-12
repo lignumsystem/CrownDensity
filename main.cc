@@ -394,47 +394,47 @@ int main(int argc, char** argv)
   // Initializations
 
   //The tree
-  ScotsPineTree pine1(Point(0.0,0.0,0),PositionVector(0,0,1.0),
-		      "sf.fun","fapical.fun","fgo.fun",
-		      "fsapwdown.fun","faf.fun","fna.fun", "fwd.fun",
-		      "flr.fun", "ebh.fun","bvf.fun");
+  ScotsPineTree* pine1 = new ScotsPineTree(Point(0.0,0.0,0),PositionVector(0,0,1.0),
+					   "sf.fun","fapical.fun","fgo.fun",
+					   "fsapwdown.fun","faf.fun","fna.fun", "fwd.fun",
+					   "flr.fun", "ebh.fun","bvf.fun");
 
   // Bud View Function to Lsystem
   // Its use is controlled by the global variable is_bud_view_function
   // If it is == false, bud_view_f is ignored
   //  Bud View Function file is specifed in the constructor of the tree
-  bud_view_f = GetFunction(pine1, SPBVF);
+  bud_view_f = GetFunction(*pine1, SPBVF);
 
   //SPis_EBH can be set only after the tree has been created
-  SetValue(pine1, SPis_EBH, 0.0);   // i.e. false (1.0 == true)
+  SetValue(*pine1, SPis_EBH, 0.0);   // i.e. false (1.0 == true)
   if(growthloop_is_EBH) {
-    SetValue(pine1, SPis_EBH, 1.0);
+    SetValue(*pine1, SPis_EBH, 1.0);
   }
 
   if (growthloop_is_EBH1) {
-    SetValue(pine1, SPis_EBH, 1.0);
+    SetValue(*pine1, SPis_EBH, 1.0);
   }
 
   //Creation of L-system
-  Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData> pl1;
+  Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData>* pl1 = new Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData>();
 
   //Heartwood build up age
-  SetValue(pine1,SPHwStart,hw_start);
+  SetValue(*pine1,SPHwStart,hw_start);
 
   // Create an instance of intialization class for tree and initialize the
   // global tree created above
 
   InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,VERBOSE);
-  init_pine1.initialize(pine1);
+  init_pine1.initialize(*pine1);
 
   
   //    Tämä on hack ---------------------------------------!
-  tax_share = GetValue(pine1, LGPq);   
+  tax_share = GetValue(*pine1, LGPq);   
 
   //Read the amount of incoming radiation (from all directions, no
   // cosine correction) from Firmament instance of the tree and set that
   // as the value of max radiation to the tree
-  SetValue(pine1,TreeQinMax,GetFirmament(pine1).diffuseBallSensor());
+  SetValue(*pine1,TreeQinMax,GetFirmament(*pine1).diffuseBallSensor());
 
   //Attenuation of radiation inside of shoot (needles) depends
   //on direction expressed by function K(angle)
@@ -449,29 +449,29 @@ int main(int argc, char** argv)
  
 
   //Expand axiom, first initial structure
-  pl1.start();
+  pl1->start();
   cout << "Start end: "  << endl;
 
   //Update Lignum tree pine1 to correspond the structure of the L-system tree
-  pl1.lstringToLignum(pine1,1,PBDATA);
+  pl1->lstringToLignum(*pine1,1,PBDATA);
 
   double wf = 0.0;
   cout << "Collect new foliage begin: " << endl;
-  wf = Accumulate(pine1,wf,CollectNewFoliageMass<ScotsPineSegment,ScotsPineBud>());
+  wf = Accumulate(*pine1,wf,CollectNewFoliageMass<ScotsPineSegment,ScotsPineBud>());
   cout << "Collect new foliage end: " << wf << endl;
 
   //Initial root mass
-  SetValue(pine1,TreeWr,GetValue(pine1,LGPar)*wf);
+  SetValue(*pine1,TreeWr,GetValue(*pine1,LGPar)*wf);
 
   //Calculate  the  LGAsf (specific leaf area) for   newly  created  segments,  sf  in  P
   //Kaitaniemi data depens on segment length
-  ForEach(pine1,SetScotsPineSegmentSf());
+  ForEach(*pine1,SetScotsPineSegmentSf());
 
   LGMdouble trees_left = stems_ha(0.0);
 
   //Initialize tree information
   DCLData dcl;
-  AccumulateDown(pine1,dcl,AddBranchWf(),DiameterCrownBase<ScotsPineSegment,ScotsPineBud>());
+  AccumulateDown(*pine1,dcl,AddBranchWf(),DiameterCrownBase<ScotsPineSegment,ScotsPineBud>());
 
   cout << "Init done" << endl;
 
@@ -483,12 +483,8 @@ int main(int argc, char** argv)
   double Db_current = 0.0;
   ///GrowthLoop here is only to collect data for HDF5 files
   typedef GrowthLoop<ScotsPineTree,ScotsPineSegment,ScotsPineBud,Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData> > ScotsPineGrowthLoop;
-  ScotsPineGrowthLoop gloop;
+  ScotsPineGrowthLoop gloop(pine1,pl1);
   gloop.parseCommandLine(argc,argv);
-  vector<ScotsPineTree*>& treev = const_cast<vector<ScotsPineTree*>&>(gloop.getTrees());
-  treev.clear();
-  ///One tree during the simulation
-  treev.push_back(&pine1);
   gloop.resizeTreeDataMatrix();
   ///Initial data
   gloop.collectDataAfterGrowth(0,false);
@@ -506,15 +502,15 @@ int main(int argc, char** argv)
     cout << "Iter: " << iter << endl;
 
     //tree age and height to L-system through these global variables
-    L_age = GetValue(pine1,LGAage);
-    L_H =  GetValue(pine1,LGAH);
+    L_age = GetValue(*pine1,LGAage);
+    L_H =  GetValue(*pine1,LGAH);
 
     if(is_height_function) {
       if(iter == 0) {
 	dDb = 0.003;    // 3 mm --> length growth about 50*0.003 = 0.15
-	Db_previous = GetValue(pine1, LGADbase);
+	Db_previous = GetValue(*pine1, LGADbase);
       } else {
-	Db_current = GetValue(pine1, LGADbase);
+	Db_current = GetValue(*pine1, LGADbase);
 	dDb = Db_current - Db_previous;
 	Db_previous = Db_current;
       }
@@ -522,24 +518,24 @@ int main(int argc, char** argv)
 
     if (increase_xi){
       if(L_age > 15.0) {
-	double xii = GetValue(pine1, LGPxi);
+	double xii = GetValue(*pine1, LGPxi);
 	xii += 0.1/25.0;
 	if(xii > 0.85) xii=0.85;
-	cout << "Increasing LGPxi from " << GetValue(pine1,LGPxi) << " to " << xii <<endl;
-	SetValue(pine1,LGPxi, xii);
+	cout << "Increasing LGPxi from " << GetValue(*pine1,LGPxi) << " to " << xii <<endl;
+	SetValue(*pine1,LGPxi, xii);
       }
     }
   
     //The star  mean for each segment 0.14 . 
     SetStarMean<ScotsPineSegment,ScotsPineBud> setstar(ParametricCurve(0.14));
-    ForEach(pine1,setstar);
+    ForEach(*pine1,setstar);
  
-    double d13cm = GetValue(pine1,LGADbh)*100.0;
+    double d13cm = GetValue(*pine1,LGADbh)*100.0;
 
     if (self_thinning)
       trees_left = stems_ha(d13cm);
     else
-      trees_left = stems_ha(GetValue(pine1,LGAage));
+      trees_left = stems_ha(GetValue(*pine1,LGAage));
 
     //================================================================
     //Radiation calculations
@@ -547,7 +543,7 @@ int main(int argc, char** argv)
     LGMdouble k_forest = K(PI_VALUE/2.0);
     LGMdouble Hcb = 0.0;
     LGMdouble treeAf = 0.0;
-    treeAf = Accumulate(pine1,treeAf,CollectFoliageArea<
+    treeAf = Accumulate(*pine1,treeAf,CollectFoliageArea<
 			ScotsPineSegment,ScotsPineBud>());
 
     if(iter > 0) {
@@ -555,7 +551,7 @@ int main(int argc, char** argv)
     }
 
       double af_to_radiation = treeAf;
-      double h_to_radiation = GetValue(pine1,LGAH);
+      double h_to_radiation = GetValue(*pine1,LGAH);
       double hcb_to_radiation = Hcb;
       global_hcb = Hcb;
       double trees_left_to_radiation = trees_left;
@@ -572,16 +568,16 @@ int main(int argc, char** argv)
       EvaluateRadiationForCfTreeSegmentForest<ScotsPineSegment,ScotsPineBud>
 	Rad(K,af_to_radiation,k_forest,h_to_radiation,hcb_to_radiation,
 	    trees_left_to_radiation, Point(x_coord,y_coord,0));
-      ForEach(pine1,Rad);
+      ForEach(*pine1,Rad);
     }
     else {
       cerr << "Year " << iter << " Voxel radiation calculation" << endl;
       VoxelSpace vs(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
-		    0.2,0.2,0.2,5,5,5,GetFirmament(pine1));
+		    0.2,0.2,0.2,5,5,5,GetFirmament(*pine1));
 
       BoundingBox bb;
       FindCfBoundingBox<ScotsPineSegment,ScotsPineBud> fb;
-      bb = Accumulate(pine1, bb, fb);
+      bb = Accumulate(*pine1, bb, fb);
 
       Point ll = bb.getMin();
       Point ur = bb.getMax();
@@ -590,49 +586,49 @@ int main(int argc, char** argv)
       vs.reset();
       int num_parts = 5;
       bool wood_voxel = true;
-      DumpCfTree(vs, pine1, num_parts, wood_voxel);
+      DumpCfTree(vs, *pine1, num_parts, wood_voxel);
 
       EvaluateRadiationSelfVoxel Rad(&vs,af_to_radiation,k_forest,h_to_radiation,hcb_to_radiation,
 				     trees_left_to_radiation, Point(x_coord,y_coord,0), K);
-      ForEach(pine1,Rad);
+      ForEach(*pine1,Rad);
     }
     cerr << "CalculateTreeLight end " << endl;
  
     //===============================================================================
     // Photosynthesis and allocation
 
-    pine1.photosynthesis();
+    pine1->photosynthesis();
 
-    pine1.respiration();
+    pine1->respiration();
 
     //As in LignumForest collect data before growth after respiration
-    gloop.collectDataBeforeGrowth(pine1,0);
+    gloop.collectDataBeforeGrowth(*pine1,0);
 
     //To print  consistent P and  respirations we must  collect masses
     //now before senescense and new growth
-    double wroot = GetValue(pine1,TreeWr);  //root mass
+    double wroot = GetValue(*pine1,TreeWr);  //root mass
 
     //Collect foliage 
     LGMdouble wfoliage = 0.0;
-    Accumulate(pine1,wfoliage,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wfoliage,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());
 
     //Collect sapwood mass
     LGMdouble wsapwood = 0.0;
-    Accumulate(pine1,wsapwood,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wsapwood,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
 
     //TreeAging takes care of senescence in segments (above ground part)
-    ForEach(pine1,TreeAging<ScotsPineSegment,ScotsPineBud>()); 
+    ForEach(*pine1,TreeAging<ScotsPineSegment,ScotsPineBud>()); 
     
     //Root mortality
-    SetValue(pine1,TreeWr, 
-	     GetValue(pine1,TreeWr)-GetValue(pine1,LGPsr)*GetValue(pine1,TreeWr));
+    SetValue(*pine1,TreeWr, 
+	     GetValue(*pine1,TreeWr)-GetValue(*pine1,LGPsr)*GetValue(*pine1,TreeWr));
 
     //Collect  sapwood after  senescence from  all  segments.  Collect
     //again after  new growth excluding new  segments.  The difference
     //of  the two  will tell  how much  sapwood was  needed  in diameter
     //growth
     LGMdouble ws1 = 0.0;
-    ws1 = Accumulate(pine1,ws1,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    ws1 = Accumulate(*pine1,ws1,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
 
     //As in LignumForest update `ws_after_senescence` vector
     UpdateSapwoodAfterSenescence(gloop,ws1,0);
@@ -641,35 +637,35 @@ int main(int argc, char** argv)
     //Radiation   intercepted    and   absorbed;   photosynthesis   and
     //Respiration;  sapwood and foliage  masses; sapwood  an heartwood
     //areas.    cout  <<   "CheckQinQabsPRWsWfAsAh  begin"   <<  endl;
-    //ForEach(pine1,    CheckQinQabsPRWsWfAsAh<ScotsPineSegment,ScotsPineBud>());
+    //ForEach(*pine1,    CheckQinQabsPRWsWfAsAh<ScotsPineSegment,ScotsPineBud>());
     //cout << "CheckQinQabsPRWfAsAh done" << endl;
     
     //This first derive() creates the new segments, whose lengths will be iterated
-    pl1.derive();
-    pl1.lstringToLignum(pine1,1,PBDATA);
+    pl1->derive();
+    pl1->lstringToLignum(*pine1,1,PBDATA);
 
     //Pass the  qin to newly  created segments and to  the terminating
     //buds. Also set LGAip (qin/TreeQinMax) for the terminating buds
     double qin = 0.0;
-    PropagateUp(pine1,qin,ForwardScotsPineQin());
+    PropagateUp(*pine1,qin,ForwardScotsPineQin());
 
     //Set the needle angle for newly created segments
-    ForEach(pine1,SetScotsPineSegmentNeedleAngle());
+    ForEach(*pine1,SetScotsPineSegmentNeedleAngle());
 
     //The variable apical (now attribute of ScotsPineSegment) is set in new segments
     //before length growth by vigor index
     double o0 = 1.0;
-    PropagateUp(pine1,o0,SetScotsPineSegmentApical());
+    PropagateUp(*pine1,o0,SetScotsPineSegmentApical());
    
     //Calculate the vigour index
-    TreePhysiologyVigourIndex(pine1);
+    TreePhysiologyVigourIndex(*pine1);
 
-    LGMdouble qin_max = Accumulate(pine1,qin_max,GetQinMax<ScotsPineSegment,ScotsPineBud>());
-    SetValue(pine1,TreeQinMax,GetFirmament(pine1).diffuseBallSensor());
+    LGMdouble qin_max = Accumulate(*pine1,qin_max,GetQinMax<ScotsPineSegment,ScotsPineBud>());
+    SetValue(*pine1,TreeQinMax,GetFirmament(*pine1).diffuseBallSensor());
 
     //Length of path from base of tree to each segment
     LGMdouble plength = 0.0;
-    PropagateUp(pine1,plength,PathLength<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,plength,PathLength<ScotsPineSegment,ScotsPineBud>());
 
     //============================================================================
     // Space colonialization
@@ -678,7 +674,7 @@ int main(int argc, char** argv)
        BoundingBox bbs;
       FindCfBoundingBox<ScotsPineSegment,ScotsPineBud> fbs(true); 
       //Segments with needles considered only
-      bbs = Accumulate(pine1, bbs, fbs);
+      bbs = Accumulate(*pine1, bbs, fbs);
 
       Point lls = bbs.getMin();
       Point urs = bbs.getMax();
@@ -687,16 +683,16 @@ int main(int argc, char** argv)
       DumpTreeOccupy<ScotsPineSegment,ScotsPineBud> dto(3);     //in 3 parts, only foliage parts
       dto.space = &space_occupancy;
 
-      ForEach(pine1, dto);
+      ForEach(*pine1, dto);
     }
 
     //==============================================================================
     // Extended Borchert-Honda calculation if it is in use
     //==============================================================================
 
-    if(GetValue(pine1, SPis_EBH) > 0.0) {
+    if(GetValue(*pine1, SPis_EBH) > 0.0) {
 
-      ParametricCurve lambda_fun = GetFunction(pine1,SPEBHF);
+      ParametricCurve lambda_fun = GetFunction(*pine1,SPEBHF);
       if(growthloop_is_EBH_reduction) {
 	//After age 20 EBH values for all orders change gradually from the nominal value to ebh_final_value 
 	if(L_age > 20) {
@@ -704,7 +700,7 @@ int main(int argc, char** argv)
 	  double v2 = lambda_fun(2.0);
 	  double v3 = lambda_fun(3.0);
 	  double v6 = lambda_fun(6.0);
-	  LGMdouble p = GetValue(pine1, LGPapical);
+	  LGMdouble p = GetValue(*pine1, LGPapical);
 	  v1 *= EBH_reduction_parameter;
 	  v2 *= EBH_reduction_parameter;
 	  v3 *= EBH_reduction_parameter;
@@ -734,18 +730,18 @@ int main(int argc, char** argv)
       }
       
       EBH_basipetal_info EBHbI0, EBHbI1;
-      //      EBHbI1 = AccumulateDown(pine1, EBHbI0, EBH_basipetal(lambda_fun) );
-       EBHbI1 = AccumulateDown(pine1, EBHbI0, EBH_basipetal(lambda_fun, growthloop_ebh_mode) );
+      //      EBHbI1 = AccumulateDown(*pine1, EBHbI0, EBH_basipetal(lambda_fun) );
+       EBHbI1 = AccumulateDown(*pine1, EBHbI0, EBH_basipetal(lambda_fun, growthloop_ebh_mode) );
 
       EBH_acropetal_info EBHaI0(1.0, 1.0/lambda_fun(1.0), 1.0);
-      PropagateUp(pine1, EBHaI0, EBH_acropetal(lambda_fun) );
+      PropagateUp(*pine1, EBHaI0, EBH_acropetal(lambda_fun) );
 
       MaxEBHResource_info m0, m1;
       m0.my_resource = -R_HUGE;
 
-      m1 = AccumulateDown(pine1, m0, MaxEBHResource() );
+      m1 = AccumulateDown(*pine1, m0, MaxEBHResource() );
 
-      ForEach(pine1, NormalizeEBHResource(m1.my_resource) );
+      ForEach(*pine1, NormalizeEBHResource(m1.my_resource) );
     }
     
     //=================================================================
@@ -753,24 +749,24 @@ int main(int argc, char** argv)
 
     //Initialize calculation of thickness growth induced by adding new shoots.
     double alku = 1.0;    //= Gravelius order of main axis
-    PropagateUp(pine1,alku,SetSapwoodDemandAtJunction());
+    PropagateUp(*pine1,alku,SetSapwoodDemandAtJunction());
 
     DiameterGrowthData data;
     LGMGrowthAllocator2<ScotsPineSegment,ScotsPineBud,SetScotsPineSegmentLength,
       PartialSapwoodAreaDown,ScotsPineDiameterGrowth2,DiameterGrowthData>
-      G(pine1,data,PartialSapwoodAreaDown(GetFunction(pine1,SPSD)));   
+      G(*pine1,data,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)));   
 
 
     if(is_by_branches && iter > 4) {
-      //      allocateByBranches(pine1);
+      //      allocateByBranches(*pine1);
 
       if(is_height_function) {
 	//Here length of leader at tree level, if height function
-	Axis<ScotsPineSegment,ScotsPineBud>& stem =  GetAxis(pine1);
+	Axis<ScotsPineSegment,ScotsPineBud>& stem =  GetAxis(*pine1);
 	TreeSegment<ScotsPineSegment,ScotsPineBud>* last = 
 	  GetLastTreeSegment(stem);
-	double e1 = GetValue(pine1,LGPe1);
-	double e2 = GetValue(pine1,LGPe2);
+	double e1 = GetValue(*pine1,LGPe1);
+	double e2 = GetValue(*pine1,LGPe2);
 	double Lnew = (e1 + e2*global_hcb/L_H) * dDb;
         if(Lnew < 0.1)           //safeguarding against losing top
             Lnew = 0.1;
@@ -802,7 +798,7 @@ int main(int argc, char** argv)
         exit(0);
       }
 
-      Axis<ScotsPineSegment,ScotsPineBud>& stem =  GetAxis(pine1);
+      Axis<ScotsPineSegment,ScotsPineBud>& stem =  GetAxis(*pine1);
 
       TreeSegment<ScotsPineSegment,ScotsPineBud>* last =
 	GetLastTreeSegment(stem);
@@ -814,41 +810,41 @@ int main(int argc, char** argv)
 
     //Calculate  the  LGAsf  for   newly  created  segments,  sf  in  P
     //Kaitaniemi data depens on segment length
-    ForEach(pine1,SetScotsPineSegmentSf());
+    ForEach(*pine1,SetScotsPineSegmentSf());
     bool kill = false;
-    PropagateUp(pine1,kill,KillBudsAfterAllocation<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,kill,KillBudsAfterAllocation<ScotsPineSegment,ScotsPineBud>());
 
     //Now the lengths of the segments are such that Growth = P - M. Do (that is, store permanently,
     //before it was not) the induced diameter growth
     DiameterGrowthData dgdata;
-    AccumulateDown(pine1,dgdata,PartialSapwoodAreaDown(GetFunction(pine1,SPSD)),
+    AccumulateDown(*pine1,dgdata,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),
 		   ScotsPineDiameterGrowth2(LGMGROWTH));
 
     double wfnew = 0.0;
-    Accumulate(pine1,wfnew,CollectNewFoliageMass<ScotsPineSegment,ScotsPineBud>());
-    SetValue(pine1,TreeWr, 
-	     GetValue(pine1,TreeWr)+
-	     GetValue(pine1,LGPar)*wfnew);
+    Accumulate(*pine1,wfnew,CollectNewFoliageMass<ScotsPineSegment,ScotsPineBud>());
+    SetValue(*pine1,TreeWr, 
+	     GetValue(*pine1,TreeWr)+
+	     GetValue(*pine1,LGPar)*wfnew);
     //To plot how much is allocated to new growth (iWn), diameter growth (iWo)
     //and to roots (iWr) collect datat
     LGMdouble ws2 = 0.0;
-    ws2 = Accumulate(pine1,ws2,CollectOldSegmentSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    ws2 = Accumulate(*pine1,ws2,CollectOldSegmentSapwoodMass<ScotsPineSegment,ScotsPineBud>());
     LGMdouble ws3 = ws2-ws1;//diameter growth
     //ws4 together with wfnew is new growth
     LGMdouble ws4 = 0.0;
-    ws4 = Accumulate(pine1,ws4,CollectNewSegmentSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    ws4 = Accumulate(*pine1,ws4,CollectNewSegmentSapwoodMass<ScotsPineSegment,ScotsPineBud>());
     //This is needed for roots
-    LGMdouble wr1 = GetValue(pine1,LGPar)*wfnew;
+    LGMdouble wr1 = GetValue(*pine1,LGPar)*wfnew;
 
     //Update L-string, pass the state of the bud to control branching
-    pl1.lignumToLstring(pine1,1,PBDATA);
-    pl1.lstringToLignum(pine1,1,PBDATA);
+    pl1->lignumToLstring(*pine1,1,PBDATA);
+    pl1->lstringToLignum(*pine1,1,PBDATA);
 
     //Before derive  pass the  foliage mass of  the mother  segment to
     //terminating buds
 
     double wftobuds = 0.0;
-    PropagateUp(pine1,wftobuds,ForwardWf<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,wftobuds,ForwardWf<ScotsPineSegment,ScotsPineBud>());
 
     //============================================================================
     // Here is calculation of estimation of local needle area density for
@@ -858,45 +854,45 @@ int main(int argc, char** argv)
       BoundingBox b1;
       bool foliage = true;
       FindCfBoundingBox<ScotsPineSegment,ScotsPineBud> fb1(foliage);
-      b1 = Accumulate(pine1, b1, fb1);
+      b1 = Accumulate(*pine1, b1, fb1);
 
       Point ll = b1.getMin();
       Point ur = b1.getMax();
 
       VoxelSpace vs1(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
-      	     0.05,0.05,0.05,5,5,5,GetFirmament(pine1));
+      	     0.05,0.05,0.05,5,5,5,GetFirmament(*pine1));
       vs1.resize(ll, ur);
       vs1.reset();
       int num_parts = 5;
-      DumpCfTree(vs1, pine1, num_parts);
+      DumpCfTree(vs1, *pine1, num_parts);
 
       LGMdouble cone_height = 0.5, cone_half_angle =  0.7; //= 40 degrees
       int no_points_on_rim = 12;
         
       SetBudViewFunctor sbvf(&vs1, cone_height, cone_half_angle, no_points_on_rim);
-      ForEach(pine1, sbvf);
+      ForEach(*pine1, sbvf);
     }
 
-    pl1.lignumToLstring(pine1,1,PBDATA);
+    pl1->lignumToLstring(*pine1,1,PBDATA);
 
     //Create new buds in L-system as the function of the mother segment foliage mass
-    pl1.derive();
-    pl1.lstringToLignum(pine1,1,PBDATA);
+    pl1->derive();
+    pl1->lstringToLignum(*pine1,1,PBDATA);
  
-    Axis<ScotsPineSegment,ScotsPineBud>& stem = GetAxis(pine1);
+    Axis<ScotsPineSegment,ScotsPineBud>& stem = GetAxis(*pine1);
 
     //Collect foliage after growth
     LGMdouble wfaftergrowth = 0.0;
-    Accumulate(pine1,wfaftergrowth,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wfaftergrowth,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());
     //Collect sapwood mass after growth
     LGMdouble wsaftergrowth = 0.0;
-    Accumulate(pine1,wsaftergrowth,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wsaftergrowth,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
     list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>& ls = GetTreeCompartmentList(stem);
     //Mean branch length
     summing bs;
     bs.d2 = bs.d2l = bs.lsum = 0.0;
     bs.n_br = 0;
-    bs = Accumulate(pine1, bs, Branchmeans() );
+    bs = Accumulate(*pine1, bs, Branchmeans() );
 
     //The Qin at the top
     LGMdouble qintop1 = 0.0;
@@ -904,19 +900,19 @@ int main(int argc, char** argv)
     qintop1 = accumulate(ls.begin(),ls.end(),qintop1, getTopQin1);
 
     //Diameter and heigth at the crown base.
-    AccumulateDown(pine1,dcl,AddBranchWf(),DiameterCrownBase<ScotsPineSegment,ScotsPineBud>());
+    AccumulateDown(*pine1,dcl,AddBranchWf(),DiameterCrownBase<ScotsPineSegment,ScotsPineBud>());
 
     //Crown volume
     CrownVolume<ScotsPineSegment,ScotsPineBud> cv(0.30);
-    double cvol = cv(pine1);
+    double cvol = cv(*pine1);
 
     //Main stem volume
     MainAxisVolume<ScotsPineSegment,ScotsPineBud> mav;
-    double stemvol = mav(pine1);
+    double stemvol = mav(*pine1);
 
     //Number of segments
     int nsegment = 0;
-    nsegment = AccumulateDown(pine1,nsegment,
+    nsegment = AccumulateDown(*pine1,nsegment,
 			       CountTreeSegments<ScotsPineSegment,ScotsPineBud>()); 
 
     //There are  some gnuplot  scripts that can  plot data  files from
@@ -927,36 +923,36 @@ int main(int argc, char** argv)
     //after senescence and new growth.
     if(toFile) {
       double qbs = 0.0;
-      double qabs= Accumulate(pine1,qbs,CollectQabs<ScotsPineSegment,
+      double qabs= Accumulate(*pine1,qbs,CollectQabs<ScotsPineSegment,
 			    ScotsPineBud>());
 //       double tla0 = 0.0;
-//       treeAf = Accumulate(pine1,tla0,CollectFoliageArea<
+//       treeAf = Accumulate(*pine1,tla0,CollectFoliageArea<
 // 				 ScotsPineSegment,ScotsPineBud>());
 
       double a0 = 0.0;
-      double ASeg0 = Accumulate(pine1,a0,SurfaceAreaOfNewSegments());
+      double ASeg0 = Accumulate(*pine1,a0,SurfaceAreaOfNewSegments());
 
       double wood = 0.0;
-      Accumulate(pine1,wood,CollectWoodMass<ScotsPineSegment,ScotsPineBud>());
+      Accumulate(*pine1,wood,CollectWoodMass<ScotsPineSegment,ScotsPineBud>());
 
       //Collect wood mass in the main axis
-      double wstem = GetValue(pine1,LGAWstem);
+      double wstem = GetValue(*pine1,LGAWstem);
 
       //Wood mass in branches
       double wbranches = wood - wstem;
 
       //Sapwood mass of stem
       double stem_sw = 0.0;
-      Accumulate(pine1,stem_sw,CollectStemSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+      Accumulate(*pine1,stem_sw,CollectStemSapwoodMass<ScotsPineSegment,ScotsPineBud>());
 
 
       ff <</*1 */ left << setw(6) << setfill(' ') << iter+1 << " "
 	 <</*2 */ left << setw(8) << trees_left << " " 
-	 <</*3 */ left << setw(8) << GetValue(pine1,LGAH) << " " 
+	 <</*3 */ left << setw(8) << GetValue(*pine1,LGAH) << " " 
 	 <</*4 */ setw(9) << qintop1 << " " 
-	 <</*5 */ setw(12) << qintop1/GetValue(pine1,TreeQinMax) << " " 
-	 <</*6 */ setw(11) << GetValue(pine1,LGADbase) << " "
-	 <</*7 */ setw(11) << GetValue(pine1,LGADbh) << " "
+	 <</*5 */ setw(12) << qintop1/GetValue(*pine1,TreeQinMax) << " " 
+	 <</*6 */ setw(11) << GetValue(*pine1,LGADbase) << " "
+	 <</*7 */ setw(11) << GetValue(*pine1,LGADbh) << " "
 	 <</*8 */ setw(11) << dcl.DCrownBase() << " " 
 	 <</*9 */ setw(11) << dcl.HCrownBase() << " " 
 	 <</*10*/ setw(11) << G.getP() << " "      //Production before new growth
@@ -964,17 +960,17 @@ int main(int argc, char** argv)
 	 <</*12*/ setw(12) << wfaftergrowth << " " //Foliage mass after new growth
 	 <</*13*/ setw(14) << bs.d2l/bs.d2 << " "  //Branch means
 	 <</*14*/ setw(14) << bs.lsum/(double)bs.n_br  << " "
-	 <</*15*/ setw(11) << GetValue(pine1,TreeWr) << " "     //Root mass after new growth
-	 <</*16*/ setw(11) << GetValue(pine1,LGPmr)*wroot << " "//Root respiration before new growth
-	 <</*17*/ setw(11) << G.getM() - GetValue(pine1,LGPmr)*wroot << " "//Above ground respiration 
+	 <</*15*/ setw(11) << GetValue(*pine1,TreeWr) << " "     //Root mass after new growth
+	 <</*16*/ setw(11) << GetValue(*pine1,LGPmr)*wroot << " "//Root respiration before new growth
+	 <</*17*/ setw(11) << G.getM() - GetValue(*pine1,LGPmr)*wroot << " "//Above ground respiration 
 	 <</*18*/ setw(11) << wsaftergrowth  << " "           //Sapwood mass after new growth
-	 <</*19*/ setw(11) << GetValue(pine1,LGPms)*wsapwood << " " //Sapwood respiration before new growth
-	 <</*20*/ setw(11) << GetValue(pine1,LGPmf)*wfoliage << " " //Foliage respiration before new growth
+	 <</*19*/ setw(11) << GetValue(*pine1,LGPms)*wsapwood << " " //Sapwood respiration before new growth
+	 <</*20*/ setw(11) << GetValue(*pine1,LGPmf)*wfoliage << " " //Foliage respiration before new growth
 	 <</*21*/ setw(11) << cvol << " "  // Crown volume
 	 <</*22*/ setw(11) << treeAf << " "//Sum[(LeafA+NeedleA)/Vbox]/Nboxes
 	 <</*23*/ setw(11) << nsegment << " " //Number of segments
 	 <</*24*/ setw(11) << qabs << " "     // Qabs  
-	 <</*25*/ setw(11) << qabs/(GetFirmament(pine1).
+	 <</*25*/ setw(11) << qabs/(GetFirmament(*pine1).
 				    diffuseBallSensor()*treeAf) << " "  //Rad eff.
 	 <</*26*/ setw(11) << wfoliage << " "  //Foliage that photosynthesized
 	 <</*27*/ setw(11) << G.getP()/wfoliage << " "  //The ubiquitous P/Wf
@@ -990,8 +986,8 @@ int main(int argc, char** argv)
 	 <</*37*/ setw(11) << wstem << " " //Wood mass of stem
 	 <</*38*/ setw(11) << wbranches << " " //Wood mass of branches
 	 <</*39*/ setw(11) << stem_sw << " " //Sapwood mass of stem
-	 <</*40*/ setw(11) << GetValue(pine1,LGAAsbase) << " "//Sapwood at base
-	 <</*41*/ setw(11) << GetValue(pine1,LGAAsDbh) << " " //Sapwood at D 1.3
+	 <</*40*/ setw(11) << GetValue(*pine1,LGAAsbase) << " "//Sapwood at base
+	 <</*41*/ setw(11) << GetValue(*pine1,LGAAsDbh) << " " //Sapwood at D 1.3
 	 <</*42*/ setw(11) << dcl.ASwCrownBase() << " "       //Sapwood at crown base 
 	 <</*43*/ setw(11) << G.getL()  //Lambda s.t. G(L) = 0.
 	 << endl; 
@@ -1002,10 +998,10 @@ int main(int argc, char** argv)
       //Collect and print the two lists of foliage masses and their heights 
       //in the main axis.  Print and assess the crown base afterwards.
       CrownLimitData cld;
-      AccumulateDown(pine1,cld,AddCrownLimitData(),
+      AccumulateDown(*pine1,cld,AddCrownLimitData(),
 		     CollectCrownLimitData<ScotsPineSegment,ScotsPineBud>());
       //Collect diameters from the segments in the main axis
-      list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*> & tc_ls = GetTreeCompartmentList(GetAxis(pine1));
+      list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*> & tc_ls = GetTreeCompartmentList(GetAxis(*pine1));
       list<double> d_ls;//list of diameters
       d_ls = accumulate(tc_ls.begin(),tc_ls.end(),d_ls,CollectSegmentDiameters());
     
@@ -1036,7 +1032,7 @@ int main(int argc, char** argv)
 	      << setw(11) << "dQabs/dH" << " "
 	      << setw(11) << "rel H" << endl;
       //For relative height
-      LGMdouble Htree = GetValue(pine1, LGAH);
+      LGMdouble Htree = GetValue(*pine1, LGAH);
       while (hwf_it != hwf_ls.end()){
 	cl_file << setfill(' ')
 		<< setw(11) << (*hwf_it).first << " " 
@@ -1059,27 +1055,27 @@ int main(int argc, char** argv)
       }
 
       if (interval && !xmlfile.empty() &&
-	  (static_cast<int>(GetValue(pine1,LGAage)) % interval == 0 )){
+	  (static_cast<int>(GetValue(*pine1,LGAage)) % interval == 0 )){
 	ostringstream xml_interval;
-	xml_interval << GetValue(pine1,LGAage) << "-" << xmlfile;
+	xml_interval << GetValue(*pine1,LGAage) << "-" << xmlfile;
 	XMLDomTreeWriter<ScotsPineSegment,ScotsPineBud> writer;
 	cout << "Saving tree to "<< xml_interval.str() << " begin" <<endl; 
-	writer.writeTreeToXML(pine1,xml_interval.str());
+	writer.writeTreeToXML(*pine1,xml_interval.str());
 	cout << "End" <<endl;
       }
       if (interval && !fipfile.empty()){
-	if (static_cast<int>(GetValue(pine1,LGAage)) % interval == 0){
+	if (static_cast<int>(GetValue(*pine1,LGAage)) % interval == 0){
 	  ostringstream fip_interval;
-	  fip_interval << GetValue(pine1,LGAage) << "-" << fipfile << ".txt";
+	  fip_interval << GetValue(*pine1,LGAage) << "-" << fipfile << ".txt";
 	  cout << "Printing vertical distribution of fip to " << fip_interval.str() << endl;
 	  ofstream fipstream(fip_interval.str().c_str());
-	  int age = static_cast<int>(GetValue(pine1,LGAage));
+	  int age = static_cast<int>(GetValue(*pine1,LGAage));
 	  pair<vector<pair<double,int> >,double> p;
 	  //number of vertical divisions is tree age
 	  p.first.resize(age);
 	  //height intervals is the mean annual growth
-	  p.second = GetValue(pine1,LGAH)/GetValue(pine1,LGAage);
-	  Accumulate(pine1,p,CollectVerticalDistributionOfFip());
+	  p.second = GetValue(*pine1,LGAH)/GetValue(*pine1,LGAage);
+	  Accumulate(*pine1,p,CollectVerticalDistributionOfFip());
 	  double interval = p.second;
 	  double height = interval;
 	  //Title
@@ -1102,17 +1098,17 @@ int main(int argc, char** argv)
     
     }  //if (crowninformation) {  
 
-    pl1.prune(pine1);
+    pl1->prune(*pine1);
 
     //Set radiation use efficiency in new segments as a function of shadiness
     //experienced by mother segment
    if(growthloop_is_radiation_use_efficiency) {   //rue = 1 == no effect by default
     SetRadiationUseEfficiency<ScotsPineSegment,ScotsPineBud>
-      set_rue(GetFirmament(pine1).diffuseBallSensor(),
+      set_rue(GetFirmament(*pine1).diffuseBallSensor(),
 					       radiation_use_efficiency_parameter);
   
     LGMdouble initial = 0.0;
-    PropagateUp(pine1,initial,set_rue);
+    PropagateUp(*pine1,initial,set_rue);
    }
    ///As in LignumForest Collect data to HDF5 files after growth 
    gloop.collectDataAfterGrowth(iter+1);
@@ -1156,17 +1152,17 @@ int main(int argc, char** argv)
   if(toFile)
     ff.close();
 
-  pl1.end();  
+  pl1->end();  
  
  //Print  Qin and  (x,y,z)  for each  segment  of age  0,1  or 2.  In
   //addition  to Qin,  this gives  you  the idea  of the  size of  the
   //branches
-  ForEach(pine1,PrintSegmentQin<ScotsPineSegment,ScotsPineBud>());
+  ForEach(*pine1,PrintSegmentQin<ScotsPineSegment,ScotsPineBud>());
   LGMdouble wf1 = 0.0;
-  cout << "Wf: " << Accumulate(pine1,wf1,
+  cout << "Wf: " << Accumulate(*pine1,wf1,
        		       CollectFoliageMass<ScotsPineSegment,ScotsPineBud>()) << endl;
   summing bs;
-  bs = Accumulate(pine1, bs, Branchmeans());
+  bs = Accumulate(*pine1, bs, Branchmeans());
   if(bs.d2 > 0.0)
     cout << "Averaged2 branch length, m: " << bs.d2l/bs.d2 << endl;
   else
@@ -1180,30 +1176,30 @@ int main(int argc, char** argv)
     cout << "Somethin wrong in d2 branch averaging!" << endl;
 
   int n = 0;
-  cout << "Segments: " << Accumulate(pine1,n, 
+  cout << "Segments: " << Accumulate(*pine1,n, 
 				     CountTreeSegments<ScotsPineSegment,
 				     ScotsPineBud>()) << endl;
   LGMdouble qabs = 0.0;
   cout << "Tree       Qabs: " 
-       <<  Accumulate(pine1,qabs,CollectQabs<ScotsPineSegment,ScotsPineBud>())<<endl;
+       <<  Accumulate(*pine1,qabs,CollectQabs<ScotsPineSegment,ScotsPineBud>())<<endl;
  
 
   //Write the tree to xml file
   if (!xmlfile.empty()){
     XMLDomTreeWriter<ScotsPineSegment,ScotsPineBud> writer;
-    writer.writeTreeToXML(pine1,xmlfile);
+    writer.writeTreeToXML(*pine1,xmlfile);
   }
 
   if (!fipfile.empty()){
     cout << "Printing vertical distribution of fip to " << fipfile << endl;
     ofstream fipstream(fipfile.c_str());
-    int age = static_cast<int>(GetValue(pine1,LGAage));
+    int age = static_cast<int>(GetValue(*pine1,LGAage));
     pair<vector<pair<double,int> >,double> p;
     //number of vertical divisions is tree age
     p.first.resize(age);
     //height intervals is the mean annual growth
-    p.second = GetValue(pine1,LGAH)/GetValue(pine1,LGAage);
-    Accumulate(pine1,p,CollectVerticalDistributionOfFip());
+    p.second = GetValue(*pine1,LGAH)/GetValue(*pine1,LGAage);
+    Accumulate(*pine1,p,CollectVerticalDistributionOfFip());
     double interval = p.second;
     double height = interval;
     //Title
@@ -1224,17 +1220,17 @@ int main(int argc, char** argv)
   }
 
   //Write information about the grown pine to these files
-  ForEach(pine1, BranchInformation("branchinformation.dat"));
-  ForEach(pine1, SegmentProductionBalance("productionbalance.dat"));
+  ForEach(*pine1, BranchInformation("branchinformation.dat"));
+  ForEach(*pine1, SegmentProductionBalance("productionbalance.dat"));
 
-  cout << "Value of Xi at the end " << GetValue(pine1, LGPxi) << endl;
+  cout << "Value of Xi at the end " << GetValue(*pine1, LGPxi) << endl;
 
   // Write information about the branches to file
   ofstream f("branchdata.dat" , ofstream::trunc);
   f << "Height order2 segments segs_w_fol" << endl;
   Sum2ndOrderBranchesSegments sum_segments;
   list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>& ls 
-    = GetTreeCompartmentList(GetAxis(pine1));
+    = GetTreeCompartmentList(GetAxis(*pine1));
   list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>::iterator i_c;
   for(i_c = ls.begin(); i_c != ls.end(); i_c++) {
     if(BranchingPoint<ScotsPineSegment,ScotsPineBud>* bp =
@@ -1255,18 +1251,18 @@ int main(int argc, char** argv)
   f.close(); 
 
 
-
+  return 0;
 #if defined (__APPLE__) || defined(__MACOSX__)
   if(CheckCommandLine(argc,argv,"-viz")) {
     LGMVisualization viz;
     viz.InitVisualization(argc,argv);
     // textures 512x512
-    viz.AddCfTree(pine1, "pine_texture.png", "needle.tga");
-    float th = (float)GetValue(pine1,LGAH);
+    viz.AddCfTree(*pine1, "pine_texture.png", "needle.tga");
+    float th = (float)GetValue(*pine1,LGAH);
     cout << th << endl;
     //viz.ResetCameraPosition(th);
     viz.SetMode(SOLID);
-    //viz.ResetCameraPosition(GetValue(pine1,LGAH));
+    //viz.ResetCameraPosition(GetValue(*pine1,LGAH));
     viz.StartVisualization();
   }
 #endif

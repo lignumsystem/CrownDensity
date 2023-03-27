@@ -1,4 +1,6 @@
-//Include Lignum implementation 
+///\file main.cc
+///\brief main growth loop
+///Include Lignum implementation 
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
@@ -78,8 +80,9 @@ double tax_share = 0.3;        //for toptax
 ParametricCurve bud_view_f;
 bool is_bud_view_function = false;   // and if it is in use 
 
-/// **Usage**
-/// \snippet{lineno} main.cc Usagex
+///\section main Main program 
+///\snippet{lineno} main.cc Usagex
+///\internal
 // [Usagex]
 void Usage()
 {
@@ -115,7 +118,8 @@ void Usage()
   cout << "                   increase of rue as a function of shadiness (0 < <value> < 2)." << endl;
   cout << "-heightFun         If length of stem apical shoot is derived from relative crown length (params. LGPe1, LGPe2)." << endl;
 }
- // [Usagex]
+//[Usagex]
+///\endinternal
 
 
 int main(int argc, char** argv)
@@ -128,7 +132,7 @@ int main(int argc, char** argv)
 		        //assigning foliage and computing Qabs.
   double hw_start = 0.0;//the age for heartwood formation
 
-
+  ///\section mainfunction Main growth loop
   //========================================================================
   //Read command line arguments
 
@@ -138,7 +142,7 @@ int main(int argc, char** argv)
   }
   else{
     iterations = atoi(argv[1]);
-    metafile = string(argv[2]);  ///<`-metafile`, file containing actual parameter files etc.
+    metafile = string(argv[2]);  //< `metafile`, file containing actual parameter files etc.
   }
 
   //Check possible command line arguments
@@ -247,25 +251,19 @@ int main(int argc, char** argv)
     space2 = true;
   }
 
-  ///+ Parse Extended Borchert-Honda (EBH) ollocation of growth
+  ///\subsection ebhsection Parse Extended Borchert-Honda (EBH) allocation of growth
+  ///EBH resource distn can be in use in two ways. Both are set by command line
+  ///arguments. Option `-EBH` means EBH is in use and values (of lambda parameter)
+  ///are specified for all Gravelius orders. Function SPEBHF, in ScotsPine.h,
+  ///function file is specified the constructor of the tree. `-EBH1 <value>` means
+  ///that EBH is in use and one *value*  is used for all Gravelius orders.
+  ///Option `-EBH1 <value>` overrides option `-EBH`. EBH is set by SPis_EBH (Scots Pine Parameter Double SPPD)
+  ///to have it in the same way as in CD, 0 == false, 1 == true.
   ///\snippet{lineno} main.cc ebh
   ///\internal
   //[ebh]
-
-  // EBH resource distn can be in use in two ways. Both are set by command line
-  // arguments.
-  // -EBH means EBH is in use and values (of lambda parameter) are
-  // specified for all Gravelius orders (function SPEBHF, ScotsPine.h, function
-  // file is specified the constructor of the tree).
-  // -EBH1 <value> means that EBH is in use and one value <value> is used 
-  // for all Gravelius orders.
-  // Option -EBH1 <value> overrides option -EBH
-  // (EBH is set SPis_EBH (Scots Pine Parameter Double SPPD) to have it in the same way
-  // as in CD, 0 == false, 1 == true)
-
-  
-  //NOTE: this condition is checked and set as tree paramaeter: SetValue(tree, SPis_EBH, value);
-  //in initializeTrees()
+  ///\note This condition is checked and set as tree parameter: SetValue(tree, SPis_EBH, value);
+  ///\sa Lignum::InitializeTree
   bool growthloop_is_EBH = false;
   if(CheckCommandLine(argc,argv,"-EBH")) {
     growthloop_is_EBH = true;
@@ -391,22 +389,43 @@ int main(int argc, char** argv)
 
   //See CL option "-EBH1 <value>" after instantiatiation of the tree
 
-
-  //=============================================================================================
-  // Initializations
-
-  //The tree
+  ///\subsection treefunctions  Tree functions 
+  ///\snippet{lineno} main.cc TreeInit
+  ///\internal
+  //[TreeInit]
+  //Param sf.fun Specific needle area as function of relative light, domain [0,1] range: meaningfule values for sf  
+  //Param fapical.fun Apical dominance as a function of relative light, domain [0,1] in range [0,1]      
+  //Param fgo.fun Gravelius order (go) effect on segment length, domain [1, max go] range [0,1]   
+  //Param fsapwdown.fun Gravelius order (go) effect passing sapwood down, domain [1, max go] range [0,1]   
+  //Param faf.fun parameter estimation? See faf.fun    
+  //Param fna.fun Relative light effect on needle angle, domain [0,1] range basically [0,2*pi] but see fna.fun    
+  //Param fwd.fun Density of growth ring as function of tree age, domain [0, max age] range [165,214] (based on
+  //H. Makinen 2006     
+  //Param flr.fun Segment length - radius relationship as function of relative light, domain [0,1] range see flr.fun
+  //Param ebh.fun EBH lambda as a function of Gravelius order, domain [1, macx go] range see ebh.fun
+  //Param bvf.fun Number of new buds (modifier) as function of local needle area/local volume, domain see bvf.fun
+  //range [0,1]
   ScotsPineTree* pine1 = new ScotsPineTree(Point(0.0,0.0,0),PositionVector(0,0,1.0),
 					   "sf.fun","fapical.fun","fgo.fun",
 					   "fsapwdown.fun","faf.fun","fna.fun", "fwd.fun",
 					   "flr.fun", "ebh.fun","bvf.fun");
 
-  // Bud View Function to Lsystem
-  // Its use is controlled by the global variable is_bud_view_function
-  // If it is == false, bud_view_f is ignored
-  //  Bud View Function file is specifed in the constructor of the tree
+  //[TreeInit]
+  ///\endinternal
+  
+  ///\subsection budview Bud view function
+  ///Bud View Function to Lsystem
+  ///Its use is controlled by the global variable is_bud_view_function
+  ///If it is == false, bud_view_f is ignored
+  ///Bud View Function file is specifed in the constructor of the tree
+  ///\snippet{lineno} main.cc BudView
+  ///\internal
+  //[BudView]
+  //Param pine1 The tree
+  //Param SPBVF The name of the bud view function. \sa bvf.fun ParametricCurve file 
   bud_view_f = GetFunction(*pine1, SPBVF);
-
+  //[BudView]
+  ///\endinternal
   //SPis_EBH can be set only after the tree has been created
   SetValue(*pine1, SPis_EBH, 0.0);   // i.e. false (1.0 == true)
   if(growthloop_is_EBH) {
@@ -425,7 +444,6 @@ int main(int argc, char** argv)
 
   // Create an instance of intialization class for tree and initialize the
   // global tree created above
-
   InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,VERBOSE);
   init_pine1.initialize(*pine1);
 
@@ -446,7 +464,6 @@ int main(int argc, char** argv)
   //function of time if self_thinning is not set
   //If self_thinning is set, stems_ha sepcifies density as a
   //function of diameter at breast height
-
   ParametricCurve stems_ha("stemsha.fun");
  
 
@@ -483,22 +500,35 @@ int main(int argc, char** argv)
 
   double Db_previous = 0.0;
   double Db_current = 0.0;
-  ///GrowthLoop here is only to collect data for HDF5 files
+  ///\subsection hdf5 GrowthLoop initialization
+  ///GrowthLoop from LignumForest is here to collect data to HDF5
+  ///\snippet{lineno} main.cc GLoopInit
+  ///\internal
+  //[GLoopInit]
   typedef GrowthLoop<ScotsPineTree,ScotsPineSegment,ScotsPineBud,Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData> > ScotsPineGrowthLoop;
   ScotsPineGrowthLoop gloop(pine1,pl1);
   gloop.parseCommandLine(argc,argv);
   gloop.resizeTreeDataMatrix();
-  ///Initial data
+  //Initial data
   gloop.collectDataAfterGrowth(0,false);
-  ///HDF5 file initialization
+  //[GLoopInit]
+  ///\endinternal
+  ///\subsection hdf5file HDF5 file initialization
+  ///Collect to HDF5 file command line, parameters used, tree functions, all functions, simulation results and  trees in xml format
+  ///\snippet{lineno} main.cc HDF5Init
+  ///\internal
+  //[HDF5Init]
   string hdf5fname;
   ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
   LGMHDF5File hdf5_file(hdf5fname);
   LGMHDF5File hdf5_trees(TREEXML_PREFIX+hdf5fname);
-  hdf5_file.createGroup(PGROUP);///< Paramaters
-  hdf5_file.createGroup(TFGROUP);///< Tree functions (Found in MetaFile.txt)
-  hdf5_file.createGroup(AFGROUP);///< All functions (*.fun files found)
-  hdf5_trees.createGroup(TXMLGROUP);///< Tree in xml format
+  hdf5_file.createGroup(PGROUP);
+  hdf5_file.createGroup(TFGROUP);
+  hdf5_file.createGroup(AFGROUP);
+  hdf5_trees.createGroup(TXMLGROUP);
+  ///\sa cxxadt::LGMHDF5File and  TreeDataAfterGrowth.h in LignumForest for HDF5 file group names
+  //[HDF5Init]
+  ///\endinternal
   for (int iter = 0; iter < iterations; iter++)
   {
     cout << "Iter: " << iter << endl;
@@ -1147,43 +1177,47 @@ int main(int argc, char** argv)
     LGMdouble initial = 0.0;
     PropagateUp(*pine1,initial,set_rue);
    }
-   ///As in LignumForest Collect data to HDF5 files after growth 
+   //As in LignumForest Collect data to HDF5 files after growth 
    gloop.collectDataAfterGrowth(iter+1,false);
    CreateTreeXMLDataSet(gloop,hdf5_trees,TXMLGROUP,gloop.getWriteInterval());
   }   // END OF ITERATION END OF ITERATION END OF ITERATION END OF ITERATION
 
   
-//Clean up.
+  //Clean up.
   cout << "Growth end" << endl;
   cout << "GROWTH DONE " << "NUMBER OF TREES " << gloop.getNumberOfTrees() << endl;
-  ///Unlike in LignumForest no need for clean up
-  ///gloop.cleanUp();
-  /// **Collect HDF5 data**
-  ///
-  /// **Year by year, tree by tree data**
+  //Unlike in LignumForest no need for clean up
+  //gloop.cleanUp();
+  ///\subsection collectHDF5 Collect HDF5 data
+  ///Save collected year by year tree data to an HDF5 file together with data to repeat simulation
+  ///\snippet{lineno} main.cc CollectHDF5
+  ///\internal
+  //[CollectHDF5]
   TMatrix3D<double>& hdf5_data = gloop.getHDF5TreeData();
   hdf5_file.createDataSet(TREE_DATA_DATASET_NAME,hdf5_data.rows(),hdf5_data.cols(),hdf5_data.zdim(),hdf5_data);
   hdf5_file.createColumnNames(TREE_DATA_DATASET_NAME,TREE_DATA_COLUMN_ATTRIBUTE_NAME,TREE_DATA_COLUMN_NAMES);
-  /// **Parameters used**  
+  //Parameters used  
   TMatrix2D<double> hdf5_tree_param_data = gloop.getHDF5TreeParameterData();
   hdf5_file.createDataSet(PGROUP+TREE_PARAMETER_DATASET_NAME,hdf5_tree_param_data.rows(),hdf5_tree_param_data.cols(),
 			  hdf5_tree_param_data);
   hdf5_file.createColumnNames(PGROUP+TREE_PARAMETER_DATASET_NAME,TREE_PARAMETER_ATTRIBUTE_NAME,TREE_PARAMETER_NAMES);
-  /// **Functions known in a tree**
+  //Functions known in a tree
   for (unsigned int i=0; i < FN_V.size();i++){ 
     TMatrix2D<double> hdf5_tree_fn_data = gloop.getHDF5TreeFunctionData(FN_V[i]);
     hdf5_file.createDataSet(TFGROUP+FNA_STR[i],hdf5_tree_fn_data.rows(),hdf5_tree_fn_data.cols(),hdf5_tree_fn_data);
     hdf5_file.createColumnNames(TFGROUP+FNA_STR[i],TREE_FN_ATTRIBUTE_NAME,TREE_FN_COLUMN_NAMES);
   }
-  /// **All functions used**
+  //All functions used
   hdf5_file.createFnDataSetsFromDir("*.fun",AFGROUP,TREE_FN_ATTRIBUTE_NAME,TREE_FN_COLUMN_NAMES);
-   /// **Command line**
+  //Command line
   vector<string> c_vec;
   std::copy( argv, argv+argc,back_inserter(c_vec));
   ostringstream cline;
   copy(c_vec.begin(),c_vec.end(),ostream_iterator<string>(cline, " "));
   hdf5_file.createDataSet(COMMAND_LINE_DATASET_NAME,cline.str());
   hdf5_file.close();
+  //[CollectHDF5]
+  ///\endinternal
   cout << "DATA SAVED TO HDF5 FILES AND SIMULATION DONE" <<endl;
   //Close result file if was open
   if(toFile)
@@ -1191,7 +1225,7 @@ int main(int argc, char** argv)
 
   pl1->end();  
  
- //Print  Qin and  (x,y,z)  for each  segment  of age  0,1  or 2.  In
+  //Print  Qin and  (x,y,z)  for each  segment  of age  0,1  or 2.  In
   //addition  to Qin,  this gives  you  the idea  of the  size of  the
   //branches
   ForEach(*pine1,PrintSegmentQin<ScotsPineSegment,ScotsPineBud>());

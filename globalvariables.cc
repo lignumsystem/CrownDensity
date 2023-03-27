@@ -1,4 +1,4 @@
-///\file GlobalVariales.cc
+///\file globalvariables.cc
 ///\brief Global variables
 ///
 ///Global variables used in LignumForest initialized by GrowthLoop.

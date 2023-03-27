@@ -818,7 +818,7 @@ int main(int argc, char** argv)
     PropagateUp(*pine1,alku,SetSapwoodDemandAtJunction());
 
     DiameterGrowthData data;
-    LGMGrowthAllocator2<ScotsPineSegment,ScotsPineBud,SetScotsPineSegmentLength,
+    LGMGrowthAllocator2<ScotsPineSegment,ScotsPineBud,SetScotsPineSegmentLengthBasic,
       PartialSapwoodAreaDown,ScotsPineDiameterGrowth2,DiameterGrowthData>
       G(*pine1,data,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)));   
 

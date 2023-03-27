@@ -52,3 +52,11 @@ To use Doxyfile the following three programs are needed:
   + doxywizard: GUI to browse, edit and optionally run Doxyfile. 
     
 On macOS these are easiest to install with MacPorts (or some other software package system). 
+
+### LaTeX typesetting
+Documentation uses LaTeX typesetting for equations. To generate LaTeX equations `amsmath` package must be part of LaTeX installation.
+On macOS this can be done for example with MacPorts TeXLive full installation:
+
+   	 sudo port install texlive +full.
+
+Doxyfile has the necessary LaTeX `amsmath` configuration. 

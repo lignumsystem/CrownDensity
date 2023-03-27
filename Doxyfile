@@ -874,7 +874,9 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = 
+INPUT                  = . \
+                         ../LignumForest/include/SomeFunctors.h \
+                         ../LEngine/include/LSystem.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -965,7 +967,10 @@ RECURSIVE              = YES
 
 EXCLUDE                = pine-em98.cpp \
                          pine-em98.L \
-                         pine-axiom.L
+                         pine-axiom.L \
+                         build \
+                         xcode \
+                         release
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -998,9 +1003,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = . \
-                         ../c++adt/src \
-                         ../stl-lignum/
+EXAMPLE_PATH           = .
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -1890,7 +1893,7 @@ PAPER_TYPE             = a4
 # If left blank no extra packages will be included.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-EXTRA_PACKAGES         =
+EXTRA_PACKAGES         = amsmath
 
 # The LATEX_HEADER tag can be used to specify a user-defined LaTeX header for
 # the generated LaTeX document. The header should contain everything until the

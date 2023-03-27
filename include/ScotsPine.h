@@ -12,7 +12,7 @@ enum SPFN {SPFAF,///<Scots pine Initial foliage m^2/kgC
 	   SPFLR,///<Scots pine length - radius relationship, R = f(relative_light)*R 
 	   SPFNA,///<Scots pine Needle Angle
 	   SPFSF,///<Scots pine Specific Leaf Area
-	   SPSD,///<Scots pine Sapwood Down as a function of Gravelius order
+	   SPSD,///<Scots pine Sapwood down as a function of Gravelius order
 	   SPWD,///<Scots pine density of growth ring as function of tree age
 	   SPEBHF,///<Scots pine Extended Borcher-Honda lambda value function
 	   SPBVF///<Scots pine Bud View function

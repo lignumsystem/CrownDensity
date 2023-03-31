@@ -3,12 +3,17 @@
 # mkdir build
 # cd  build
 # cmake .. -DCMAKE_BUILD_TYPE=Debug/Release
+# Explicitely set c++ compiler
+# cmake ..  -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS=-stdlib=libc++
+# To compile
 # make
+#
 # For Xcode IDE:
 # mkdir xcode
 # cd xcode
 # cmake .. -G Xcode
 # open crowndens.xcodeproj   #Opens Xcode IDE
+#
 # Build the 'crowndens' Product in Xcode. See also Product (menu bar) -> Scheme is set to 'crowndens' to allow Run to debug.
 # Copy necessary *.fun files and *.txt parameter files to xcode/Debug where 'crowndens´ is located.
 # Otherwise hard coded files are not found in the program.
@@ -44,9 +49,9 @@ find_package(GLUT REQUIRED)
 set(SOURCE_FILES main.cc
 globalvariables.cc
 pine-em98.cpp
-../LignumForest/branchfunctor.cc
-../LignumForest/src/metabolism.cc
 src/radiation.cc
+src/ScotsPine.cc
+../LignumForest/src/branchfunctor.cc
 ../LignumForest/src/space.cc
 )
 

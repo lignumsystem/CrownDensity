@@ -8,7 +8,7 @@
 
 
 extern double tax_share;
-
+namespace CrownDensity{
 void allocateByBranches(ScotsPineTree& pine) {
 
   double H = GetValue(pine, LGAH);
@@ -338,4 +338,5 @@ void makeTreeOfTopWhorls(ScotsPineTree& pine, ScotsPineTree* tree) {
 
 
   return;
+}
 }

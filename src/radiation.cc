@@ -6,7 +6,7 @@
 
 
 
-
+namespace CrownDensity{
 //This functor EvaluateRadiationSelfVoxel evaluates self shading
 //using VoxelSpace: as in LignumForest with -dumpSelf command line option.
 //Both Qin ja Q abs.
@@ -120,7 +120,7 @@
   }
   return tc;
 }
-
+}
 
 #undef HIT_THE_FOLIAGE
 #undef NO_HIT

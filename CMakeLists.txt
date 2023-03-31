@@ -2,7 +2,7 @@
 # For Unix Makefile build system:
 # mkdir build
 # cd  build
-# cmake ..
+# cmake .. -DCMAKE_BUILD_TYPE=Debug/Release
 # make
 # For Xcode IDE:
 # mkdir xcode

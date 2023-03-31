@@ -9,7 +9,8 @@
 #include <sstream>
 #include <Lignum.h>
 #include <Bisection.h>
-#include <GrowthLoop.h> ///<From ../LignumForest/
+//<From ../LignumForest/
+#include <GrowthLoop.h> 
 #include <Shading.h>
 //From LignumForest project
 #include <TreeDataAfterGrowth.h>
@@ -24,6 +25,11 @@
 #include <OpenGLUnix.h>
 #include <LGMVisualization.h>
 #endif
+#include <SomeFunctors.h>         //< From ../LignumForest/include
+#include <DiameterGrowth.h>       //< From ../LignumForest/include
+#include <RadiationCrownDens.h>   //< From ../LignumForest/include
+#include <Palubicki_functors.h>   //< From ../LignumForest/include
+#include <Space.h>                //< From ../LignumForest/include
 //Includes all kinds of stuff, turtle graphics etc.
 #include <lengine.h>
 
@@ -33,12 +39,9 @@ namespace Pine{
 
 }
 
-#include <SomeFunctors.h>         ///<From ../LignumForest/include
-#include <DiameterGrowth.h>       ///<From ../LignumForest/include
-#include <RadiationCrownDens.h>   ///<From ../LignumForest/include
-#include <Palubicki_functors.h>   ///<From ../LignumForest/include
-#include <Space.h>                ///<From ../LignumForest/include
 
+
+using namespace LignumForest;
 //#include <ByBranches.h>
 
 int ran3_seed;
@@ -80,7 +83,8 @@ double tax_share = 0.3;        //for toptax
 ParametricCurve bud_view_f;
 bool is_bud_view_function = false;   // and if it is in use 
 
-///\section main Main program 
+namespace CrownDensity{
+///\section main Main program usage
 ///\snippet{lineno} main.cc Usagex
 ///\internal
 // [Usagex]
@@ -437,7 +441,7 @@ int main(int argc, char** argv)
   }
 
   //Creation of L-system
-  Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData>* pl1 = new Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData>();
+  Pine::LSystem<ScotsPineSegment,ScotsPineBud,PineTree::PBNAME,PineTree::PineBudData>* pl1 = new Pine::LSystem<ScotsPineSegment,ScotsPineBud,PineTree::PBNAME,PineTree::PineBudData>();
 
   //Heartwood build up age
   SetValue(*pine1,SPHwStart,hw_start);
@@ -472,7 +476,7 @@ int main(int argc, char** argv)
   cout << "Start end: "  << endl;
 
   //Update Lignum tree pine1 to correspond the structure of the L-system tree
-  pl1->lstringToLignum(*pine1,1,PBDATA);
+  pl1->lstringToLignum(*pine1,1,PineTree::PBDATA);
 
   double wf = 0.0;
   cout << "Collect new foliage begin: " << endl;
@@ -505,7 +509,7 @@ int main(int argc, char** argv)
   ///\snippet{lineno} main.cc GLoopInit
   ///\internal
   //[GLoopInit]
-  typedef GrowthLoop<ScotsPineTree,ScotsPineSegment,ScotsPineBud,Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData> > ScotsPineGrowthLoop;
+  typedef GrowthLoop<ScotsPineTree,ScotsPineSegment,ScotsPineBud,Pine::LSystem<ScotsPineSegment,ScotsPineBud,PineTree::PBNAME,PineTree::PineBudData> > ScotsPineGrowthLoop;
   ScotsPineGrowthLoop gloop(pine1,pl1);
   gloop.parseCommandLine(argc,argv);
   gloop.resizeTreeDataMatrix();
@@ -702,7 +706,7 @@ int main(int argc, char** argv)
     
     //This first derive() creates the new segments, whose lengths will be iterated
     pl1->derive();
-    pl1->lstringToLignum(*pine1,1,PBDATA);
+    pl1->lstringToLignum(*pine1,1,PineTree::PBDATA);
 
     //Pass the  qin to newly  created segments and to  the terminating
     //buds. Also set LGAip (qin/TreeQinMax) for the terminating buds
@@ -725,7 +729,7 @@ int main(int argc, char** argv)
 
     //Length of path from base of tree to each segment
     LGMdouble plength = 0.0;
-    PropagateUp(*pine1,plength,PathLength<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,plength,PineTree::PathLength<ScotsPineSegment,ScotsPineBud>());
 
     //============================================================================
     // Space colonialization
@@ -878,7 +882,7 @@ int main(int argc, char** argv)
     //Kaitaniemi data depens on segment length
     ForEach(*pine1,SetScotsPineSegmentSf());
     bool kill = false;
-    PropagateUp(*pine1,kill,KillBudsAfterAllocation<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,kill,PineTree::KillBudsAfterAllocation<ScotsPineSegment,ScotsPineBud>());
 
     //Now the lengths of the segments are such that Growth = P - M. Do (that is, store permanently,
     //before it was not) the induced diameter growth
@@ -903,14 +907,14 @@ int main(int argc, char** argv)
     LGMdouble wr1 = GetValue(*pine1,LGPar)*wfnew;
 
     //Update L-string, pass the state of the bud to control branching
-    pl1->lignumToLstring(*pine1,1,PBDATA);
-    pl1->lstringToLignum(*pine1,1,PBDATA);
+    pl1->lignumToLstring(*pine1,1,PineTree::PBDATA);
+    pl1->lstringToLignum(*pine1,1,PineTree::PBDATA);
 
     //Before derive  pass the  foliage mass of  the mother  segment to
     //terminating buds
 
     double wftobuds = 0.0;
-    PropagateUp(*pine1,wftobuds,ForwardWf<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,wftobuds,PineTree::ForwardWf<ScotsPineSegment,ScotsPineBud>());
 
     //============================================================================
     // Here is calculation of estimation of local needle area density for
@@ -939,11 +943,11 @@ int main(int argc, char** argv)
       ForEach(*pine1, sbvf);
     }
 
-    pl1->lignumToLstring(*pine1,1,PBDATA);
+    pl1->lignumToLstring(*pine1,1,PineTree::PBDATA);
 
     //Create new buds in L-system as the function of the mother segment foliage mass
     pl1->derive();
-    pl1->lstringToLignum(*pine1,1,PBDATA);
+    pl1->lstringToLignum(*pine1,1,PineTree::PBDATA);
  
     Axis<ScotsPineSegment,ScotsPineBud>& stem = GetAxis(*pine1);
 
@@ -962,7 +966,7 @@ int main(int argc, char** argv)
 
     //The Qin at the top
     LGMdouble qintop1 = 0.0;
-    GetTopQin<ScotsPineSegment,ScotsPineBud> getTopQin1;
+    PineTree::GetTopQin<ScotsPineSegment,ScotsPineBud> getTopQin1;
     qintop1 = accumulate(ls.begin(),ls.end(),qintop1, getTopQin1);
 
     //Diameter and heigth at the crown base.
@@ -1228,7 +1232,7 @@ int main(int argc, char** argv)
   //Print  Qin and  (x,y,z)  for each  segment  of age  0,1  or 2.  In
   //addition  to Qin,  this gives  you  the idea  of the  size of  the
   //branches
-  ForEach(*pine1,PrintSegmentQin<ScotsPineSegment,ScotsPineBud>());
+  ForEach(*pine1,PineTree::PrintSegmentQin<ScotsPineSegment,ScotsPineBud>());
   LGMdouble wf1 = 0.0;
   cout << "Wf: " << Accumulate(*pine1,wf1,
        		       CollectFoliageMass<ScotsPineSegment,ScotsPineBud>()) << endl;
@@ -1323,6 +1327,7 @@ int main(int argc, char** argv)
 
 
   return 0;
+
 #if defined (__APPLE__) || defined(__MACOSX__)
   if(CheckCommandLine(argc,argv,"-viz")) {
     LGMVisualization viz;
@@ -1338,3 +1343,5 @@ int main(int argc, char** argv)
   }
 #endif
 }
+
+}//namespace CrownDensity

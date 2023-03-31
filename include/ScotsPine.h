@@ -5,6 +5,23 @@
 #include <Pine.h>
 #include <VoxelSpace.h>
 
+extern ParametricCurve bud_view_f;
+
+extern ParametricCurve adhoc;
+extern bool is_adhoc;
+extern VoxelSpace space_occupancy;
+
+extern bool space0;
+extern bool space1;
+extern bool space2;
+extern double space2_distance;
+
+extern double L_age, L_H;
+extern double global_hcb;
+
+extern LGMdouble max_rueqin;
+extern int ran3_seed;
+namespace CrownDensity{
 ///Scots Pine Functions
 enum SPFN {SPFAF,///<Scots pine Initial foliage m^2/kgC   
 	   SPFAD,///<Scots pine  Apical Dominance,
@@ -35,21 +52,6 @@ enum SPPD {SPis_EBH ///< Extended Borchert-Honda ("boolean")
 class ScotsPineBud;
 class ScotsPineSegment;
 
-extern ParametricCurve bud_view_f;
-
-extern ParametricCurve adhoc;
-extern bool is_adhoc;
-extern VoxelSpace space_occupancy;
-
-extern bool space0;
-extern bool space1;
-extern bool space2;
-extern double space2_distance;
-
-extern double L_age, L_H;
-extern double global_hcb;
-
-extern LGMdouble max_rueqin;
 
 class ScotsPineTree: public Tree<ScotsPineSegment,ScotsPineBud>{
   //Return the function asked
@@ -252,7 +254,7 @@ private:
 };
 
 ///\brief ScotsPineSegment with attributes and ParametricCurves for CrownDensity and LignumForest
-class ScotsPineSegment: public PineSegment<ScotsPineSegment,ScotsPineBud>{
+  class ScotsPineSegment: public PineTree::PineSegment<ScotsPineSegment,ScotsPineBud>{
   ///The SetValue  for LGPsf  changes the specific  leaf area to  be a
   ///function instead of being  single tree level parameter. That's why
   ///no  value argument. Also  this is  meant to  be used  with functor
@@ -398,11 +400,11 @@ private:
 };   //ScotsPineSegment
 
 
-class ScotsPineBud:  public PineBud<ScotsPineSegment,ScotsPineBud>{
+  class ScotsPineBud:  public PineTree::PineBud<ScotsPineSegment,ScotsPineBud>{
 public:
   ScotsPineBud(const Point& p, const PositionVector& d, 
 	       const LGMdouble go, Tree<ScotsPineSegment,ScotsPineBud>* tree)
-    :PineBud<ScotsPineSegment,ScotsPineBud>(p,d,go,tree){}
+    :PineTree::PineBud<ScotsPineSegment,ScotsPineBud>(p,d,go,tree){}
 };
 
 
@@ -506,7 +508,6 @@ public:
 
 	//Random variation in lengths of segments (not stem)
 	if(go > 1.0) {
-	  extern int ran3_seed;
 	  LGMdouble rp = GetValue(GetTree(*ts),LGPlen_random);
 	  Lnew *= 1.0 + (rp/0.5)*(ran3(&ran3_seed)-0.5);
 	}
@@ -730,5 +731,6 @@ public:
   }
 };
 
+}
 
 #endif

@@ -3,6 +3,7 @@
 #include <Lignum.h>
 #include <ScotsPine.h>
 
+namespace CrownDensity{
 void makeTreeOfTopWhorls(ScotsPineTree& pine, ScotsPineTree* tree);
 
 void allocateByBranches(ScotsPineTree& pine);
@@ -60,5 +61,5 @@ class CountLivingBuds {
   }
 };
 
-
+}
 #endif

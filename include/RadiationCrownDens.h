@@ -4,6 +4,7 @@
 #include <ScotsPine.h>
 #include <VoxelSpace.h>
 
+namespace CrownDensity{
 class EvaluateRadiationSelfVoxel {
 public:
   EvaluateRadiationSelfVoxel(VoxelSpace* vs, const LGMdouble& Af, const LGMdouble& for_k,
@@ -48,6 +49,6 @@ class AccumulateOpticalThickness{
     LGMdouble box_volume;
 };
 
-
+}
 
 #endif

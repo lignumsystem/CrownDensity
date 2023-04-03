@@ -1,5 +1,7 @@
 ///\file ScotsPine.h
 ///\brief Scots pine segment, Scots pine bud and Scots pine tree implementations  
+///\todo Consider cleaning up and moving  ScotsPine.h and ScotsPine.cc to Pine project.
+///Then LignumForest does not depend on CrownDensity (both are now mutually depended on each other).
 #ifndef SCOTSPINE_H
 #define SCOTSPINE_H
 #include <Pine.h>
@@ -373,7 +375,9 @@ public:
     return data;
   }
 
+    ///Respiration
   void respiration();
+    ///Aging after growth
   void aging();
   void setEBHResource(const double& r) {EBH_resource = r;}
   double getEBHResource() {return EBH_resource;}
@@ -381,7 +385,9 @@ public:
   double getQv() {return Qv;}
   void setApical(const double& ap) {apical = ap;}
   double getApical() {return apical;}
-  double view;                   ///Make this private?
+    ///\todo Make `view`  private
+  double view;
+    /// Photosynthesis
   void photosynthesis();
   LGMdouble getQinStand() {return Qin_stand;}
   void setQinStand(LGMdouble qis) {Qin_stand = qis;}

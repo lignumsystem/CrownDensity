@@ -44,6 +44,8 @@ namespace Pine{
 using namespace LignumForest;
 //#include <ByBranches.h>
 
+///\defgroup g1main Global variables Growth related variables
+///@{
 int ran3_seed;
 bool is_by_branches = false;          ///<this is needed in SomeFunctors.h SetScotsPineSegmentApical
 
@@ -55,21 +57,29 @@ ParametricCurve toptax("toptax.fun"); ///<function to adjust resource distn amon
 int growthloop_ebh_mode = 0;          ///<This global variable is needed e.g. in bybranches.cc
 
 LGMdouble max_rueqin;
-
-// VoxelSpace for space occupancy
+///@}
+///\defgroup g2main Global variable Voxel space
+///VoxelSpace for space occupancy
+///@}
 Firmament dummy_firm;
 VoxelSpace space_occupancy(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
 			   0.1,0.1,0.1,5,5,5,dummy_firm);
 
-//These global variables have been declared in pine-em98.L and convey 
+///\defgroup g3main Global variables L system variables
+///These global variables have been declared in pine-em98.L and convey 
 //tree age and height to L-system
+///@{
 extern double L_age, L_H;
-
-double global_hcb;      //For conveying height of grown base to SetScotsPineSegmentLength
+///@}
+///\defgroup g4main Global variables Height growth
+///For conveying height of grown base to SetScotsPineSegmentLength
+double global_hcb;      
 double dDb;
-
-//Space colonialization options for SetScotsPineSegmentLength (in ScotsPine.h)
-//and other global variables
+///@}
+///\defgroup g5main Global variables Space colonization
+///Space colonialization options for SetScotsPineSegmentLength (in ScotsPine.h)
+///and other global variables
+///@{
 bool space0 = false;
 bool space1 = false;
 bool space2 = false;
@@ -77,12 +87,14 @@ double space2_distance = 0.3;
 bool is_forced_height = false;
 bool is_height_function = false;
 double tax_share = 0.3;        //for toptax
-
-
-//This global variable conveys the Bud View Function to Lsystem
+///@}
+///\defgroup g6main Global variables Bud view function
+///This global variable conveys the Bud View Function to Lsystem
+///@{
 ParametricCurve bud_view_f;
-bool is_bud_view_function = false;   // and if it is in use 
-
+///If it is in use 
+bool is_bud_view_function = false;   
+///@}
 namespace CrownDensity{
 ///\section main Main program usage
 ///\snippet{lineno} main.cc Usagex

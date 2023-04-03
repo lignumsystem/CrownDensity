@@ -1,27 +1,20 @@
+///\file ScotsPine.cc
+///\brief Photosynthesis, respiration and aging
 #include <ScotsPine.h>
-using namespace CrownDensity;
-///\file metabolism.cc
-///Redefine respiration, that is defined in CfTreeSeegmentMetabolismI.h
-///to take into account wood density that varies between annual rings
-///according to function SPWD.
 
-///The variation of wood density among tree rings is taken into
-///consideration in an average manner: mean density of sapwood is
-///calculated with the aif of function SPWD that defines density of
-///annual ring as a function of age of segment (at creation of annual
-///ring). The average is taken of function SPWD over range (hardwood
-//radius/radius) x segment age ... segment age.
-
-///RESPIRATION rate of the segment as the function of needle mass
-///and sapwood mass
-
-///Radiation use efficiency: photosynthetic production of a CfTreeSegment =
-///rue*LGPpr*Qabs, where parameter LGPpr = Photosynthetic efficiency
-///(see LGMSymbols.h). rue depends on the radiation conditions of the CfTreeSegment
-///at its birth. At full light (at top of the stand) rue = 1, in shaded
-///conditions possibly rue > 1.
-///\todo photsynthesis, respiration and aging could be implemented as functors
-/// to ease the testing of experimental models. 
+namespace CrownDensity{
+///\brief Photosynthetic production.
+///Photosynthetic production implemented as 
+///\f[
+///P = rue \times LGP_{pr} \times Q_{abs}
+///\f]
+///where parameter `Lignum::LGPpr` = Photosynthetic efficiency
+///(see LGMSymbols.h). `rue` depends on the radiation conditions of the CfTreeSegment
+///at its birth. At full light (at top of the stand) `rue` = 1, in shaded
+///conditions possibly `rue` > 1.
+///\pre `CrownDensity::SPrue` must be defined
+///\todo ScotsPineSegment::photosynthesis(), ScotsPineSegment::respiration() and ScotsPineSegment::aging() could be implemented as functors
+/// to ease the testing of experimental models.
 void ScotsPineSegment::photosynthesis()
 {
   Tree<ScotsPineSegment,ScotsPineBud>& t = GetTree(*this);
@@ -45,8 +38,29 @@ void ScotsPineSegment::photosynthesis()
   // SetValue(*this, LGAP, pr*GetValue(*this,LGAQabs));
 }
 
-
-
+///\brief Respiration
+///
+///Respiration rate of the segment as the function of needle mass
+///and sapwood mass. Respiration is
+///\f[
+/// R_{tot} = R_{W_f} + R_{W_s}
+///\f]
+///where
+///\f[
+///\begin{cases}
+/// R_{W_f} = LGP_{mf} \times W_f\\
+/// R_{W_s} = LGP_{ms} \times {W_s}.
+///\end{cases}
+///\f]
+///\todo Redefine respiration, that is defined in CfTreeSeegmentMetabolismI.h
+///to take into account wood density that varies between annual rings
+///according to function `SPWD`.
+///The variation of wood density among tree rings is taken into
+///consideration in an average manner: mean density of sapwood is
+///calculated with the aid of function `SPWD` that defines density of
+///annual ring as a function of age of segment (at creation of annual
+///ring). The average is taken of function `SPWD` over range (hardwood
+//radius/radius) x segment age ... segment age.
 void ScotsPineSegment::respiration()
 {
   LGMdouble resp = 0.0;
@@ -81,23 +95,31 @@ void ScotsPineSegment::respiration()
   SetValue(*this,LGAM, resp);
 }
 
-//Aging  tailored for ScotsPineSegment:  heartwood formation  after 13
-//years
+///Aging  tailored for ScotsPineSegment:  heartwood formation  after `SPHWStart` years.
+///\pre Sapwood senescence age `CrownDensity::SPHwStart` must be defined (from command line )
+///\pre Foliage senescence function `Lignum::LGMFM` must be defined 
 void ScotsPineSegment::aging()
 {
-  //Add age (see foliage senescence below)
+  ///\internal
+  ///**The aging steps**
+  ///+ Add age (see foliage senescence below)
+  ///+ Sapwood senescence if `LGAage` > `SPHwStart` (e.g. 13 years, Bjorklund, Silva Fennica)
+  ///+ Foliage senescence as a declining function of age
+  ///\endinternal
+  //One year older
   SetValue(*this,LGAage,GetValue(*this,LGAage)+1.0);
-
-  //Sapwood senescence if segment age > 13 (Bjorklund, Silva Fennica)
+  //Sapwood senescence
   if (GetValue(*this,LGAage) > GetValue(dynamic_cast<const ScotsPineTree&>(GetTree(*this)),SPHwStart)){
     LGMdouble dAs = GetValue(GetTree(*this),LGPss) * GetValue(*this,LGAAs);
     LGMdouble Ah_new =  dAs + GetValue(*this, LGAAh);
     LGMdouble Rh_new = sqrt(Ah_new/PI_VALUE);
     SetValue(*this,LGARh,Rh_new);
   }
-  //Foliage senescence
+  //Foliage mass decline
   const ParametricCurve& fm = GetFunction(GetTree(*this),LGMFM);
   //This implementation assumes declining function of age from 1 to 0.
   LGMdouble Wf_new = fm(GetValue(*this,LGAage))*GetValue(*this,LGAWf0);
-  SetValue(*this,LGAWf,Wf_new);  
+  SetValue(*this,LGAWf,Wf_new);
+  
+}
 }

@@ -95,16 +95,18 @@ void ScotsPineSegment::respiration()
   SetValue(*this,LGAM, resp);
 }
 
-///Aging  tailored for ScotsPineSegment:  heartwood formation  after `SPHWStart` years.
+///Aging  tailored for ScotsPineSegment:  heartwood formation  after `CrownDensity::SPHWStart` years.
 ///\pre Sapwood senescence age `CrownDensity::SPHwStart` must be defined (from command line )
-///\pre Foliage senescence function `Lignum::LGMFM` must be defined 
+///\pre Foliage senescence function `Lignum::LGMFM` must be defined
+///\sa run-crowndens.sh
 void ScotsPineSegment::aging()
 {
   ///\internal
   ///**The aging steps**
-  ///+ Add age (see foliage senescence below)
+  ///+ Add age 1 year (time step)
   ///+ Sapwood senescence if `LGAage` > `SPHwStart` (e.g. 13 years, Bjorklund, Silva Fennica)
   ///+ Foliage senescence as a declining function of age
+  /// \sa CrownDensity::SPHwStart Lignum::LGMFM
   ///\endinternal
   //One year older
   SetValue(*this,LGAage,GetValue(*this,LGAage)+1.0);

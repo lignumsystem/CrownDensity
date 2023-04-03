@@ -1,7 +1,7 @@
 ///\file globalvariables.cc
 ///\brief Global variables
 ///
-///\defgroup Gvars Global variables
+///\defgroup gvarslf Global variables for LignumForest
 ///Global variables used in LignumForest initialized by GrowthLoop.
 ///Variables are dummy in the context of CrownDensity, needed for compilation.
 ///@{

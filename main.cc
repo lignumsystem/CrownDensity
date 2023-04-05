@@ -1,6 +1,16 @@
 ///\file main.cc
-///\brief main growth loop
-///Include Lignum implementation 
+///\brief Main growth loop
+///Growth loop steps
+///+ Initialize global variables
+///+ Read command line
+///+ Initialize tree, L-system and global variables from command line
+///+ Run the simulation
+///+ Save simulation data to HDF5 files.
+///\sa CrownDensity
+///\page runscript Run crowndensity
+///Use the following `run-crowndens.sh` script to run crowndensity.
+///Edit `crowndens` command line according to your needs 
+///\include run-crowndens.sh
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
@@ -58,12 +68,14 @@ int growthloop_ebh_mode = 0;          ///<This global variable is needed e.g. in
 
 LGMdouble max_rueqin;
 ///@}
-///\defgroup g2main Global variable Voxel space
-///VoxelSpace for space occupancy
-///@}
+///\defgroup g2main Global variable space occupance
+///@{
+///Firmament for space occupancy
 Firmament dummy_firm;
+///VoxelSpace for space occupancy
 VoxelSpace space_occupancy(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
 			   0.1,0.1,0.1,5,5,5,dummy_firm);
+///@}
 
 ///\defgroup g3main Global variables L system variables
 ///These global variables have been declared in pine-em98.L and convey 
@@ -1357,3 +1369,4 @@ int main(int argc, char** argv)
 }
 
 }//namespace CrownDensity
+ 

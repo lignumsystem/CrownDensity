@@ -416,8 +416,16 @@ public:
 
 class SetScotsPineSegmentLength{
 public:
-  SetScotsPineSegmentLength(double lamda):l(lamda)  ///space_occupancy is
-  {space_occupancy.resetOccupiedTry();}             ///global
+  ///\overload SetScotsPineSegmentLength(double lamda):
+  ///\link space_occupancy \endlink is global \sa resetOccupiedTry
+  ///\param lambda The \f$\lambda\f$ parameter for carbon balance equation
+  ///\post resetOccupiedTry called, i.e. \link space_occupancy \endlink reset.
+  SetScotsPineSegmentLength(double lambda):l(lambda)  
+  {space_occupancy.resetOccupiedTry();}
+  ///\overload SetScotsPineSegmentLength(const SetScotsPineSegmentLength& sl):
+  ///\param sl SetScotsPineSegmentLength to be copied
+  ///\post The member `l` set (carbon balance parameter \f$\lambda\f$)
+  ///\note No call to resetOccupiedTry, i.e. no \link space_occupancy \endlink reset
   SetScotsPineSegmentLength(const SetScotsPineSegmentLength& sl)
     :l(sl.l)/*,apical(sl.apical),qin(sl.qin)*/{}
   SetScotsPineSegmentLength& operator=(const SetScotsPineSegmentLength& sl){
@@ -623,7 +631,7 @@ public:
     return tc;
   }
 protected:
-  double l;//Lamda to iterate segment lengths
+  double l;///< The \f$\lambda\f$  to iterate segment lengths
 };
 
 ///\brief Segment length model close to original single open grown Scots pine models.

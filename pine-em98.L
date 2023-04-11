@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 using namespace std;
 //Defines ran3 etc
 #include <mathsym.h>
@@ -28,7 +29,8 @@ open Pine;
 const double l1 = 0.9;
 
 
-const double PI = 3.1415926535897932384;
+//const double PI = 3.1415926535897932384;
+const double PI = acos(-1.0);
 const double pitch = 45.0*PI/180.0; //the angle of branching in the main axis    = 45
 const double roll  = 137.5*PI/180.0; //137.5 is convenient to distribute buds (137.5*N never overlaps)
 const double turn_branch = 30.0*PI/180.0;//the angle of branching in branches  = 30
@@ -36,7 +38,7 @@ const double pitch_down = 2.0*PI/180.0;//branches bending down annually
 const double max_pitch_down = 90.0*PI/180.0;//horizontal branches
 const double hupdir = 85.0*PI/180.0; //if a bud points down make it N degrees upwards from horizontal
 const double hdir   =  45.0*PI/180.0; //branch buds maintain N degree angle  up from horizontal
-
+//Number of buds and their roll around parenet segment direction
 const double rollmain2  =(360.0/2.0)*PI/180.0;
 const double rollmain3  =(360.0/3.0)*PI/180.0;
 const double rollmain4  =(360.0/4.0)*PI/180.0;

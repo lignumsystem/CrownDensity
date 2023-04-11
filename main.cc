@@ -9,8 +9,11 @@
 ///\sa CrownDensity
 ///\page runscript Run crowndensity
 ///Use the following `run-crowndens.sh` script to run crowndensity.
-///Edit `crowndens` command line according to your needs 
+///Create new ones or edit `crowndens` command line according to simulation needs.
 ///\include run-crowndens.sh
+///\page lsystem L-system file
+///The following L system file defines architecture for Scots pine 
+///\include pine-em98.L
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
@@ -85,6 +88,7 @@ extern double L_age, L_H;
 ///@}
 ///\defgroup g4main Global variables Height growth
 ///For conveying height of grown base to SetScotsPineSegmentLength
+///@{
 double global_hcb;      
 double dDb;
 ///@}

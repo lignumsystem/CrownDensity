@@ -56,7 +56,9 @@ class ScotsPineSegment;
 
 
 class ScotsPineTree: public Tree<ScotsPineSegment,ScotsPineBud>{
-  //Return the function asked
+  ///\param t The tree
+  ///\param name The name of the function
+  ///\return t The function queried
   friend const ParametricCurve& GetFunction(const ScotsPineTree& t, SPFN name)
   {
     switch (name){
@@ -89,6 +91,9 @@ class ScotsPineTree: public Tree<ScotsPineSegment,ScotsPineBud>{
 
   ///Two alternatives of SetFunction, the latter one comes from merging tree
   ///growth of the project CrownDensity
+  ///\param t The tree
+  ///\param f The function
+  ///\param name The name of the function
   friend void SetFunction(ScotsPineTree& t, ParametricCurve& f, SPFN name)
   {  
     if (name == SPFAF){
@@ -139,7 +144,10 @@ class ScotsPineTree: public Tree<ScotsPineSegment,ScotsPineBud>{
   //   }
   // }
   
-
+  ///Return tree attribute value
+  ///\param t The tree
+  ///\name The name of the attribute
+  ///\return The value of the queried attribute 
   friend double GetValue(const  ScotsPineTree& t, SPAD name)
   {
     if (name == SPHwStart){
@@ -156,7 +164,10 @@ class ScotsPineTree: public Tree<ScotsPineSegment,ScotsPineBud>{
       return t.hw_start;
     }
   }
-
+  ///Retun tree parameter value
+  ///\param t The tree
+  ///\param name The parameter name
+  ///\return The queried parameter value
   friend double GetValue(ScotsPineTree& t, SPPD name) {
     if (name == SPis_EBH){ //If Palubicki et al 2009 Extended Borchert et Honda
       // resource distribution in use (0 = false, 1 = true)
@@ -382,27 +393,34 @@ public:
   void setEBHResource(const double& r) {EBH_resource = r;}
   double getEBHResource() {return EBH_resource;}
   void setQv(const double& qv) {Qv = qv;}
+    ///\retval Qv \sa Qv
   double getQv() {return Qv;}
   void setApical(const double& ap) {apical = ap;}
+    ///\retval apical \sa apical
   double getApical() {return apical;}
     ///\todo Make `view`  private
   double view;
     /// Photosynthesis
   void photosynthesis();
+    ///\retval Qin_stand \sa \Qin_stand
   LGMdouble getQinStand() {return Qin_stand;}
   void setQinStand(LGMdouble qis) {Qin_stand = qis;}
 private:
-  LGMdouble AsDown;
-  LGMdouble Qin_stand;
-  LGMdouble EBH_resource;      ///Extended Borchert-Honda model resource
-  LGMdouble Qv;      ///Cumulative radiation in basipetal direction in EBH calculation
-  LGMdouble apical;  ///Measure of apical dominance on lateral Segments = f(qin/TreeQinMax),
-                     ///see functor SetScotsPineSegmentApical
-  LGMdouble rue;  ///Radiation use efficiency: photosynthetic production of a CfTreeSegment =
-                  ///rue*LGPpr*Qabs, where parameter LGPpr = Photosynthetic efficiency
-                  ///(see LGMSymbols.h). rue depends on the radiation conditions of the CfTreeSegment
-                  ///at its birth. At full light (at top of the stand) rue = 1, in shaded
-                  ///conditions possibly rue > 1.
+  LGMdouble AsDown; ///< Sapwood area passed down in a tree
+  LGMdouble Qin_stand; ///< Qin stand level
+  LGMdouble EBH_resource;      ///<Extended Borchert-Honda model resource
+  LGMdouble Qv;      ///<Cumulative radiation in basipetal direction in EBH calculation
+  LGMdouble apical;  ///<Measure of apical dominance on lateral Segments = f(qin/TreeQinMax),
+                     ///< \sa SetScotsPineSegmentApical
+  ///\brief Radiation use efficiency.
+  ///
+  ///Photosynthetic production of a CfTreeSegment = rue*LGPpr*Qabs,
+  ///where parameter LGPpr = Photosynthetic efficiency.
+  ///`rue` depends on the radiation conditions of the CfTreeSegment
+  ///at its birth. At full light (at top of the stand) `rue` = 1, in shaded
+  ///conditions possibly `rue` > 1.
+  ///\sa LGMSymbols.h
+  LGMdouble rue;  
 };   //ScotsPineSegment
 
 
@@ -416,7 +434,7 @@ public:
 
 class SetScotsPineSegmentLength{
 public:
-  ///\overload SetScotsPineSegmentLength(double lamda):
+  ///\overload SetScotsPineSegmentLength(double lambda):
   ///\link space_occupancy \endlink is global \sa resetOccupiedTry
   ///\param lambda The \f$\lambda\f$ parameter for carbon balance equation
   ///\post resetOccupiedTry called, i.e. \link space_occupancy \endlink reset.

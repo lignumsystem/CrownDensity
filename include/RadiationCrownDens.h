@@ -1,3 +1,4 @@
+///\file RadiationCrownDens.h
 #ifndef RADIATIONCROWNDENS_H
 #define RADIATIONCROWNDENS_H
 #include <Lignum.h>
@@ -5,8 +6,17 @@
 #include <VoxelSpace.h>
 
 namespace CrownDensity{
+///\brief Evaluate self shading using VoxelSpace.
 class EvaluateRadiationSelfVoxel {
 public:
+  ///\param vs Voxel space
+  ///\param Af Segment foliage area
+  ///\param for_k Forest extinction parameter for K function
+  ///\param tree_h Tree height
+  ///\param Hcb Height crown base
+  ///\param dens Homogenous border forest density
+  ///\param x0 Location of the Tree stem
+  ///\param k_func Empirical extinction function K (also of `for_k`)
   EvaluateRadiationSelfVoxel(VoxelSpace* vs, const LGMdouble& Af, const LGMdouble& for_k,
 			     const LGMdouble& tree_h, const LGMdouble& Hcb,
 			     const LGMdouble& dens, const Point& x0, const ParametricCurve& k_func):
@@ -15,14 +25,14 @@ public:
   TreeCompartment<ScotsPineSegment,ScotsPineBud>*
     operator()(TreeCompartment<ScotsPineSegment,ScotsPineBud>* tc)const;
 private:
-  VoxelSpace* voxel_space;
-  LGMdouble needle_area;
-  LGMdouble forest_k;
-  LGMdouble tree_height;
-  LGMdouble crownbase_height;
-  LGMdouble density;
-  Point stem_loc;
-  ParametricCurve K;
+  VoxelSpace* voxel_space;///< Voxel space
+  LGMdouble needle_area; ///< Segment needle area
+  LGMdouble forest_k; ///< Forest extinction coeffient \sa K
+  LGMdouble tree_height;///<Tree height
+  LGMdouble crownbase_height;///Crown base height
+  LGMdouble density; ///Border forest density
+  Point stem_loc;///Tree main stem location
+  ParametricCurve K;///<Empirical extinction function (also of `forest_k`)\sa forest_k
 };
 
 class AccumulateOpticalThickness{

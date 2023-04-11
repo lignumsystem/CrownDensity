@@ -20,8 +20,8 @@ To remove all compilation work type `make distclean`.
 ## Running the program
 
 Command line options and their short documentation for usage can be obtained by running the program
-without any parameters: <CODE>./crowndens</CODE> \sa Usage()
-
+without any parameters: <CODE>./crowndens</CODE>
+See also CrownDensity::Usage  and run-crowndens.sh 
 ## Documentation
 
 The Reference Guide for the CrownDensity will be based on comments and other information

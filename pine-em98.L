@@ -47,13 +47,13 @@ const double rollmain6  =(360.0/6.0)*PI/180.0;
 const double rollmain7  =(360.0/7.0)*PI/180.0;
 const double rollmain8  =(360.0/8.0)*PI/180.0;
 
-//L system runs in two modes. first create the new segments and
-//after their lengths are adjusted, the second mode creates the new buds.
-//There are two calls to derive in the main program in pine.cc
-//NOTE for pine-forest: As the 'mode' is a global variable, it is visible to a l l L-systems.
-//Consequently each l[i].derive() will change the mode and alternately the L-systems 
-//will receive 0 and 1 as the mode. This is not what we want but what is needed is an additional
-//explicit call to l[i].endEach() after each l[i].derive() in pine-forest.cc that resets the mode.
+///L system runs in two modes. first create the new segments and
+///after their lengths are adjusted, the second mode creates the new buds.
+///There are two calls to derive in the main program in pine.cc
+///\note for pine-forest: As the 'mode' is a global variable, it is visible to *all* L-systems.
+///Consequently each l[i].derive() will change the mode and alternately the L-systems 
+///will receive 0 and 1 as the mode. This is not what we want but what is needed is an additional
+///explicit call to l[i].endEach() after each l[i].derive() in pine-forest.cc that resets the mode.
 int mode = 0; //0 = new segment, 1 = new buds
 
 //Number of buds as the function of foliage mass

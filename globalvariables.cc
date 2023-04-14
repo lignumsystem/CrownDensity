@@ -2,7 +2,8 @@
 ///\brief Global variables
 ///
 ///\defgroup gvarslf Global variables for LignumForest
-///Global variables used in LignumForest initialized by GrowthLoop.
+///Global variables used in LignumForest initialized by LignumForest::GrowthLoop.
+///These are (so far) declared in CrownDensity. 
 ///Variables are dummy in the context of CrownDensity, needed for compilation.
 ///@{
 double H_0_ini = 0.0;

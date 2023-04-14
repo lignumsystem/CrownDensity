@@ -46,10 +46,10 @@
 //Includes all kinds of stuff, turtle graphics etc.
 #include <lengine.h>
 
-//and for pine, see also pine9bp.L in lsys.
+///L-system is in Pine namespace \sa pine-em98.L
 namespace Pine{
 #include <LSystem.h>
-
+ extern int mode;
 }
 
 

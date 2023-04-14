@@ -881,7 +881,12 @@ INPUT                  = . \
                          ../LignumForest/src \
                          ../Pine \
                          ../LignumForest/GrowthLoop.h \
-                         ../LignumForest/GrowthLoopI.h
+                         ../LignumForest/GrowthLoopI.h \
+                         ../stl-voxelspace/include/VOBookKeeper.h \
+                         ../stl-voxelspace/include/VoxelObject.h \
+                         ../stl-lignum/TreeSegment/BeamShading.cc \
+                         ../stl-lignum/include/Shading.h \
+                         ../stl-lignum/include/ShadingI.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

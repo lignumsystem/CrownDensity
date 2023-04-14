@@ -8,8 +8,8 @@
 ///+ Save simulation data to HDF5 files.
 ///\sa CrownDensity
 ///\page runscript Run crowndensity
-///Use the following `run-crowndens.sh` script to run crowndensity.
-///Create new ones or edit `crowndens` command line according to simulation needs.
+///Use the following `run-crowndens.sh` script to run `crowndens`.
+///Create new scripts or edit `crowndens` command line according to simulation needs.
 ///\include run-crowndens.sh
 ///\page lsystem L-system file
 ///The following L system file defines architecture for Scots pine 
@@ -49,7 +49,8 @@
 ///L-system is in Pine namespace \sa pine-em98.L
 namespace Pine{
 #include <LSystem.h>
- extern int mode;
+  
+  extern int mode;
 }
 
 

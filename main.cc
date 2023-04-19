@@ -154,7 +154,7 @@ void Usage()
 //[Usagex]
 ///\endinternal
 
-
+}//namespace CrownDensity
 int main(int argc, char** argv)
 {
   int iterations = 0;//Number of iterations
@@ -168,9 +168,8 @@ int main(int argc, char** argv)
   ///\section mainfunction Main growth loop
   //========================================================================
   //Read command line arguments
-
   if (argc < 3){
-    Usage();
+    CrownDensity::Usage();
     return 0;
   }
   else{
@@ -1373,5 +1372,5 @@ int main(int argc, char** argv)
 #endif
 }
 
-}//namespace CrownDensity
+
  

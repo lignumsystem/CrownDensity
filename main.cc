@@ -1148,7 +1148,7 @@ int main(int argc, char** argv)
     PropagateUp(*pine1,initial,set_rue);
    }
    ///As in LignumForest Collect data to HDF5 files after growth 
-   gloop.collectDataAfterGrowth(iter+1);
+   gloop.collectDataAfterGrowth(iter+1,false);
    CreateTreeXMLDataSet(gloop,hdf5_trees,TXMLGROUP,gloop.getWriteInterval());
   }   // END OF ITERATION END OF ITERATION END OF ITERATION END OF ITERATION
 

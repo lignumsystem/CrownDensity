@@ -51,6 +51,7 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
   # cmake 3.23 output erroneusly prints 'glut not found'. It is found. 
   find_package(GLUT REQUIRED)
 elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+  message("SYSTEM: Linux platform")
   find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
   find_package(Qt5 COMPONENTS Xml Core  REQUIRED)
 else()
@@ -109,6 +110,5 @@ else()
   message(${CMAKE_HOST_SYSTEM_NAME} " not supported")
   message(FATAL_ERROR "Exiting cmake")
 endif()
->>>>>>> 134db5efefa78e900ab881091ce3ef4dee009076
 
 install(TARGETS crowndens DESTINATION "${CMAKE_CURRENT_LIST_DIR}")

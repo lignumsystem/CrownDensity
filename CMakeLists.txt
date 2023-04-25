@@ -1,25 +1,30 @@
-# cmake file to compile CrownDensity
-# For Unix/Linux/macOS Makefile build system type:
-# mkdir build
-# cd  build
-# cmake .. -DCMAKE_BUILD_TYPE=Debug/Release
-# Explicitely set c++ compiler
+# CMAKE file to compile CrownDensity
+# For Unix Makefile build system for Debug:
+# mkdir debug
+# cd  debug
+# cmake .. -DCMAKE_BUILD_TYPE=Debug
+# Optionally explicitely set c++ compiler
 # cmake ..  -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS=-stdlib=libc++
-# To compile type:
 # make
-# To installl binary to directory above type (to run with a script):
-# make install
-# For Xcode IDE type:
+# -------------------
+# For Unix Makefile build system for Release:
+# mkdir release
+# cd release
+# cmake .. -DCMAKE_BUILD_TYPE=Release
+# make
+# -------------------
+# For Xcode IDE:
 # mkdir xcode
 # cd xcode
 # cmake .. -G Xcode
-# To open Xcode IDE type:
-# open crowndens.xcodeproj   
-#
-# Build the 'crowndens' Product in Xcode. See also Product (menu bar) -> Scheme is set to 'crowndens' to allow Run to debug.
-# Copy necessary *.fun files and *.txt parameter files to xcode/Debug where 'crowndens´ is located.
+# Open Xcode IDE
+# open lignum-forest.xcodeproj
+# --------------------
+# Build the 'lignum-forest' Product in Xcode.
+# See also Xcode -> Product (in menu bar) -> Scheme is set to 'lignum-forest' to allow Run to debug.
+# Copy necessary *.fun files and *.txt parameter files to xcode/Debug where 'lignum-forest´ is located.
 # Otherwise hard coded files are not found in the program.
-# Set command line parameters for 'crowndens' in Product (menu bar) -> Scheme -> Edit Schmeme -> Arguments.
+# Set command line parameters for 'lignum-forest' in Product (menu bar) -> Scheme -> Edit Schmeme -> Arguments.
 # Divide the command line into practical parts for debugging from Arguments -> '+'.
 cmake_minimum_required(VERSION 3.12)
 # cmake 3.23 for Xcode 13 recommends the policy CMP0114 (warning output)

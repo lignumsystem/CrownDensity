@@ -22,6 +22,7 @@
 cmake_minimum_required(VERSION 3.12)
 # cmake 3.23 for Xcode 13 recommends the policy CMP0114 (warning output)
 cmake_policy(SET CMP0114 NEW)
+#list(APPEND CMAKE_PREFIX_PATH "/usr/lib64/cmake/Qt5Xml/")
 project(crowndens DESCRIPTION "Single tree in homogeneous forest")
 
 # Lignum core projects as an ExternalProject. 'lignum-core' target is compiled first
@@ -41,10 +42,10 @@ include(../LEngine/lib/l2c.cmake)
 include(../Graphics/lib/Visual.cmake)
 
 find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
-find_package(Qt4 COMPONENTS QtOpenGL QtXml QtGui QtCore REQUIRED)
-find_package(OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Xml Core  REQUIRED)
+#find_package(OpenGL REQUIRED)
 # cmake 3.23 output erroneusly prints 'glut not found'. It is found. 
-find_package(GLUT REQUIRED)
+#find_package(GLUT REQUIRED)
 
 set(SOURCE_FILES main.cc
 globalvariables.cc
@@ -84,9 +85,8 @@ ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
 add_dependencies(crowndens lignum-core)
 
 target_link_libraries(crowndens
-HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore
-GLUT::GLUT OpenGL::GLU OpenGL::GL
-Visual L voxel sky LGM cxxadt
+HDF5::HDF5 Qt5::Xml Qt5::Core
+L voxel sky LGM cxxadt
 )
 
 install(TARGETS crowndens DESTINATION "${CMAKE_CURRENT_LIST_DIR}")

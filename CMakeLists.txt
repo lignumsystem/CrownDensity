@@ -1,18 +1,20 @@
 # cmake file to compile CrownDensity
-# For Unix Makefile build system:
+# For Unix/Linux/macOS Makefile build system type:
 # mkdir build
 # cd  build
 # cmake .. -DCMAKE_BUILD_TYPE=Debug/Release
 # Explicitely set c++ compiler
 # cmake ..  -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS=-stdlib=libc++
-# To compile
+# To compile type:
 # make
-#
-# For Xcode IDE:
+# To installl binary to directory above type (to run with a script):
+# make install
+# For Xcode IDE type:
 # mkdir xcode
 # cd xcode
 # cmake .. -G Xcode
-# open crowndens.xcodeproj   #Opens Xcode IDE
+# To open Xcode IDE type:
+# open crowndens.xcodeproj   
 #
 # Build the 'crowndens' Product in Xcode. See also Product (menu bar) -> Scheme is set to 'crowndens' to allow Run to debug.
 # Copy necessary *.fun files and *.txt parameter files to xcode/Debug where 'crowndens´ is located.
@@ -42,10 +44,19 @@ include(../LEngine/lib/l2c.cmake)
 include(../Graphics/lib/Visual.cmake)
 
 find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
-find_package(Qt5 COMPONENTS Xml Core  REQUIRED)
-#find_package(OpenGL REQUIRED)
-# cmake 3.23 output erroneusly prints 'glut not found'. It is found. 
-#find_package(GLUT REQUIRED)
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+  message("SYSTEM: Apple platform")
+  find_package(Qt4 COMPONENTS QtOpenGL QtXml QtGui QtCore REQUIRED)
+  find_package(OpenGL REQUIRED)
+  # cmake 3.23 output erroneusly prints 'glut not found'. It is found. 
+  find_package(GLUT REQUIRED)
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+  find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
+  find_package(Qt5 COMPONENTS Xml Core  REQUIRED)
+else()
+  message(${CMAKE_HOST_SYSTEM_NAME} " not supported")
+  message(FATAL_ERROR "Exiting cmake")
+endif()
 
 set(SOURCE_FILES main.cc
 globalvariables.cc
@@ -83,10 +94,21 @@ ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
 # However 'lignum-core' dependency (Targets in Xcode) is compiled once ignoring after
 # that time stamp based changes in Lignum core project files when rebuilding crowndens.
 add_dependencies(crowndens lignum-core)
-
-target_link_libraries(crowndens
-HDF5::HDF5 Qt5::Xml Qt5::Core
-L voxel sky LGM cxxadt
-)
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+  target_link_libraries(crowndens
+    HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore
+    GLUT::GLUT OpenGL::GLU OpenGL::GL
+    Visual L voxel sky LGM cxxadt
+  )
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+  target_link_libraries(crowndens
+    HDF5::HDF5 Qt5::Xml Qt5::Core
+    L voxel sky LGM cxxadt
+  )
+else()
+  message(${CMAKE_HOST_SYSTEM_NAME} " not supported")
+  message(FATAL_ERROR "Exiting cmake")
+endif()
+>>>>>>> 134db5efefa78e900ab881091ce3ef4dee009076
 
 install(TARGETS crowndens DESTINATION "${CMAKE_CURRENT_LIST_DIR}")

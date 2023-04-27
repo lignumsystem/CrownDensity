@@ -7,10 +7,14 @@
 ///+ Run the simulation
 ///+ Save simulation data to HDF5 files.
 ///\sa CrownDensity
-///\page runscript Run crowndensity
+///\page runscript Run CrownDensity
 ///Use the following `run-crowndens.sh` script to run `crowndens`.
 ///Create new scripts or edit `crowndens` command line according to simulation needs.
 ///\include run-crowndens.sh
+///\page runscript_arch Run CrownDensity architecture
+///Use the following `run-crowndens-architecture.sh` script to run `crowndens`
+///to test architecture effects. Use `SetScotsPineSegmentLenghtBasic`functor.
+///\include run-crowndens-architecture.sh
 ///\page lsystem L-system file
 ///The following L system file defines architecture for Scots pine 
 ///\include pine-em98.L

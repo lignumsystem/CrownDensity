@@ -57,6 +57,7 @@ y <- 0:ymax                      #Simulation years
 
 #Height
 plot(y,td[7,1,], type="l", ylim=c(0,30), lwd=2, xlab="time (y)", ylab="Tree height (m)", main="Tree height")
+points(y,td[11,1,], type="l", lwd=2, lty=2)
 
 # points(va27$a,va27$HgM,type="l",lwd=3,col="darkgreen")
 # points(vv$age,vv$H,type="l",lwd=3,col="darkgreen")

@@ -509,7 +509,6 @@ public:
 	  LGMdouble rp = GetValue(GetTree(*ts),LGPlen_random);
 	  Lnew *= 1.0 + (rp/0.5)*(ran3(&ran3_seed)-0.5);
 	}
-	//	  cout << Lnew << " ";
 
 	//Here Space occupancy
 	if(space0 || space1 || space2) {
@@ -575,10 +574,6 @@ public:
 
 
 	Lnew = max(Lnew,0.0);
-
-	if( L_age > 20 && (GetValue(*ts,LGAomega) < 2.0) ) {
-	  Lnew += 0.1;
-	}
 
 	const ParametricCurve& flr = 
 	  GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),SPFLR);

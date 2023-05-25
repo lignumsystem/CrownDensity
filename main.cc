@@ -523,15 +523,18 @@ int main(int argc, char** argv)
 
     if(is_mode_change && (iter == mode_change_year)) {     // Change the mode of crown development
       cout << "Change of morphological mode mode at L_age " << L_age << endl;
+
       SetValue(*pine1, SPis_EBH, 0.0);     // --- now FGO or vigor index
       growthloop_is_EBH_reduction = false;
       is_adhoc = false;                   //No ad hoc lengthening of shoots at crown base
-    
+
+      //This changes parameter values and functions
+      InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
+      init_pine1.initialize(*pine1);
+
+      //... but not fgo
       ParametricCurve fgo1("fgo1.fun");
       SetFunction(*pine1, fgo1, SPFGO);
-
-      ParametricCurve fip1("fip1.fun");
-      SetFunction(*pine1, fip1, LGMIP);
     }
 
     if(is_height_function) {

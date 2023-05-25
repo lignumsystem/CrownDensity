@@ -1,0 +1,6 @@
+#File describing the location of definition files
+#for parameters and fuctions of LIGNUM
+Parameters:
+    Tree: Tree1.txt 
+Functions:
+    LGMIP: fip1.fun

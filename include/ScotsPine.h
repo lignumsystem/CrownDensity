@@ -4,7 +4,7 @@
 #define SCOTSPINE_H
 #include <Pine.h>
 #include <VoxelSpace.h>
-
+using namespace PineTree;
 ///Scots Pine Functions
 enum SPFN {SPFAF,///<Scots pine Initial foliage m^2/kgC   
 	   SPFAD,///<Scots pine  Apical Dominance,

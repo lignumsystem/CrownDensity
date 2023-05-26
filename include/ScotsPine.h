@@ -51,6 +51,9 @@ extern double global_hcb;
 
 extern LGMdouble max_rueqin;
 
+extern bool is_mode_change;
+extern int mode_change_year;
+
 class ScotsPineTree: public Tree<ScotsPineSegment,ScotsPineBud>{
   //Return the function asked
   friend const ParametricCurve& GetFunction(const ScotsPineTree& t, SPFN name)
@@ -489,18 +492,20 @@ public:
 	const ParametricCurve& fip = GetFunction(GetTree(*ts),LGMIP);
 	double B = GetValue(GetTree(*ts),TreeQinMax);
 	double qin = GetValue(*ts,LGAQin);
-	double ip = qin/B; 
-	// double ip = GetValue(*ts,SPrue)*qin / max_rueqin;
-	// if(ip > 1.0) {
-	//   ip = 1.0;
-	// }
-	
+	double ip = qin/B;
+
+
 	if(GetValue(dynamic_cast<ScotsPineTree&>(GetTree(*ts)), SPis_EBH) < 1.0) {
 
-	  Lnew = l*fip(ip)*Lnew * adhoc_factor;
-	  //	  cout << Lnew << " ";
+	  if(!is_mode_change || (!(L_age >= mode_change_year)) ) {
+	    Lnew = l*fip(ip)*Lnew * adhoc_factor;
+	  } else {
+	    double rel_h = (GetPoint(*ts).getZ()-global_hcb)/(L_H - global_hcb);
+	    Lnew = l*fip(rel_h)*Lnew * adhoc_factor; //*********** MODE CHANGE CASE
+	  }
+	  
 	} else {
-
+	  
 	  Lnew = l * Lnew * adhoc_factor;
 	}
 
@@ -510,7 +515,6 @@ public:
 	  LGMdouble rp = GetValue(GetTree(*ts),LGPlen_random);
 	  Lnew *= 1.0 + (rp/0.5)*(ran3(&ran3_seed)-0.5);
 	}
-	//	  cout << Lnew << " ";
 
 	//Here Space occupancy
 	if(space0 || space1 || space2) {
@@ -576,10 +580,6 @@ public:
 
 
 	Lnew = max(Lnew,0.0);
-
-	if( L_age > 20 && (GetValue(*ts,LGAomega) < 2.0) ) {
-	  Lnew += 0.1;
-	}
 
 	const ParametricCurve& flr = 
 	  GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),SPFLR);

@@ -53,6 +53,9 @@ int growthloop_ebh_mode = 0;          ///<This global variable is needed e.g. in
 
 LGMdouble max_rueqin;
 
+bool is_mode_change = false;   ///<This global variable is for change in morphological development
+int mode_change_year = 20;    ///<This global variable is for change in morphological development
+
 // VoxelSpace for space occupancy
 Firmament dummy_firm;
 VoxelSpace space_occupancy(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
@@ -95,7 +98,7 @@ void Usage()
   cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc]" << endl;
   cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
   cout << "[-space2Distance <Value>] [-byBranches] [-forcedHeight]" << endl;
-  cout << "[-heightFun]" << endl;
+  cout << "[-heightFun] [-modeChange <year>] [-kBorderConifer]" << endl;
   cout << endl;
   cout << "EBH resource distn can be in use in two ways. Both are set by command line arguments." << endl;
   cout << "-EBH               means EBH is in use and values (of lambda parameter) are" << endl;
@@ -117,6 +120,11 @@ void Usage()
   cout << "                   conditions. Photosynthetic production of TreeSegment = rue * LGApr * Qabs. <value> = degree of" << endl;
   cout << "                   increase of rue as a function of shadiness (0 < <value> < 2)." << endl;
   cout << "-heightFun         If length of stem apical shoot is derived from relative crown length (params. LGPe1, LGPe2)." << endl;
+  cout << "-modeChange <year> If the mode of morphological development changes in year <year>" << endl;
+  cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
+  cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
+  cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
+  cout << endl;
 }
 //[Usagex]
 ///\endinternal
@@ -385,6 +393,13 @@ int main(int argc, char** argv)
     is_height_function = true;
   }
 
+  //bool is_mode_change and int mode_change_yearis are  global variables
+  clarg.clear();
+  if(ParseCommandLine(argc,argv,"-modeChange", clarg)) {
+    is_mode_change = true;
+    mode_change_year = atoi(clarg.c_str());
+  }
+
   //See CL argument "-EBH" after instantiatiation of the tree
 
   //See CL option "-EBH1 <value>" after instantiatiation of the tree
@@ -535,28 +550,22 @@ int main(int argc, char** argv)
     //tree age and height to L-system through these global variables
     L_age = GetValue(*pine1,LGAage);
     L_H =  GetValue(*pine1,LGAH);
-       if(iter == 20) {
-	 is_adhoc = true;
-	 //	 SetValue(pine1, LGPLmin, 0.04);
-	 	 is_bud_view_function = true;
-		 //	 	 space0 = true;
-        }
-    // ParametricCurve fgo1;
-    // if(iter == 20) {
-    //   ParametricCurve apu("fgo1.fun");
-    //   fgo1 = apu;
-    //   SetFunction(pine1, fgo1, SPFGO);
-    // }
-    // ParametricCurve fip1;
-    // if(iter == 20) {
-    //   ParametricCurve apu("fip1.fun");
-    //   fip1 = apu;
-    //   SetFunction(pine1, fip1, LGMIP);
-    // }
-    
 
-    //Tree age and height to L-system through these global variables
+    if(is_mode_change && (iter == mode_change_year)) {     // Change the mode of crown development
+      cout << "Change of morphological mode mode at L_age " << L_age << endl;
 
+      SetValue(*pine1, SPis_EBH, 0.0);     // --- now FGO or vigor index
+      growthloop_is_EBH_reduction = false;
+      is_adhoc = false;                   //No ad hoc lengthening of shoots at crown base
+
+      //This changes parameter values and functions
+      InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
+      init_pine1.initialize(*pine1);
+
+      //... but not fgo
+      ParametricCurve fgo1("fgo1.fun");
+      SetFunction(*pine1, fgo1, SPFGO);
+    }
 
     if(is_height_function) {
       if(iter == 0) {
@@ -595,6 +604,10 @@ int main(int argc, char** argv)
 
     //    LGMdouble k_forest = K(PI_VALUE/2.0);
     LGMdouble k_forest = 0.11;
+    clarg.clear();
+    if (ParseCommandLine(argc,argv,"-kBorderConifer", clarg)){
+      k_forest = atof(clarg.c_str());
+    }
 
     LGMdouble Hcb = 0.0;
     LGMdouble treeAf = 0.0;
@@ -668,6 +681,7 @@ int main(int argc, char** argv)
     //now before senescense and new growth
     double wroot = GetValue(*pine1,TreeWr);  //root mass
 
+    
     //Collect foliage 
     LGMdouble wfoliage = 0.0;
     Accumulate(*pine1,wfoliage,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());

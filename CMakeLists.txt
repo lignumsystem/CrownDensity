@@ -76,12 +76,13 @@ endif()
 #find_package(GLUT REQUIRED)
 
 set(SOURCE_FILES main.cc
-globalvariables.cc
-pine-em98.cpp
-../LignumForest/branchfunctor.cc
-../LignumForest/src/metabolism.cc
-src/radiation.cc
-../LignumForest/src/space.cc
+  crowndensity_globals.cc
+  globalvariables.cc
+  pine-em98.cpp
+  ../LignumForest/branchfunctor.cc
+  ../LignumForest/src/metabolism.cc
+  src/radiation.cc
+  ../LignumForest/src/space.cc
 )
 
 # Rebuild L system compiler with custom command for 'l2c'
@@ -93,7 +94,7 @@ COMMAND ${CMAKE_CURRENT_LIST_DIR}/../LEngine/bin/l2c ${CMAKE_CURRENT_LIST_DIR}/p
 
 # Main target, the executable 'crowndens'.
 add_executable(crowndens ${SOURCE_FILES})
-target_include_directories(crowndens PUBLIC include
+target_include_directories(crowndens PUBLIC . include
 ${CMAKE_CURRENT_LIST_DIR}/../LignumForest
 ${CMAKE_CURRENT_LIST_DIR}/../LignumForest/include
 ${CMAKE_CURRENT_LIST_DIR}/../stl-voxelspace/include

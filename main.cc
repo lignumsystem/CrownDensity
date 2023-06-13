@@ -1,6 +1,26 @@
 ///\file main.cc
-///\brief main growth loop
-///Include Lignum implementation 
+///\brief Main growth loop
+///
+///Growth loop steps
+///+ Initialize global variables
+///+ Read command line
+///+ Initialize tree, L-system and global variables from command line
+///+ Run the simulation
+///+ Save simulation data to HDF5 files.
+///\sa CrownDensity
+///\page runscript Run CrownDensity with EBH
+///Use the following `run-crowndens.sh` script to run `crowndens` with EBH, ad_hoc etc. experiments.
+///Create new scripts or edit `crowndens` command line according to simulation needs.
+///\include run-crowndens.sh
+///\page runscript_arch Run CrownDensity Basic Model
+///Use the following `run-crowndens-basic-model.sh` script to run `crowndens`
+///with simple model for segment elongation: \f$L=\lambda \times \f_{vi} \times \f_{go} \times \f_{ip}\f$.
+///The command line does not use flags for EBH, ad_hoc etc. experiments.
+///\include run-crowndens-basic-model.sh
+///\page lsystem L-system file
+///The following L system file defines architecture for Scots pine
+///\include pine-em98.L
+
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
@@ -17,6 +37,8 @@
 #include <XMLTree.h>
 //Include the implementation of the tree segment and bud
 #include <ScotsPine.h>
+#include <CrownDensityGlobals.h>
+
 #if defined (__APPLE__) || defined(__MACOSX__)
 #include <VisualFunctor.h>
 //Impelements VisualizeLGMTree
@@ -40,49 +62,6 @@ namespace Pine{
 #include <Space.h>                ///<From ../LignumForest/include
 
 //#include <ByBranches.h>
-
-int ran3_seed;
-bool is_by_branches = false;          ///<this is needed in SomeFunctors.h SetScotsPineSegmentApical
-
-ParametricCurve adhoc("adhoc.fun");   ///<increases growth in lower parts of crown
-bool is_adhoc = false;
-
-ParametricCurve toptax("toptax.fun"); ///<function to adjust resource distn among branches
-
-int growthloop_ebh_mode = 0;          ///<This global variable is needed e.g. in bybranches.cc
-
-LGMdouble max_rueqin;
-
-bool is_mode_change = false;   ///<This global variable is for change in morphological development
-int mode_change_year = 20;    ///<This global variable is for change in morphological development
-
-// VoxelSpace for space occupancy
-Firmament dummy_firm;
-VoxelSpace space_occupancy(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
-			   0.1,0.1,0.1,5,5,5,dummy_firm);
-
-//These global variables have been declared in pine-em98.L and convey 
-//tree age and height to L-system
-extern double L_age, L_H;
-
-double global_hcb;      //For conveying height of grown base to SetScotsPineSegmentLength
-double dDb;
-
-//Space colonialization options for SetScotsPineSegmentLength (in ScotsPine.h)
-//and other global variables
-bool space0 = false;
-bool space1 = false;
-bool space2 = false;
-double space2_distance = 0.3;
-bool is_forced_height = false;
-bool is_height_function = false;
-double tax_share = 0.3;        //for toptax
-
-
-//This global variable conveys the Bud View Function to Lsystem
-ParametricCurve bud_view_f;
-bool is_bud_view_function = false;   // and if it is in use 
-
 ///\section main Main program 
 ///\snippet{lineno} main.cc Usagex
 ///\internal
@@ -99,6 +78,7 @@ void Usage()
   cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
   cout << "[-space2Distance <Value>] [-byBranches] [-forcedHeight]" << endl;
   cout << "[-heightFun] [-modeChange <year>] [-kBorderConifer]" << endl;
+  cout << "-fipmode <file> -fgomode <file> f(ip) and f(go) after growth mode change" <<endl;
   cout << endl;
   cout << "EBH resource distn can be in use in two ways. Both are set by command line arguments." << endl;
   cout << "-EBH               means EBH is in use and values (of lambda parameter) are" << endl;
@@ -259,6 +239,33 @@ int main(int argc, char** argv)
     space2 = true;
   }
 
+  ///\subsection growthmode Growth mode functions
+  ///Parse parameters for f(ip) and f(go) to be used after growth mode change.
+  ///\snippet{lineno} main.cc gmode
+  ///\internal
+  //[gmode]
+  string fipmodefile,fgomodefile;
+  const ParametricCurve fipmode, fgomode;
+  if (ParseCommandLine(argc,argv,"-fipmode",clarg)){
+    fipmodefile = clarg;
+    const_cast<ParametricCurve&>(fipmode) = ParametricCurve(fipmodefile);
+    clarg.clear();
+    if (!fipmode.ok()){
+      cerr << "f(ip) for after growth mode change not defined" <<endl;
+      exit(0);
+    }
+  }
+  if (ParseCommandLine(argc,argv,"-fgomode",clarg)){
+    fgomodefile = clarg;
+    const_cast<ParametricCurve&>(fgomode) = ParametricCurve(fgomodefile);
+    clarg.clear();
+    if (!fgomode.ok()){
+      cerr << "f(go) for after growth mode change not defined" <<endl;
+      exit(0);
+    }
+  }
+  //[gmode]
+  ///\endinternal
   ///\subsection ebhsection Parse Extended Borchert-Honda (EBH) allocation of growth
   ///EBH resource distn can be in use in two ways. Both are set by command line
   ///arguments. Option `-EBH` means EBH is in use and values (of lambda parameter)
@@ -717,7 +724,9 @@ int main(int argc, char** argv)
     //This first derive() creates the new segments, whose lengths will be iterated
     pl1->derive();
     pl1->lstringToLignum(*pine1,1,PBDATA);
-
+    //Pass physiological age from mother buds to newly created segments
+    double phys_age = 0.0;
+    AccumulateDown(*pine1,phys_age,PassPhysiologicalAge<ScotsPineSegment,ScotsPineBud>());
     //Pass the  qin to newly  created segments and to  the terminating
     //buds. Also set LGAip (qin/TreeQinMax) for the terminating buds
     double qin = 0.0;
@@ -834,7 +843,7 @@ int main(int argc, char** argv)
     DiameterGrowthData data;
     LGMGrowthAllocator2<ScotsPineSegment,ScotsPineBud,SetScotsPineSegmentLength,
       PartialSapwoodAreaDown,ScotsPineDiameterGrowth2,DiameterGrowthData>
-      G(*pine1,data,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)));   
+      G(*pine1,data,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),GetFunction(*pine1,SPFGO),GetFunction(*pine1,LGMIP),fgomode,fipmode);   
 
 
     if(is_by_branches && iter > 4) {
@@ -862,7 +871,7 @@ int main(int argc, char** argv)
 	cout << "P=" << G.getP() << " M=" 
 	     << G.getM() << " " << " P-M="<< G.getP() - G.getM() << endl;
 	cout << "Bisection begin" <<endl;
-	Bisection(0.0,10.0,G,0.01,/*verbose*/false); //10 grams (C) accuracy 
+	Bisection(0.0,50.0,G,0.01,/*verbose*/false); //10 grams (C) accuracy 
 	cout << "Bisection end " << "L=" << G.getL()<<endl;
       }
       //G will throw an exception if P < M

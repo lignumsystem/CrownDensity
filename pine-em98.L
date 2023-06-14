@@ -67,7 +67,7 @@ module F(double);
 //When physiological age reaches mode_change_year the side branches create only two new side branches
 //Main axis retain physiological age 1
 //Bud(data, omega, initial length,physiological age)
-module B(PineBudData,int,double,int);
+module B(PineBudData,int,double,double);
 module Pitch(double);
 module Roll(double);
 module Turn(double);
@@ -85,7 +85,7 @@ Start:
    fnbudslight.install("fnbudslight.fun"); 
    fipbud.install("fip-bud.fun");
 
-  PineBudData data(ALIVE,0.0,1.0,1.0);
+  PineBudData data(ALIVE,0.0,1.0,1.0,1.0);
   mode = 0;
   produce F(0.30) SB() Down(1.0) Pitch(pitch) B(data,2,l1,1.0) EB() 
                   SB() Roll(rollmain4) Down(1.0) Pitch(pitch)  B(data,2,1.0,1.0) EB()
@@ -153,7 +153,7 @@ B(data,omega,l,phys_age):
        //cout << "No new buds, DEAD" <<endl;
        produce B(data,omega,l,phys_age);
     }
-    else if (omega == 1){
+    else if (omega == 1){//Main_axis, do not increase physiological age
        if (nbuds == 1)
           produce  SB() Down(1.0) Pitch(pitch)B(data,omega+1,l1,phys_age) EB()
                    B(data,omega,l,phys_age);
@@ -172,14 +172,13 @@ B(data,omega,l,phys_age):
 	           SB() Roll(2.0*rollmain4) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
 		   SB() Roll(3.0*rollmain4) Down(1.0) Pitch(pitch)  B(data,omega+1,l1,phys_age) EB()
                    B(data,omega,l,phys_age);
-       else if (nbuds == 5){
+       else if (nbuds == 5)
           produce  SB() Down(1.0) Pitch(pitch)B(data,omega+1,l1,phys_age) EB() 
                    SB() Roll(rollmain5) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
 		   SB() Roll(2.0*rollmain5) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
 		   SB() Roll(3.0*rollmain5) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
 		   SB() Roll(4.0*rollmain5) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
                    B(data,omega,l,phys_age);
-       }
        else if (nbuds == 6)
           produce  SB() Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB() 
                    SB() Roll(rollmain6) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
@@ -209,43 +208,49 @@ B(data,omega,l,phys_age):
                    B(data,omega,l,phys_age);
     }//omega == 1
     else if (omega >= 2 && omega <= 6){
+        //For branches start increasing physiological age
+        data.phys_age += 1;
+        phys_age += 1;
         if (nbuds == 0)
            produce B(data,omega,l,phys_age);
         else if ((is_mode_change == true) && (phys_age >= mode_change_year))
-            //Growth change: always only two new branches at the same plane to the opposite sides
-           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age+1) EB() 
-                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age+1) EB()
-                    Down(-1) B(data,omega,l,phys_age+1);
+           //Growth mode change: always only two new branches at the same plane to the opposite sides
+           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
+                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
+                    Down(-1) B(data,omega,l,phys_age);
         else if (nbuds == 1)
-           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age+1) EB()
-                    Down(-1) B(data,omega,l,phys_age+1);
+           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
+                    Down(-1) B(data,omega,l,phys_age);
         else if (nbuds == 2)
            //Two new branches at the same plane to the opposite sides
-           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age+1) EB() 
-                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age+1) EB()
-                    Down(-1) B(data,omega,l,phys_age+1);
+           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
+                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
+                    Down(-1) B(data,omega,l,phys_age);
         else if (nbuds == 3)
-           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB() 
-                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB()
-   		    SB() Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB()
-                    Down(-1) B(data,omega,l,phys_age+1);
+           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB() 
+                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
+   		    SB() Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
+                    Down(-1) B(data,omega,l,phys_age);
         else if (nbuds == 4)
-           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age+1) EB() 
-                    SB() Roll(2.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age+1) EB()
-   		    SB() Roll(3.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age+1) EB()
-   		    SB() Roll(4.0*roll)  Turn(turn_branch)Down(3.0)     B(data,omega+1,l1,phys_age+1) EB()
-                    Down(-1) B(data,omega,l,phys_age+1);
+           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age) EB() 
+                    SB() Roll(2.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age) EB()
+   		    SB() Roll(3.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age) EB()
+   		    SB() Roll(4.0*roll)  Turn(turn_branch)Down(3.0)     B(data,omega+1,l1,phys_age) EB()
+                    Down(-1) B(data,omega,l,phys_age);
         else if (nbuds >= 5){
-           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB() 
-                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB()
-   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB()
-   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB()
-   		    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age+1) EB()
-                    Down(-1) B(data,omega,l,phys_age+1);
+           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB() 
+                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
+   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
+   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
+   		    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
+                    Down(-1) B(data,omega,l,phys_age);
         }
     }//2 <= omega <= 6  		    
     else{//omega>6
-       produce B(data,omega,l,phys_age+1);
+       //No more new branches for Gravelius order > 6
+       data.phys_age += 1;
+       phys_age += 1;
+       produce B(data,omega,l,phys_age);
     }
  }//mode ==1
 }//bud

@@ -31,6 +31,8 @@ extern LGMdouble max_rueqin;
 
 extern bool is_mode_change;
 extern int mode_change_year;    
+extern bool is_architecture_change;
+extern int architecture_change_year;
 
 extern Firmament dummy_firm;
 extern VoxelSpace space_occupancy;

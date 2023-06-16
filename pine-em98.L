@@ -10,13 +10,13 @@ using namespace PineTree;
 //Defines headers necessary for lsystem
 #include <lengine.h>
 
-
+#include <CrownDensityGlobals.h>
 double L_age, L_H;
 
-extern bool is_bud_view_function;
-extern ParametricCurve bud_view_f;
-extern int is_mode_change;
-extern int mode_change_year;
+//extern bool is_bud_view_function;
+//extern ParametricCurve bud_view_f;
+//extern int is_mode_change;
+//extern int mode_change_year;
 
 //Start the namespace (compiles to "namespace Pine{")
 //The matching "close" statement closes the namespace 
@@ -213,7 +213,7 @@ B(data,omega,l,phys_age):
         phys_age += 1;
         if (nbuds == 0)
            produce B(data,omega,l,phys_age);
-        else if ((is_mode_change == true) && (phys_age >= mode_change_year))
+        else if ((is_architecture_change == true) && (phys_age >= architecture_change_year))
            //Growth mode change: always only two new branches at the same plane to the opposite sides
            produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
                     SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()

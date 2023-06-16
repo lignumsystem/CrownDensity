@@ -36,7 +36,7 @@
 //XML file 
 #include <XMLTree.h>
 //Include the implementation of the tree segment and bud
-#include <ScotsPine.h>
+#include <CrownDensityScotsPine.h>
 #include <CrownDensityGlobals.h>
 
 #if defined (__APPLE__) || defined(__MACOSX__)
@@ -103,6 +103,8 @@ void Usage()
   cout << "-modeChange <year> If the mode of morphological development changes in year <year>" << endl;
   cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
   cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
+  cout << "-architectureChange <year> If the mode of architectural development changes in year <year> this is implemented in the L system." <<endl;
+  cout << "                           See the global variables is_architecure_change and architecture_change_year" <<endl;                    
   cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
   cout << endl;
 }
@@ -406,7 +408,12 @@ int main(int argc, char** argv)
     is_mode_change = true;
     mode_change_year = atoi(clarg.c_str());
   }
-
+  clarg.clear();
+  //is_architecture_change and architecture_change_year are global variables
+  if (ParseCommandLine(argc,argv,"-architectureChange",clarg)){
+    is_architecture_change = true;
+    architecture_change_year = atoi(clarg.c_str());
+  }
   //See CL argument "-EBH" after instantiatiation of the tree
 
   //See CL option "-EBH1 <value>" after instantiatiation of the tree

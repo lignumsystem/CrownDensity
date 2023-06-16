@@ -18,11 +18,18 @@ int growthloop_ebh_mode = 0;
 LGMdouble max_rueqin;
 
 ///\defgroup modechange Growth mode change experiment
+///Architectural and morphological modes now separated and set independently.
+///`is_mode_change` sets the morphological mode change (reset parameters, functions)
+///and `is_architecture_change` sets the architecture mode change (L-system implementation) 
 ///@{
 ///This global variable is for change in morphological development
 bool is_mode_change = false;
 ///This global variable is to set year for change in morphological development
-int mode_change_year = 20;    
+int mode_change_year = 20;
+///This global variable denotes change in architecture development
+bool is_architecture_change = false;
+///This global variable denotes year for change in architecture development
+int architecture_change_year = 20;
 ///@}
 ///\defgroup vsoccupance VoxelSpace for space occupancy
 ///@{

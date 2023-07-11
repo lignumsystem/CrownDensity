@@ -53,7 +53,7 @@ For Unix Makefile build system for Release (optimised, no debug information) typ
     cmake .. -DCMAKE_BUILD_TYPE=Release
     make install
 
-In both cases `make install` will move `crowndens` to CrownDensity directory
+In all cases `make install` will move `crowndens` to CrownDensity directory
 where there are two example  shell scripts to run the program:
 	
 	run-crowndens-basic-model.sh	

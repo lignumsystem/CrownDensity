@@ -7,6 +7,12 @@ LignumForest       for      tree       growth.      Most       notably
 LignumForest::ScotsPineTree,     LignumForest::ScotsPineSegment    and
 LignumForest::SetScotsPineSegmentLength.
 
+CrownDensity project  must reside under *lignum-core*  directory. That
+means clone first [lignum-core](https://github.com/lignumsystem/lignum-core.git)
+repository  and  then  in  *lignum-core*  clone [CrownDensity](https://github.com/lignumsystem/CrownDensity.git)
+and [LignumForest](https://github.com/lignumsystem/LignumForest.git) 
+repositories.
+
 ## Compilation
 
 It  seems  that  [CMake](https://cmake.org) is  becoming  increasingly
@@ -14,8 +20,8 @@ popular  (perhaps   de  facto  standard)  build   system  for  various
 programming languages including C/C++. This is true also for Qt system
 that seems to be giving up its `qmake` tool for CMake (Qt6 onwards). 
 
-Lignum core  system as well  as two recent projects,  CrownDensity and
-LignumForest, have  now CMake  project files  to organise  and compile
+The Lignum  core system as  well as two recent  projects, CrownDensity
+and LignumForest, have now CMake project files to organise and compile
 Lignum  software.  Qt  `qmake`  can be  still used  but  it is  highly
 recommended to start to use CMake.
 
@@ -24,11 +30,6 @@ trees, i.e.   the software compilation  takes under a  single separate
 build directory located  outside the source trees.  The second benefit
 is the  ability to generate  build systems for several  IDEs including
 Xcode.
-
-CrownDensity project  must reside under *lignum-core*  directory. That
-means first clone lignum-core repository and then in lignum-core clone
-[CrownDensity](https://github.com/lignumsystem/CrownDensity.git).  You
-must of course clone also LignumForest under *lignum-core*.
 
 ### CrownDensity compilation with CMake
 
@@ -40,6 +41,7 @@ type:
     mkdir debug
     cd  debug
     cmake .. -DCMAKE_BUILD_TYPE=Debug
+	make install 
 
 Optionally explicitely set C++ compiler (macOS example):
 
@@ -71,13 +73,17 @@ Open  Xcode  IDE  from  Terminal  (or  open  the  Xcode  project  file
 	 open crowndens.xcodeproj
 
 Build the `crowndens` Product in  Xcode for debugging.  It will appear
-in *xcode/Debug*  directory. See  also that: 
+in *xcode/Debug*  directory:
+
+	Xcode -> Product (in the menu bar) -> Build For -> Running/Testing/Profiling
+
+See  also that: 
 
 	Xcode -> Product (in the menu bar) -> Scheme 
 
 is set  to `crowndens` to allow Run: 
 
-	XCode -> Product (in the menu bar) -> Run
+	Xcode -> Product (in the menu bar) -> Run
 	
 to debug the program.
 
@@ -89,7 +95,7 @@ directory instead and load the binary to Xcode from there.
 
 Set command  line parameters for  `crowndens` in 
 
-	XCode -> Product (in the menu  bar) -> Scheme ->  Edit Scheme -> Arguments.
+	Xcode -> Product (in the menu  bar) -> Scheme ->  Edit Scheme -> Arguments.
 
 Divide the command line into practical parts for debugging from `Arguments -> '+'`.
 

@@ -14,11 +14,14 @@
 ///\include run-crowndens.sh
 ///\page runscript_arch Run CrownDensity Basic Model
 ///Use the following `run-crowndens-basic-model.sh` script to run `crowndens`
-///with simple model for segment elongation: \f$L=\lambda \times \f_{vi} \times \f_{go} \times \f_{ip}\f$.
+///with simple model for segment elongation: \f$L=\lambda \times f_{vi} \times f_{go} \times f_{ip}\f$.
 ///The command line does not use flags for EBH, ad_hoc etc. experiments.
 ///\include run-crowndens-basic-model.sh
 ///\page lsystem L-system file
-///The following L system file defines architecture for Scots pine
+///The following L system file defines architecture for Scots pine.
+///Note that now command line can define architecure change when branches
+///will always create two subbranches unless growth conditions set the segment length
+///to zero (see GROWTH ARCHITECTURE CHANGE comment)
 ///\include pine-em98.L
 
 #include <cmath>
@@ -29,15 +32,21 @@
 #include <sstream>
 #include <Lignum.h>
 #include <Bisection.h>
-#include <GrowthLoop.h> ///<From ../LignumForest/
-#include <Shading.h>
-//From LignumForest project
-#include <TreeDataAfterGrowth.h>
 //XML file 
 #include <XMLTree.h>
 //Include the implementation of the tree segment and bud
-#include <CrownDensityScotsPine.h>
+#include <ScotsPine.h>
 #include <CrownDensityGlobals.h>
+//From ../LignumForest/
+#include <GrowthLoop.h> 
+#include <Shading.h>
+//From ../LignumForest project
+#include <TreeDataAfterGrowth.h>
+#include <SomeFunctors.h>         //From ../LignumForest/include
+#include <DiameterGrowth.h>       //From ../LignumForest/include
+#include <RadiationCrownDens.h>   //From ../LignumForest/include
+#include <Palubicki_functors.h>   //From ../LignumForest/include
+#include <Space.h>                //From ../LignumForest/include
 
 #if defined (__APPLE__) || defined(__MACOSX__)
 #include <VisualFunctor.h>
@@ -50,70 +59,71 @@
 #include <lengine.h>
 
 //and for pine, see also pine9bp.L in lsys.
+///\brief L-system in Pine namespace
 namespace Pine{
 #include <LSystem.h>
 
 }
+using namespace LignumForest;
 
-#include <SomeFunctors.h>         ///<From ../LignumForest/include
-#include <DiameterGrowth.h>       ///<From ../LignumForest/include
-#include <RadiationCrownDens.h>   ///<From ../LignumForest/include
-#include <Palubicki_functors.h>   ///<From ../LignumForest/include
-#include <Space.h>                ///<From ../LignumForest/include
-
-//#include <ByBranches.h>
-///\section main Main program 
-///\snippet{lineno} main.cc Usagex
-///\internal
-// [Usagex]
-void Usage()
-{
-  cout << "Usage:  ./crowndens  <iter>  <metafile>" <<endl;
-  cout << "-numParts <parts> -hw <hw_start>" <<endl;
-  cout << "[-toFile <Filename>] [-xml <filename>]" <<endl;
-  cout << "[-fipdistrib <filename>] [-writeInterval interval]" << endl;
-  cout << "-[-seed <num>] [-selfThinning] [-increaseXi]" <<endl;
-  cout << "[-treeFile <filename>] [-voxelCalculation <year>]" << endl;
-  cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc]" << endl;
-  cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
-  cout << "[-space2Distance <Value>] [-byBranches] [-forcedHeight]" << endl;
-  cout << "[-heightFun] [-modeChange <year>] [-kBorderConifer]" << endl;
-  cout << "-fipmode <file> -fgomode <file> f(ip) and f(go) after growth mode change" <<endl;
-  cout << endl;
-  cout << "EBH resource distn can be in use in two ways. Both are set by command line arguments." << endl;
-  cout << "-EBH               means EBH is in use and values (of lambda parameter) are" << endl;
-  cout << "                   specified for all Gravelius orders (function SPEBHF, ScotsPine.h, function" << endl;
-  cout << "                   file is specified the constructor of the tree)." << endl;
-  cout << "-EBH1 <value>      means that EBH is in use and one value <value> is used" << endl;
-  cout << "                   for all Gravelius orders. Option -EBH1 <value> overrides option -EBH" << endl;
-  cout << "                   (EBH is set as SPis_EBH (Scots Pine Parameter Double SPPD), thus 0 == false, 1 == true)" << endl;
-  cout << "                   EBH is according to W. Palubicki and K. Horel and S. Longay and" << endl;
-  cout << "                   A. Runions and B. Lane and R. Mech and P. Prusinkiewicz. 2009." << endl;
-  cout << "                   Self-organizing tree models for image synthesis ACM Transactions on Graphics 28 58:1-10." << endl;
-  cout << "-EBHREDUCTION <value> If values of EBH parameters for all orders are reduced or increased  as" << endl;
-  cout << "                      new_value = <value> * prev_value in each year after year 20. The goal of change" << endl;
-  cout << "                   can be set by -EBHFINAL. The default value is 0.5"<< endl;
-  cout << "-EBHFINAL <value>  Sets the goal value of -EBHREDUCTION" << endl;
-  cout << "-EBHInput <int>    Changes the variable that runs EBH. If int == 1, it is Qabs, if int == 2, it is rue*Qabs," << endl;
-  cout << "                   any other value or missing -EBHInput means Qin runs EBH." << endl;
-  cout << "-RUE <value>       The radiation use effeciency (rue) varies as a function of TreeSegments initial radiation" << endl;
-  cout << "                   conditions. Photosynthetic production of TreeSegment = rue * LGApr * Qabs. <value> = degree of" << endl;
-  cout << "                   increase of rue as a function of shadiness (0 < <value> < 2)." << endl;
-  cout << "-heightFun         If length of stem apical shoot is derived from relative crown length (params. LGPe1, LGPe2)." << endl;
-  cout << "-modeChange <year> If the mode of morphological development changes in year <year>" << endl;
-  cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
-  cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
-  cout << "-architectureChange <year> If the mode of architectural development changes in year <year> this is implemented in the L system." <<endl;
-  cout << "                           See the global variables is_architecure_change and architecture_change_year" <<endl;                    
-  cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
-  cout << endl;
-}
-//[Usagex]
-///\endinternal
+namespace CrownDensity{
+  //#include <ByBranches.h>
+  ///\section main Main program 
+  ///\snippet{lineno} main.cc Usagex
+  ///\internal
+  // [Usagex]
+  void Usage()
+  {
+    cout << "Usage:  ./crowndens  <iter>  <metafile>" <<endl;
+    cout << "-numParts <parts> -hw <hw_start>" <<endl;
+    cout << "[-toFile <Filename>] [-xml <filename>]" <<endl;
+    cout << "[-fipdistrib <filename>] [-writeInterval interval]" << endl;
+    cout << "-[-seed <num>] [-selfThinning] [-increaseXi <year>]" <<endl;
+    cout << "[-treeFile <filename>] [-voxelCalculation <year>]" << endl;
+    cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc] [-random_variation]" << endl;
+    cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
+    cout << "[-space2Distance <Value>] [-byBranches] [-forcedHeight]" << endl;
+    cout << "[-heightFun] [-modeChange <year>] [-architectureChange <year>] [-kBorderConifer]" << endl;
+    cout << "-fipmode <file> -fgomode <file> f(ip) and f(go) after growth mode change" <<endl;
+    cout << endl;
+    cout << "-adhoc             Increase growth in lower parts of the crown." <<endl;
+    cout << "-random_variation Random component in segment length in branches." <<endl;
+    cout << "EBH resource distn can be in use in two ways. Both are set by command line arguments." << endl;
+    cout << "-EBH               means EBH is in use and values (of lambda parameter) are" << endl;
+    cout << "                   specified for all Gravelius orders (function SPEBHF, ScotsPine.h, function" << endl;
+    cout << "                   file is specified the constructor of the tree)." << endl;
+    cout << "-EBH1 <value>      means that EBH is in use and one value <value> is used" << endl;
+    cout << "                   for all Gravelius orders. Option -EBH1 <value> overrides option -EBH" << endl;
+    cout << "                   (EBH is set as SPis_EBH (Scots Pine Parameter Double SPPD), thus 0 == false, 1 == true)" << endl;
+    cout << "                   EBH is according to W. Palubicki and K. Horel and S. Longay and" << endl;
+    cout << "                   A. Runions and B. Lane and R. Mech and P. Prusinkiewicz. 2009." << endl;
+    cout << "                   Self-organizing tree models for image synthesis ACM Transactions on Graphics 28 58:1-10." << endl;
+    cout << "-EBHREDUCTION <value> If values of EBH parameters for all orders are reduced or increased  as" << endl;
+    cout << "                      new_value = <value> * prev_value in each year after year 20. The goal of change" << endl;
+    cout << "                   can be set by -EBHFINAL. The default value is 0.5"<< endl;
+    cout << "-EBHFINAL <value>  Sets the goal value of -EBHREDUCTION" << endl;
+    cout << "-EBHInput <int>    Changes the variable that runs EBH. If int == 1, it is Qabs, if int == 2, it is rue*Qabs," << endl;
+    cout << "                   any other value or missing -EBHInput means Qin runs EBH." << endl;
+    cout << "-RUE <value>       The radiation use effeciency (rue) varies as a function of TreeSegments initial radiation" << endl;
+    cout << "                   conditions. Photosynthetic production of TreeSegment = rue * LGApr * Qabs. <value> = degree of" << endl;
+    cout << "                   increase of rue as a function of shadiness (0 < <value> < 2)." << endl;
+    cout << "-heightFun         If length of stem apical shoot is derived from relative crown length (params. LGPe1, LGPe2)." << endl;
+    cout << "-modeChange <year> If the mode of morphological development changes in year <year>" << endl;
+    cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
+    cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
+    cout << "-architectureChange <year> If the mode of architectural development changes in year <year> this is implemented in the L system." <<endl;
+    cout << "                           See the global variables is_architecure_change and architecture_change_year" <<endl;                    
+    cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
+    cout << endl;
+  }
+  //[Usagex]
+  ///\endinternal
+}//end namespace CrownDensity
 
 
 int main(int argc, char** argv)
 {
+  cout << "BEGIN" <<endl;
   int iterations = 0;//Number of iterations
   double x_coord = 0.0;//Location of the tree
   double y_coord = 0.0;
@@ -127,7 +137,7 @@ int main(int argc, char** argv)
   //Read command line arguments
 
   if (argc < 3){
-    Usage();
+    CrownDensity::Usage();
     return 0;
   }
   else{
@@ -168,10 +178,10 @@ int main(int argc, char** argv)
   int interval = 0;
   clarg.clear();
   if (ParseCommandLine(argc,argv,"-writeInterval", clarg)){
-     if (clarg.length()>0){
-       interval = atoi(clarg.c_str());
-       cout << "Write interval: " << interval <<endl;
-     }
+    if (clarg.length()>0){
+      interval = atoi(clarg.c_str());
+      cout << "Write interval: " << interval <<endl;
+    }
   }
  
   //If self_thinning is set, stand density is read from
@@ -185,9 +195,12 @@ int main(int argc, char** argv)
   //If value of parameter LGAXi is increased during simulation
   string xi;
   bool increase_xi=false;
-  if (CheckCommandLine(argc,argv,"-increaseXi"))
+  int increase_xi_year=0;
+  clarg.clear();
+  if (ParseCommandLine(argc,argv,"-increaseXi",clarg)){
     increase_xi = true;
-
+    increase_xi_year = atoi(clarg.c_str());
+  }
   //Implemented  the reading  and use  of tree  files to  generate the
   //forest
   string tree_file;
@@ -205,13 +218,13 @@ int main(int argc, char** argv)
   }
 
   //Initialize ran3 with some negative integer
-  ran3_seed = -3924678;
+  CrownDensity::ran3_seed = -3924678;
   clarg.clear();
   if (ParseCommandLine(argc,argv,"-seed", clarg)){
-    ran3_seed = atoi(clarg.c_str());
-    ran3_seed = -abs(ran3_seed);
+    CrownDensity::ran3_seed = atoi(clarg.c_str());
+    CrownDensity::ran3_seed = -abs(CrownDensity::ran3_seed);
   }
-  ran3(&ran3_seed);
+  ran3(&CrownDensity::ran3_seed);
 
 
   //Age after which evaluation of tree's self-shading is
@@ -227,18 +240,17 @@ int main(int argc, char** argv)
   // -space2 = also all neighboring boxes are checked
   // Note that space indicators are global variables
   // Note that only one of these should be true at one time
-
-  space0 = false;
-  space1 = false;
-  space2 = false;
+  CrownDensity::space0 = false;
+  CrownDensity::space1 = false;
+  CrownDensity::space2 = false;
   if(CheckCommandLine(argc,argv,"-space0")) {
-    space0 = true;
+    CrownDensity::space0 = true;
   }
   if(CheckCommandLine(argc,argv,"-space1")) {
-    space1 = true;
+    CrownDensity::space1 = true;
   }
   if(CheckCommandLine(argc,argv,"-space2")) {
-    space2 = true;
+    CrownDensity::space2 = true;
   }
 
   ///\subsection growthmode Growth mode functions
@@ -247,10 +259,11 @@ int main(int argc, char** argv)
   ///\internal
   //[gmode]
   string fipmodefile,fgomodefile;
-  const ParametricCurve fipmode, fgomode;
+  cout<< "GROWTH MODE FUNCTIONS BEGIN" <<endl;
+  ParametricCurve fipmode, fgomode;
   if (ParseCommandLine(argc,argv,"-fipmode",clarg)){
     fipmodefile = clarg;
-    const_cast<ParametricCurve&>(fipmode) = ParametricCurve(fipmodefile);
+    fipmode = ParametricCurve(fipmodefile);
     clarg.clear();
     if (!fipmode.ok()){
       cerr << "f(ip) for after growth mode change not defined" <<endl;
@@ -259,13 +272,14 @@ int main(int argc, char** argv)
   }
   if (ParseCommandLine(argc,argv,"-fgomode",clarg)){
     fgomodefile = clarg;
-    const_cast<ParametricCurve&>(fgomode) = ParametricCurve(fgomodefile);
+    fgomode = ParametricCurve(fgomodefile);
     clarg.clear();
     if (!fgomode.ok()){
       cerr << "f(go) for after growth mode change not defined" <<endl;
       exit(0);
     }
   }
+  cout <<  "GROWTH MODE FUNCTIONS END" <<endl;
   //[gmode]
   ///\endinternal
   ///\subsection ebhsection Parse Extended Borchert-Honda (EBH) allocation of growth
@@ -321,10 +335,10 @@ int main(int argc, char** argv)
     ebh_final_value = atof(clarg.c_str());
   }
 
-  growthloop_ebh_mode = 0;
+  CrownDensity::growthloop_ebh_mode = 0;
   clarg.clear();
   if(ParseCommandLine(argc,argv,"-EBHInput", clarg)) {
-    growthloop_ebh_mode  = atoi(clarg.c_str());
+    CrownDensity::growthloop_ebh_mode  = atoi(clarg.c_str());
   }
   //[ebh]
   ///\endinternal
@@ -374,45 +388,49 @@ int main(int argc, char** argv)
     trees_left_from_stand = ParametricCurve(n_elem, age, n);
   }
 
-  is_adhoc = false;
+  CrownDensity::is_adhoc = false;
   if(CheckCommandLine(argc,argv,"-adHoc")) {
-    is_adhoc = true;
+    CrownDensity::is_adhoc = true;
   }
-
-  is_bud_view_function = false;
+  CrownDensity::is_random_variation=false;
+  if(CheckCommandLine(argc,argv,"-random_variation")) {
+    CrownDensity::is_random_variation = true;
+  }
+  
+  CrownDensity::is_bud_view_function = false;
   if(CheckCommandLine(argc,argv,"-budViewFunction")) {
-    is_bud_view_function = true;
+    CrownDensity::is_bud_view_function = true;
   }
 
   //  bool is_by_branches = false;
   if(CheckCommandLine(argc,argv,"-byBranches")) {
-    is_by_branches = true;
+    CrownDensity::is_by_branches = true;
   }
 
   clarg.clear();
   if (ParseCommandLine(argc,argv,"-space2Distance",clarg)) {
-    space2_distance = atof(clarg.c_str());
+    CrownDensity::space2_distance = atof(clarg.c_str());
   }
 
   if(CheckCommandLine(argc,argv,"-forcedHeight")) {
-    is_forced_height = true;
+    CrownDensity::is_forced_height = true;
   }
 
   if(CheckCommandLine(argc,argv,"-heightFun")) {
-    is_height_function = true;
+    CrownDensity::is_height_function = true;
   }
 
   //bool is_mode_change and int mode_change_yearis are  global variables
   clarg.clear();
   if(ParseCommandLine(argc,argv,"-modeChange", clarg)) {
-    is_mode_change = true;
-    mode_change_year = atoi(clarg.c_str());
+    CrownDensity::is_mode_change = true;
+    CrownDensity::mode_change_year = atoi(clarg.c_str());
   }
   clarg.clear();
   //is_architecture_change and architecture_change_year are global variables
   if (ParseCommandLine(argc,argv,"-architectureChange",clarg)){
-    is_architecture_change = true;
-    architecture_change_year = atoi(clarg.c_str());
+    CrownDensity::is_architecture_change = true;
+    CrownDensity::architecture_change_year = atoi(clarg.c_str());
   }
   //See CL argument "-EBH" after instantiatiation of the tree
 
@@ -434,14 +452,13 @@ int main(int argc, char** argv)
   //Param ebh.fun EBH lambda as a function of Gravelius order, domain [1, macx go] range see ebh.fun
   //Param bvf.fun Number of new buds (modifier) as function of local needle area/local volume, domain see bvf.fun
   //range [0,1]
-  ScotsPineTree* pine1 = new ScotsPineTree(Point(0.0,0.0,0),PositionVector(0,0,1.0),
-					   "sf.fun","fapical.fun","fgo.fun",
-					   "fsapwdown.fun","faf.fun","fna.fun", "fwd.fun",
-					   "flr.fun", "ebh.fun","bvf.fun");
+  LignumForest::ScotsPineTree* pine1 = new LignumForest::ScotsPineTree(Point(0.0,0.0,0),PositionVector(0,0,1.0),
+								       "sf.fun","fapical.fun","fgo.fun",
+								       "fsapwdown.fun","faf.fun","fna.fun", "fwd.fun",
+								       "flr.fun", "ebh.fun","bvf.fun");
 
   //[TreeInit]
   ///\endinternal
-  
   ///\subsection budview Bud view function
   ///Bud View Function to Lsystem
   ///Its use is controlled by the global variable is_bud_view_function
@@ -452,7 +469,7 @@ int main(int argc, char** argv)
   //[BudView]
   //Param pine1 The tree
   //Param SPBVF The name of the bud view function. \sa bvf.fun ParametricCurve file 
-  bud_view_f = GetFunction(*pine1, SPBVF);
+  CrownDensity::bud_view_f = GetFunction(*pine1, SPBVF);
   //[BudView]
   ///\endinternal
   //SPis_EBH can be set only after the tree has been created
@@ -466,19 +483,22 @@ int main(int argc, char** argv)
   }
 
   //Creation of L-system
-  Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData>* pl1 = new Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData>();
+  Pine::LSystem<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud,PBNAME,PineBudData>* pl1 =
+    new Pine::LSystem<LignumForest::ScotsPineSegment,
+		      LignumForest::ScotsPineBud,PBNAME,
+		      PineBudData>();
 
   //Heartwood build up age
   SetValue(*pine1,SPHwStart,hw_start);
 
   // Create an instance of intialization class for tree and initialize the
   // global tree created above
-  InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1(metafile,VERBOSE);
+  InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1(metafile,VERBOSE);
   init_pine1.initialize(*pine1);
 
   
   //    Tämä on hack ---------------------------------------!
-  tax_share = GetValue(*pine1, LGPq);   
+  CrownDensity::tax_share = GetValue(*pine1, LGPq);   
 
   //Read the amount of incoming radiation (from all directions, no
   // cosine correction) from Firmament instance of the tree and set that
@@ -505,7 +525,7 @@ int main(int argc, char** argv)
 
   double wf = 0.0;
   cout << "Collect new foliage begin: " << endl;
-  wf = Accumulate(*pine1,wf,CollectNewFoliageMass<ScotsPineSegment,ScotsPineBud>());
+  wf = Accumulate(*pine1,wf,CollectNewFoliageMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
   cout << "Collect new foliage end: " << wf << endl;
 
   //Initial root mass
@@ -519,9 +539,9 @@ int main(int argc, char** argv)
 
   //Initialize tree information
   DCLData dcl;
-  AccumulateDown(*pine1,dcl,AddBranchWf(),DiameterCrownBase<ScotsPineSegment,ScotsPineBud>());
+  AccumulateDown(*pine1,dcl,AddBranchWf(),DiameterCrownBase<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
-  cout << "Init done" << endl;
+  cout << "INIT DONE" << endl;
 
   //======================================================================================
   //   The growth loop
@@ -534,7 +554,10 @@ int main(int argc, char** argv)
   ///\snippet{lineno} main.cc GLoopInit
   ///\internal
   //[GLoopInit]
-  typedef GrowthLoop<ScotsPineTree,ScotsPineSegment,ScotsPineBud,Pine::LSystem<ScotsPineSegment,ScotsPineBud,PBNAME,PineBudData> > ScotsPineGrowthLoop;
+  typedef LignumForest::GrowthLoop<LignumForest::ScotsPineTree,LignumForest::ScotsPineSegment,
+				   LignumForest::ScotsPineBud,
+				   Pine::LSystem<LignumForest::ScotsPineSegment,
+						 LignumForest::ScotsPineBud,PBNAME,PineBudData> > ScotsPineGrowthLoop;
   ScotsPineGrowthLoop gloop(pine1,pl1);
   gloop.parseCommandLine(argc,argv);
   gloop.resizeTreeDataMatrix();
@@ -550,30 +573,31 @@ int main(int argc, char** argv)
   string hdf5fname;
   ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
   LGMHDF5File hdf5_file(hdf5fname);
-  LGMHDF5File hdf5_trees(TREEXML_PREFIX+hdf5fname);
-  hdf5_file.createGroup(PGROUP);
-  hdf5_file.createGroup(TFGROUP);
-  hdf5_file.createGroup(AFGROUP);
-  hdf5_trees.createGroup(TXMLGROUP);
+  LGMHDF5File hdf5_trees(LignumForest::TREEXML_PREFIX+hdf5fname);
+  hdf5_file.createGroup(LignumForest::PGROUP);
+  hdf5_file.createGroup(LignumForest::TFGROUP);
+  hdf5_file.createGroup(LignumForest::AFGROUP);
+  hdf5_trees.createGroup(LignumForest::TXMLGROUP);
   ///\sa cxxadt::LGMHDF5File and  TreeDataAfterGrowth.h in LignumForest for HDF5 file group names
   //[HDF5Init]
   ///\endinternal
-  for (int iter = 0; iter < iterations; iter++)
-  {
+  //GROWTH LOOP BEGINS
+  cout << "GROWTH LOOP BEGINS" <<endl;
+  for (int iter = 0; iter < iterations; iter++){
     cout << "Iter: " << iter << endl;
     //tree age and height to L-system through these global variables
-    L_age = GetValue(*pine1,LGAage);
-    L_H =  GetValue(*pine1,LGAH);
+    Pine::L_age = GetValue(*pine1,LGAage);
+    Pine::L_H =  GetValue(*pine1,LGAH);
 
     if(is_mode_change && (iter == mode_change_year)) {     // Change the mode of crown development
-      cout << "Change of morphological mode mode at L_age " << L_age << endl;
+      cout << "Change of morphological mode mode at L_age " << Pine::L_age << endl;
 
       SetValue(*pine1, SPis_EBH, 0.0);     // --- now FGO or vigor index
       growthloop_is_EBH_reduction = false;
       is_adhoc = false;                   //No ad hoc lengthening of shoots at crown base
 
       //This changes parameter values and functions
-      InitializeTree<ScotsPineSegment,ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
+      InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
       init_pine1.initialize(*pine1);
 
       //... but not fgo
@@ -581,29 +605,27 @@ int main(int argc, char** argv)
       SetFunction(*pine1, fgo1, SPFGO);
     }
 
-    if(is_height_function) {
+    if(CrownDensity::is_height_function) {
       if(iter == 0) {
-	dDb = 0.003;    // 3 mm --> length growth about 50*0.003 = 0.15
+	CrownDensity::dDb = 0.003;    // 3 mm --> length growth about 50*0.003 = 0.15
 	Db_previous = GetValue(*pine1, LGADbase);
       } else {
 	Db_current = GetValue(*pine1, LGADbase);
-	dDb = Db_current - Db_previous;
+	CrownDensity::dDb = Db_current - Db_previous;
 	Db_previous = Db_current;
       }
     }
 
-    if (increase_xi){
-      if(L_age > 15.0) {
-	double xii = GetValue(*pine1, LGPxi);
-	xii += 0.1/25.0;
-	if(xii > 0.85) xii=0.85;
-	cout << "Increasing LGPxi from " << GetValue(*pine1,LGPxi) << " to " << xii <<endl;
-	SetValue(*pine1,LGPxi, xii);
-      }
+    if (increase_xi && iter > increase_xi_year){
+      double xii = GetValue(*pine1, LGPxi);
+      xii += 0.1/25.0;
+      if(xii > 0.85) xii=0.85;
+      cout << "Increasing LGPxi from " << GetValue(*pine1,LGPxi) << " to " << xii <<endl;
+      SetValue(*pine1,LGPxi, xii);
     }
   
     //The star  mean for each segment 0.14 . 
-    SetStarMean<ScotsPineSegment,ScotsPineBud> setstar(ParametricCurve(0.14));
+    LignumForest::SetStarMean<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> setstar(ParametricCurve(0.14));
     ForEach(*pine1,setstar);
  
     double d13cm = GetValue(*pine1,LGADbh)*100.0;
@@ -626,30 +648,31 @@ int main(int argc, char** argv)
     LGMdouble Hcb = 0.0;
     LGMdouble treeAf = 0.0;
     treeAf = Accumulate(*pine1,treeAf,CollectFoliageArea<
-			ScotsPineSegment,ScotsPineBud>());
+			LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     if(iter > 0) {
       Hcb = dcl.HCrownBase();   //dcl is updated after growth
     }
 
-      double af_to_radiation = treeAf;
-      double h_to_radiation = GetValue(*pine1,LGAH);
-      double hcb_to_radiation = Hcb;
-      global_hcb = Hcb;
-      double trees_left_to_radiation = trees_left;
-      if(stand_from_file) {
-	af_to_radiation = af_from_stand(L_age);
-	h_to_radiation =  h_from_stand(L_age);
-	hcb_to_radiation = hcb_from_stand(L_age);
-	trees_left_to_radiation = trees_left_from_stand(L_age);
-      }
+    double af_to_radiation = treeAf;
+    double h_to_radiation = GetValue(*pine1,LGAH);
+    double hcb_to_radiation = Hcb;
+    global_hcb = Hcb;
+    double trees_left_to_radiation = trees_left;
+    if(stand_from_file) {
+      af_to_radiation = af_from_stand(Pine::L_age);
+      h_to_radiation =  h_from_stand(Pine::L_age);
+      hcb_to_radiation = hcb_from_stand(Pine::L_age);
+      trees_left_to_radiation = trees_left_from_stand(Pine::L_age);
+    }
 
     if(iter < voxel_calculation) {
       cerr << "Year " << iter << " Pairwise radiation calculation" << endl;
 	  
-      EvaluateRadiationForCfTreeSegmentForest<ScotsPineSegment,ScotsPineBud>
-	Rad(K,af_to_radiation,k_forest,h_to_radiation,hcb_to_radiation,
-	    trees_left_to_radiation, Point(x_coord,y_coord,0));
+      EvaluateRadiationForCfTreeSegmentForest<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> Rad(K,af_to_radiation,k_forest,
+													     h_to_radiation,hcb_to_radiation,
+													     trees_left_to_radiation,
+													     Point(x_coord,y_coord,0));
       ForEach(*pine1,Rad);
     }
     else {
@@ -658,7 +681,7 @@ int main(int argc, char** argv)
 		    0.2,0.2,0.2,5,5,5,GetFirmament(*pine1));
 
       BoundingBox bb;
-      FindCfBoundingBox<ScotsPineSegment,ScotsPineBud> fb;
+      FindCfBoundingBox<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> fb;
       bb = Accumulate(*pine1, bb, fb);
 
       Point ll = bb.getMin();
@@ -670,8 +693,9 @@ int main(int argc, char** argv)
       bool wood_voxel = true;
       DumpCfTree(vs, *pine1, num_parts, wood_voxel);
 
-      EvaluateRadiationSelfVoxel Rad(&vs,af_to_radiation,k_forest,h_to_radiation,hcb_to_radiation,
-				     trees_left_to_radiation, Point(x_coord,y_coord,0), K);
+      CrownDensity::EvaluateRadiationSelfVoxel<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> Rad(&vs,af_to_radiation,k_forest,h_to_radiation,
+													      hcb_to_radiation,trees_left_to_radiation,
+													      Point(x_coord,y_coord,0), K);
       ForEach(*pine1,Rad);
     }
     cerr << "CalculateTreeLight end " << endl;
@@ -679,7 +703,7 @@ int main(int argc, char** argv)
     // If rue*Qin is used in fip, its max value needs to be set
 
     LGMdouble ini_maxr = 0.0;
-    max_rueqin = Accumulate(*pine1,ini_maxr, FindMaxRueQin());
+    CrownDensity::max_rueqin = Accumulate(*pine1,ini_maxr, LignumForest::FindMaxRueQin());
  
     //===============================================================================
     // Photosynthesis and allocation
@@ -698,14 +722,14 @@ int main(int argc, char** argv)
     
     //Collect foliage 
     LGMdouble wfoliage = 0.0;
-    Accumulate(*pine1,wfoliage,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wfoliage,CollectFoliageMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //Collect sapwood mass
     LGMdouble wsapwood = 0.0;
-    Accumulate(*pine1,wsapwood,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wsapwood,CollectSapwoodMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //TreeAging takes care of senescence in segments (above ground part)
-    ForEach(*pine1,TreeAging<ScotsPineSegment,ScotsPineBud>()); 
+    ForEach(*pine1,TreeAging<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>()); 
     
     //Root mortality
     SetValue(*pine1,TreeWr, 
@@ -716,7 +740,7 @@ int main(int argc, char** argv)
     //of  the two  will tell  how much  sapwood was  needed  in diameter
     //growth
     LGMdouble ws1 = 0.0;
-    ws1 = Accumulate(*pine1,ws1,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    ws1 = Accumulate(*pine1,ws1,CollectSapwoodMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //As in LignumForest update `ws_after_senescence` vector
     UpdateSapwoodAfterSenescence(gloop,ws1,0);
@@ -733,36 +757,36 @@ int main(int argc, char** argv)
     pl1->lstringToLignum(*pine1,1,PBDATA);
     //Pass physiological age from mother buds to newly created segments
     double phys_age = 0.0;
-    AccumulateDown(*pine1,phys_age,PassPhysiologicalAge<ScotsPineSegment,ScotsPineBud>());
+    AccumulateDown(*pine1,phys_age,PassPhysiologicalAge<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
     //Pass the  qin to newly  created segments and to  the terminating
     //buds. Also set LGAip (qin/TreeQinMax) for the terminating buds
     double qin = 0.0;
-    PropagateUp(*pine1,qin,ForwardScotsPineQin());
+    PropagateUp(*pine1,qin,LignumForest::ForwardScotsPineQin());
 
     //Set the needle angle for newly created segments
-    ForEach(*pine1,SetScotsPineSegmentNeedleAngle());
+    ForEach(*pine1,LignumForest::SetScotsPineSegmentNeedleAngle());
 
     //The variable apical (now attribute of ScotsPineSegment) is set in new segments
     //before length growth by vigor index
     double o0 = 1.0;
-    PropagateUp(*pine1,o0,SetScotsPineSegmentApical());
+    PropagateUp(*pine1,o0,LignumForest::SetScotsPineSegmentApical());
    
     //Calculate the vigour index
     TreePhysiologyVigourIndex(*pine1);
 
-    LGMdouble qin_max = Accumulate(*pine1,qin_max,GetQinMax<ScotsPineSegment,ScotsPineBud>());
+    LGMdouble qin_max = Accumulate(*pine1,qin_max,GetQinMax<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
     SetValue(*pine1,TreeQinMax,GetFirmament(*pine1).diffuseBallSensor());
 
     //Length of path from base of tree to each segment
     LGMdouble plength = 0.0;
-    PropagateUp(*pine1,plength,PathLength<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,plength,PathLength<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //============================================================================
     // Space colonialization
     //=============================================================================
     if (space0 || space1 || space2) {
-       BoundingBox bbs;
-      FindCfBoundingBox<ScotsPineSegment,ScotsPineBud> fbs(true); 
+      BoundingBox bbs;
+      FindCfBoundingBox<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> fbs(true); 
       //Segments with needles considered only
       bbs = Accumulate(*pine1, bbs, fbs);
 
@@ -770,7 +794,7 @@ int main(int argc, char** argv)
       Point urs = bbs.getMax();
 
       space_occupancy.resize(lls+Point(-0.5,-0.5,-0.5), urs+Point(0.5,0.5,0.5));
-      DumpTreeOccupy<ScotsPineSegment,ScotsPineBud> dto(3);     //in 3 parts, only foliage parts
+      DumpTreeOccupy<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> dto(3);     //in 3 parts, only foliage parts
       dto.space = &space_occupancy;
 
       ForEach(*pine1, dto);
@@ -785,7 +809,7 @@ int main(int argc, char** argv)
       ParametricCurve lambda_fun = GetFunction(*pine1,SPEBHF);
       if(growthloop_is_EBH_reduction) {
 	//After age 20 EBH values for all orders change gradually from the nominal value to ebh_final_value 
-	if(L_age > 20) {
+	if(Pine::L_age > 20) {
 	  double v1 = lambda_fun(1.0);
 	  double v2 = lambda_fun(2.0);
 	  double v3 = lambda_fun(3.0);
@@ -796,23 +820,23 @@ int main(int argc, char** argv)
 	  v3 *= EBH_reduction_parameter;
 	  v6 *= EBH_reduction_parameter;
 
-	 // if(EBH_reduction_parameter < 1.0) {
- 	 //    if(v1 < ebh_final_value) v1 = ebh_final_value;
- 	 //    if(v2 < ebh_final_value) v2 = ebh_final_value;
- 	 //    if(v3 < ebh_final_value) v3 = ebh_final_value;
- 	 //    if(v6 < ebh_final_value) v6 = ebh_final_value;
- 	 //  } else {
- 	 //    if(v1 > ebh_final_value) v1 = ebh_final_value;
- 	 //    if(v2 > ebh_final_value) v2 = ebh_final_value;
- 	 //    if(v3 > ebh_final_value) v3 = ebh_final_value;
- 	 //    if(v6 > ebh_final_value) v6 = ebh_final_value;
- 	 //  }
-	 if(EBH_reduction_parameter < 1.0) {
- 	    if(v1 < 0.52) v1 = 0.52;
- 	    if(v2 < 0.51) v2 = 0.51;
- 	    if(v3 < 0.503) v3 = 0.503;
- 	    if(v6 < 0.505) v6 = 0.505;
- 	  }
+	  // if(EBH_reduction_parameter < 1.0) {
+	  //    if(v1 < ebh_final_value) v1 = ebh_final_value;
+	  //    if(v2 < ebh_final_value) v2 = ebh_final_value;
+	  //    if(v3 < ebh_final_value) v3 = ebh_final_value;
+	  //    if(v6 < ebh_final_value) v6 = ebh_final_value;
+	  //  } else {
+	  //    if(v1 > ebh_final_value) v1 = ebh_final_value;
+	  //    if(v2 > ebh_final_value) v2 = ebh_final_value;
+	  //    if(v3 > ebh_final_value) v3 = ebh_final_value;
+	  //    if(v6 > ebh_final_value) v6 = ebh_final_value;
+	  //  }
+	  if(EBH_reduction_parameter < 1.0) {
+	    if(v1 < 0.52) v1 = 0.52;
+	    if(v2 < 0.51) v2 = 0.51;
+	    if(v3 < 0.503) v3 = 0.503;
+	    if(v6 < 0.505) v6 = 0.505;
+	  }
 
 	  vector<double> lfo = lambda_fun.getVector();
 
@@ -825,19 +849,19 @@ int main(int argc, char** argv)
 	}
       }
       
-      EBH_basipetal_info EBHbI0, EBHbI1;
+      LignumForest::EBH_basipetal_info EBHbI0, EBHbI1;
       //      EBHbI1 = AccumulateDown(*pine1, EBHbI0, EBH_basipetal(lambda_fun) );
-       EBHbI1 = AccumulateDown(*pine1, EBHbI0, EBH_basipetal(lambda_fun, growthloop_ebh_mode) );
+      EBHbI1 = AccumulateDown(*pine1, EBHbI0, LignumForest::EBH_basipetal(lambda_fun, CrownDensity::growthloop_ebh_mode) );
 
-      EBH_acropetal_info EBHaI0(1.0, 1.0/lambda_fun(1.0), 1.0);
-      PropagateUp(*pine1, EBHaI0, EBH_acropetal(lambda_fun) );
+      LignumForest::EBH_acropetal_info EBHaI0(1.0, 1.0/lambda_fun(1.0), 1.0);
+      PropagateUp(*pine1, EBHaI0, LignumForest::EBH_acropetal(lambda_fun) );
 
-      MaxEBHResource_info m0, m1;
+      LignumForest::MaxEBHResource_info m0, m1;
       m0.my_resource = -R_HUGE;
 
-      m1 = AccumulateDown(*pine1, m0, MaxEBHResource() );
+      m1 = AccumulateDown(*pine1, m0, LignumForest::MaxEBHResource() );
 
-      ForEach(*pine1, NormalizeEBHResource(m1.my_resource) );
+      ForEach(*pine1, LignumForest::NormalizeEBHResource(m1.my_resource) );
     }
     
     //=================================================================
@@ -845,27 +869,29 @@ int main(int argc, char** argv)
 
     //Initialize calculation of thickness growth induced by adding new shoots.
     double alku = 1.0;    //= Gravelius order of main axis
-    PropagateUp(*pine1,alku,SetSapwoodDemandAtJunction());
+    PropagateUp(*pine1,alku,LignumForest::SetSapwoodDemandAtJunction());
 
     DiameterGrowthData data;
-    LGMGrowthAllocator2<ScotsPineSegment,ScotsPineBud,SetScotsPineSegmentLength,
-      PartialSapwoodAreaDown,ScotsPineDiameterGrowth2,DiameterGrowthData>
-      G(*pine1,data,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),GetFunction(*pine1,SPFGO),GetFunction(*pine1,LGMIP),fgomode,fipmode);   
+    LGMGrowthAllocator2<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud,LignumForest::SetScotsPineSegmentLength,
+			LignumForest::PartialSapwoodAreaDown,LignumForest::ScotsPineDiameterGrowth2,DiameterGrowthData>
+      G(*pine1,data,LignumForest::PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),GetFunction(*pine1,SPFGO),GetFunction(*pine1,LGMIP),fgomode,fipmode);   
 
 
-    if(is_by_branches && iter > 4) {
+    if(CrownDensity::is_by_branches && iter > 4) {
       //      allocateByBranches(*pine1);
 
-      if(is_height_function) {
+      if(CrownDensity::is_height_function) {
 	//Here length of leader at tree level, if height function
-	Axis<ScotsPineSegment,ScotsPineBud>& stem =  GetAxis(*pine1);
-	TreeSegment<ScotsPineSegment,ScotsPineBud>* last = 
+	Axis<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>& stem =  GetAxis(*pine1);
+	TreeSegment<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>* last = 
 	  GetLastTreeSegment(stem);
 	double e1 = GetValue(*pine1,LGPe1);
 	double e2 = GetValue(*pine1,LGPe2);
-	double Lnew = (e1 + e2*global_hcb/L_H) * dDb;
-        if(Lnew < 0.1)           //safeguarding against losing top
-            Lnew = 0.1;
+	double Lnew = 0.0;
+	if (Pine::L_H > R_EPSILON)
+	  double Lnew = (e1 + e2*global_hcb/Pine::L_H) * CrownDensity::dDb;
+	if(Lnew < 0.1)           //safeguarding against losing top
+	  Lnew = 0.1;
 	SetValue(*last, LGAL, Lnew);
       }
     } 
@@ -878,7 +904,7 @@ int main(int argc, char** argv)
 	cout << "P=" << G.getP() << " M=" 
 	     << G.getM() << " " << " P-M="<< G.getP() - G.getM() << endl;
 	cout << "Bisection begin" <<endl;
-	Bisection(0.0,50.0,G,0.01,/*verbose*/false); //10 grams (C) accuracy 
+	Bisection(0.0,100.0,G,0.01,false); //10 grams (C) accuracy 
 	cout << "Bisection end " << "L=" << G.getL()<<endl;
       }
       //G will throw an exception if P < M
@@ -890,13 +916,12 @@ int main(int argc, char** argv)
       catch(BisectionBracketException e){
 	cout << "Could not bracket " << e.getFa() << " " << e.getFb() << " "  << e.getFbl()  <<endl;
 	cout << e.getA() << " "  << e.getB() << " " << e.getBl() <<endl;
-        cout << "Exit" << endl;
-        exit(0);
+	cout << "Exit" << endl;
+	exit(0);
       }
 
-      Axis<ScotsPineSegment,ScotsPineBud>& stem =  GetAxis(*pine1);
-
-      TreeSegment<ScotsPineSegment,ScotsPineBud>* last =
+      Axis<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>& stem =  GetAxis(*pine1);
+      TreeSegment<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>* last =
 	GetLastTreeSegment(stem);
       double lnew = GetValue(*last, LGAL);
       if(lnew < 0.1)
@@ -906,29 +931,27 @@ int main(int argc, char** argv)
 
     //Calculate  the  LGAsf  for   newly  created  segments,  sf  in  P
     //Kaitaniemi data depens on segment length
-    ForEach(*pine1,SetScotsPineSegmentSf());
+    ForEach(*pine1,LignumForest::SetScotsPineSegmentSf());
     bool kill = false;
-    PropagateUp(*pine1,kill,KillBudsAfterAllocation<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,kill,KillBudsAfterAllocation<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //Now the lengths of the segments are such that Growth = P - M. Do (that is, store permanently,
     //before it was not) the induced diameter growth
     DiameterGrowthData dgdata;
-    AccumulateDown(*pine1,dgdata,PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),
-		   ScotsPineDiameterGrowth2(LGMGROWTH));
+    AccumulateDown(*pine1,dgdata,LignumForest::PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),
+		   LignumForest::ScotsPineDiameterGrowth2(LGMGROWTH));
 
     double wfnew = 0.0;
-    Accumulate(*pine1,wfnew,CollectNewFoliageMass<ScotsPineSegment,ScotsPineBud>());
-    SetValue(*pine1,TreeWr, 
-	     GetValue(*pine1,TreeWr)+
-	     GetValue(*pine1,LGPar)*wfnew);
+    Accumulate(*pine1,wfnew,CollectNewFoliageMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
+    SetValue(*pine1,TreeWr, GetValue(*pine1,TreeWr)+GetValue(*pine1,LGPar)*wfnew);
     //To plot how much is allocated to new growth (iWn), diameter growth (iWo)
     //and to roots (iWr) collect datat
     LGMdouble ws2 = 0.0;
-    ws2 = Accumulate(*pine1,ws2,CollectOldSegmentSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    ws2 = Accumulate(*pine1,ws2,CollectOldSegmentSapwoodMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
     LGMdouble ws3 = ws2-ws1;//diameter growth
     //ws4 together with wfnew is new growth
     LGMdouble ws4 = 0.0;
-    ws4 = Accumulate(*pine1,ws4,CollectNewSegmentSapwoodMass<ScotsPineSegment,ScotsPineBud>());
+    ws4 = Accumulate(*pine1,ws4,CollectNewSegmentSapwoodMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
     //This is needed for roots
     LGMdouble wr1 = GetValue(*pine1,LGPar)*wfnew;
 
@@ -940,7 +963,7 @@ int main(int argc, char** argv)
     //terminating buds
 
     double wftobuds = 0.0;
-    PropagateUp(*pine1,wftobuds,ForwardWf<ScotsPineSegment,ScotsPineBud>());
+    PropagateUp(*pine1,wftobuds,ForwardWf<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //============================================================================
     // Here is calculation of estimation of local needle area density for
@@ -949,14 +972,14 @@ int main(int argc, char** argv)
     if (is_bud_view_function) {
       BoundingBox b1;
       bool foliage = true;
-      FindCfBoundingBox<ScotsPineSegment,ScotsPineBud> fb1(foliage);
+      FindCfBoundingBox<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> fb1(foliage);
       b1 = Accumulate(*pine1, b1, fb1);
 
       Point ll = b1.getMin();
       Point ur = b1.getMax();
 
       VoxelSpace vs1(Point(0.0,0.0,0.0),Point(1.0,1.0,1.0),
-      	     0.05,0.05,0.05,5,5,5,GetFirmament(*pine1));
+		     0.05,0.05,0.05,5,5,5,GetFirmament(*pine1));
       vs1.resize(ll, ur);
       vs1.reset();
       int num_parts = 5;
@@ -965,7 +988,7 @@ int main(int argc, char** argv)
       LGMdouble cone_height = 0.5, cone_half_angle =  0.7; //= 40 degrees
       int no_points_on_rim = 12;
         
-      SetBudViewFunctor sbvf(&vs1, cone_height, cone_half_angle, no_points_on_rim);
+      LignumForest::SetBudViewFunctor sbvf(&vs1, cone_height, cone_half_angle, no_points_on_rim);
       ForEach(*pine1, sbvf);
     }
 
@@ -975,242 +998,58 @@ int main(int argc, char** argv)
     pl1->derive();
     pl1->lstringToLignum(*pine1,1,PBDATA);
  
-    Axis<ScotsPineSegment,ScotsPineBud>& stem = GetAxis(*pine1);
-
+    Axis<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>& stem = GetAxis(*pine1);
     //Collect foliage after growth
     LGMdouble wfaftergrowth = 0.0;
-    Accumulate(*pine1,wfaftergrowth,CollectFoliageMass<ScotsPineSegment,ScotsPineBud>());
+    Accumulate(*pine1,wfaftergrowth,CollectFoliageMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
     //Collect sapwood mass after growth
     LGMdouble wsaftergrowth = 0.0;
-    Accumulate(*pine1,wsaftergrowth,CollectSapwoodMass<ScotsPineSegment,ScotsPineBud>());
-    list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>& ls = GetTreeCompartmentList(stem);
+    Accumulate(*pine1,wsaftergrowth,CollectSapwoodMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
+    list<TreeCompartment<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>*>& ls = GetTreeCompartmentList(stem);
     //Mean branch length
-    summing bs;
+    LignumForest::summing bs;
     bs.d2 = bs.d2l = bs.lsum = 0.0;
     bs.n_br = 0;
-    bs = Accumulate(*pine1, bs, Branchmeans() );
+    bs = Accumulate(*pine1, bs, LignumForest::Branchmeans() );
 
     //The Qin at the top
     LGMdouble qintop1 = 0.0;
-    GetTopQin<ScotsPineSegment,ScotsPineBud> getTopQin1;
+    GetTopQin<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> getTopQin1;
     qintop1 = accumulate(ls.begin(),ls.end(),qintop1, getTopQin1);
 
     //Diameter and heigth at the crown base.
-    AccumulateDown(*pine1,dcl,AddBranchWf(),DiameterCrownBase<ScotsPineSegment,ScotsPineBud>());
+    AccumulateDown(*pine1,dcl,AddBranchWf(),DiameterCrownBase<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
 
     //Crown volume
-    CrownVolume<ScotsPineSegment,ScotsPineBud> cv(0.30);
+    CrownVolume<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> cv(0.30);
     double cvol = cv(*pine1);
 
     //Main stem volume
-    MainAxisVolume<ScotsPineSegment,ScotsPineBud> mav;
+    MainAxisVolume<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> mav;
     double stemvol = mav(*pine1);
 
     //Number of segments
     int nsegment = 0;
     nsegment = AccumulateDown(*pine1,nsegment,
-			       CountTreeSegments<ScotsPineSegment,ScotsPineBud>()); 
+			      CountTreeSegments<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>()); 
 
-    //There are  some gnuplot  scripts that can  plot data  files from
-    //this output.   Please just add  additional output to the  end if
-    //needed (please do not  'break' those scripts).  Please note: Due
-    //to logic  in the  main loop the  production and  respiration are
-    //done before  new growth and  senescence. The masses  plotted are
-    //after senescence and new growth.
-    if(toFile) {
-      double qbs = 0.0;
-      double qabs= Accumulate(*pine1,qbs,CollectQabs<ScotsPineSegment,
-			    ScotsPineBud>());
-//       double tla0 = 0.0;
-//       treeAf = Accumulate(*pine1,tla0,CollectFoliageArea<
-// 				 ScotsPineSegment,ScotsPineBud>());
-
-      double a0 = 0.0;
-      double ASeg0 = Accumulate(*pine1,a0,SurfaceAreaOfNewSegments());
-
-      double wood = 0.0;
-      Accumulate(*pine1,wood,CollectWoodMass<ScotsPineSegment,ScotsPineBud>());
-
-      //Collect wood mass in the main axis
-      double wstem = GetValue(*pine1,LGAWstem);
-
-      //Wood mass in branches
-      double wbranches = wood - wstem;
-
-      //Sapwood mass of stem
-      double stem_sw = 0.0;
-      Accumulate(*pine1,stem_sw,CollectStemSapwoodMass<ScotsPineSegment,ScotsPineBud>());
-
-
-      ff <</*1 */ left << setw(6) << setfill(' ') << iter+1 << " "
-	 <</*2 */ left << setw(8) << trees_left << " " 
-	 <</*3 */ left << setw(8) << GetValue(*pine1,LGAH) << " " 
-	 <</*4 */ setw(9) << qintop1 << " " 
-	 <</*5 */ setw(12) << qintop1/GetValue(*pine1,TreeQinMax) << " " 
-	 <</*6 */ setw(11) << GetValue(*pine1,LGADbase) << " "
-	 <</*7 */ setw(11) << GetValue(*pine1,LGADbh) << " "
-	 <</*8 */ setw(11) << dcl.DCrownBase() << " " 
-	 <</*9 */ setw(11) << dcl.HCrownBase() << " " 
-	 <</*10*/ setw(11) << G.getP() << " "      //Production before new growth
-	 <</*11*/ setw(11) << G.getM() << " "      //Respiration before new growth: foliage+sapwood+roots
-	 <</*12*/ setw(12) << wfaftergrowth << " " //Foliage mass after new growth
-	 <</*13*/ setw(14) << bs.d2l/bs.d2 << " "  //Branch means
-	 <</*14*/ setw(14) << bs.lsum/(double)bs.n_br  << " "
-	 <</*15*/ setw(11) << GetValue(*pine1,TreeWr) << " "     //Root mass after new growth
-	 <</*16*/ setw(11) << GetValue(*pine1,LGPmr)*wroot << " "//Root respiration before new growth
-	 <</*17*/ setw(11) << G.getM() - GetValue(*pine1,LGPmr)*wroot << " "//Above ground respiration 
-	 <</*18*/ setw(11) << wsaftergrowth  << " "           //Sapwood mass after new growth
-	 <</*19*/ setw(11) << GetValue(*pine1,LGPms)*wsapwood << " " //Sapwood respiration before new growth
-	 <</*20*/ setw(11) << GetValue(*pine1,LGPmf)*wfoliage << " " //Foliage respiration before new growth
-	 <</*21*/ setw(11) << cvol << " "  // Crown volume
-	 <</*22*/ setw(11) << treeAf << " "//Sum[(LeafA+NeedleA)/Vbox]/Nboxes
-	 <</*23*/ setw(11) << nsegment << " " //Number of segments
-	 <</*24*/ setw(11) << qabs << " "     // Qabs  
-	 <</*25*/ setw(11) << qabs/(GetFirmament(*pine1).
-				    diffuseBallSensor()*treeAf) << " "  //Rad eff.
-	 <</*26*/ setw(11) << wfoliage << " "  //Foliage that photosynthesized
-	 <</*27*/ setw(11) << G.getP()/wfoliage << " "  //The ubiquitous P/Wf
-         <</*28*/ setw(11) << treeAf*trees_left << " " //Leaf Area Index
-	 <</*29*/ setw(11) << stemvol << " "  //Main axis volume
-	 <</*30*/ setw(11) << ASeg0 << " "  //Main axis volume
-	 <</*31*/ setw(11) << wfnew << ""   //Foliage produced by elongation (iWn)
-	 <</*32*/ setw(11) << ws4 << " "  //Sapwood produced by elongation (iWn)
-	 <</*33*/ setw(11) << ws3 << " "  //Sapwood required for diameter growth (iWo)
-	 <</*34*/ setw(11) << wr1 << " "  //New roots required by new foliage (iWr)
-	 <</*35*/ setw(11) << ws4+ws3 << " " //Sapwood in growth
-	 <</*36*/ setw(11) << wood << " " //Wood mass in above-ground parts
-	 <</*37*/ setw(11) << wstem << " " //Wood mass of stem
-	 <</*38*/ setw(11) << wbranches << " " //Wood mass of branches
-	 <</*39*/ setw(11) << stem_sw << " " //Sapwood mass of stem
-	 <</*40*/ setw(11) << GetValue(*pine1,LGAAsbase) << " "//Sapwood at base
-	 <</*41*/ setw(11) << GetValue(*pine1,LGAAsDbh) << " " //Sapwood at D 1.3
-	 <</*42*/ setw(11) << dcl.ASwCrownBase() << " "       //Sapwood at crown base 
-	 <</*43*/ setw(11) << G.getL()  //Lambda s.t. G(L) = 0.
-	 << endl; 
-    }
-
-    bool crowninformation = false;
-    if(crowninformation) {
-      //Collect and print the two lists of foliage masses and their heights 
-      //in the main axis.  Print and assess the crown base afterwards.
-      CrownLimitData cld;
-      AccumulateDown(*pine1,cld,AddCrownLimitData(),
-		     CollectCrownLimitData<ScotsPineSegment,ScotsPineBud>());
-      //Collect diameters from the segments in the main axis
-      list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*> & tc_ls = GetTreeCompartmentList(GetAxis(*pine1));
-      list<double> d_ls;//list of diameters
-      d_ls = accumulate(tc_ls.begin(),tc_ls.end(),d_ls,CollectSegmentDiameters());
-    
-      ostringstream crown_limit_file;
-      crown_limit_file << "CrownLimit-" << x_coord << "-" << y_coord << "-" << iter+1 << ".txt";
-      //File is CrownLimit+iter+.txt, e.g., "CrownLimit-25.5-22.0-10.txt"
-      ofstream cl_file(crown_limit_file.str().c_str());
-      const list<pair<double,double> >& hwf_ls = cld.WfHList();
-      const list<pair<double,double> >& dh_dwf_ls = cld.dHdWfList();
-      const list<pair<double,double> >& h_qabs_ls = cld.HQabsList();
-      const list<pair<double,double> >& dh_dqabs_ls = cld.dHdQabsList();
-      //How to do this with copy algorithm as with 'cout'??
-      list<pair<double,double> >::const_iterator hwf_it = hwf_ls.begin();
-      list<double>::const_iterator d_ls_it = d_ls.begin();
-      list<pair<double,double> >::const_iterator dh_dwf_it = dh_dwf_ls.begin();
-      list<pair<double,double> >::const_iterator h_qabs_it =  h_qabs_ls.begin();
-      list<pair<double,double> >::const_iterator dh_dqabs_it = dh_dqabs_ls.begin();
-
-      cl_file << setfill(' ') 
-	      << setw(11) << "H" << " " //height
-	      << setw(11) << "D" << " " //diameter
-	      << setw(11) << "Wf" << " "//foliage
-	      << setw(11) << "dH" << " "//growth increment 
-	      << setw(11) << "dWf/dH" << " "   
-	      << setw(11) << "H" << " " 
-	      << setw(11) << "Qabs" << " " 
-	      << setw(11) << "dH" << " " 
-	      << setw(11) << "dQabs/dH" << " "
-	      << setw(11) << "rel H" << endl;
-      //For relative height
-      LGMdouble Htree = GetValue(*pine1, LGAH);
-      while (hwf_it != hwf_ls.end()){
-	cl_file << setfill(' ')
-		<< setw(11) << (*hwf_it).first << " " 
-		<< setw(11) << *d_ls_it << " " 
-		<< setw(11) << (*hwf_it).second << " "
-		<< setw(11) << (*dh_dwf_it).first << " "
-		<< setw(11) << (*dh_dwf_it).second << " "
-		<< setw(11) << (*h_qabs_it).first << " "
-		<< setw(11) << (*h_qabs_it).second << " "
-		<< setw(11) << (*dh_dqabs_it).first << " "
-		<< setw(11) << (*dh_dqabs_it).second << " "
-		<< setw(11) << (*hwf_it).first / Htree << endl;
-	hwf_it++;//the heights and Wf's in the  main axis by branching points 
-	dh_dwf_it++;//the same but  now dH and dWf/dH (dWf  is Wf and dH
-	//the segment length)
-	h_qabs_it++;//the heights and Qabs's the  in the  main axis by branching points 
-	dh_dqabs_it++;//the same but now dH and dQabs/dH (dQabs is Qabs and dH
-	//the segment length)
-	d_ls_it++;
-      }
-
-      if (interval && !xmlfile.empty() &&
-	  (static_cast<int>(GetValue(*pine1,LGAage)) % interval == 0 )){
-	ostringstream xml_interval;
-	xml_interval << GetValue(*pine1,LGAage) << "-" << xmlfile;
-	XMLDomTreeWriter<ScotsPineSegment,ScotsPineBud> writer;
-	cout << "Saving tree to "<< xml_interval.str() << " begin" <<endl; 
-	writer.writeTreeToXML(*pine1,xml_interval.str());
-	cout << "End" <<endl;
-      }
-      if (interval && !fipfile.empty()){
-	if (static_cast<int>(GetValue(*pine1,LGAage)) % interval == 0){
-	  ostringstream fip_interval;
-	  fip_interval << GetValue(*pine1,LGAage) << "-" << fipfile << ".txt";
-	  cout << "Printing vertical distribution of fip to " << fip_interval.str() << endl;
-	  ofstream fipstream(fip_interval.str().c_str());
-	  int age = static_cast<int>(GetValue(*pine1,LGAage));
-	  pair<vector<pair<double,int> >,double> p;
-	  //number of vertical divisions is tree age
-	  p.first.resize(age);
-	  //height intervals is the mean annual growth
-	  p.second = GetValue(*pine1,LGAH)/GetValue(*pine1,LGAage);
-	  Accumulate(*pine1,p,CollectVerticalDistributionOfFip());
-	  double interval = p.second;
-	  double height = interval;
-	  //Title
-	  fipstream  <<left << setfill(' ')
-		     << setw(11) << "Height" << setw(11) << "CumulFip" << setw(11) << "Mean fip" <<endl;
-	  for (unsigned int i = 0; i < p.first.size(); i++){
-	    if (p.first[i].second > 0){
-	      fipstream  << setw(11) << height << setw(11) <<  p.first[i].first 
-			 << setw(11) << p.first[i].first/p.first[i].second <<endl;
-	    }
-	    else{
-	      fipstream  << setw(11) << height << setw(11) <<  p.first[i].first 
-			 << setw(11) << 0 <<endl;
-	    }
-	    height = height + interval;
-	  }
-	  cout << "Done " <<endl;
-	}
-      }
-    
-    }  //if (crowninformation) {  
+   
 
     pl1->prune(*pine1);
 
     //Set radiation use efficiency in new segments as a function of shadiness
     //experienced by mother segment
     
-   if(growthloop_is_radiation_use_efficiency) {   //rue = 1 == no effect by default
-    SetRadiationUseEfficiency<ScotsPineSegment,ScotsPineBud>
-      set_rue(GetFirmament(*pine1).diffuseBallSensor(),
-					       radiation_use_efficiency_parameter);
-  
-    LGMdouble initial = 0.0;
-    PropagateUp(*pine1,initial,set_rue);
-   }
-   //As in LignumForest Collect data to HDF5 files after growth 
-   gloop.collectDataAfterGrowth(iter+1,false);
-   CreateTreeXMLDataSet(gloop,hdf5_trees,TXMLGROUP,gloop.getWriteInterval());
-  }   // END OF ITERATION END OF ITERATION END OF ITERATION END OF ITERATION
+    if(growthloop_is_radiation_use_efficiency) {   //rue = 1 == no effect by default
+      LignumForest::SetRadiationUseEfficiency<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> set_rue(GetFirmament(*pine1).diffuseBallSensor(),
+														 radiation_use_efficiency_parameter);
+      LGMdouble initial = 0.0;
+      PropagateUp(*pine1,initial,set_rue);
+    }
+    //As in LignumForest Collect data to HDF5 files after growth 
+    gloop.collectDataAfterGrowth(iter+1,false);
+    CreateTreeXMLDataSet(gloop,hdf5_trees,LignumForest::TXMLGROUP,gloop.getWriteInterval());
+  }  // END OF ITERATION END OF ITERATION END OF ITERATION END OF ITERATION
 
   
   //Clean up.
@@ -1224,27 +1063,27 @@ int main(int argc, char** argv)
   ///\internal
   //[CollectHDF5]
   TMatrix3D<double>& hdf5_data = gloop.getHDF5TreeData();
-  hdf5_file.createDataSet(TREE_DATA_DATASET_NAME,hdf5_data.rows(),hdf5_data.cols(),hdf5_data.zdim(),hdf5_data);
-  hdf5_file.createColumnNames(TREE_DATA_DATASET_NAME,TREE_DATA_COLUMN_ATTRIBUTE_NAME,TREE_DATA_COLUMN_NAMES);
+  hdf5_file.createDataSet(LignumForest::TREE_DATA_DATASET_NAME,hdf5_data.rows(),hdf5_data.cols(),hdf5_data.zdim(),hdf5_data);
+  hdf5_file.createColumnNames(LignumForest::TREE_DATA_DATASET_NAME,LignumForest::TREE_DATA_COLUMN_ATTRIBUTE_NAME,LignumForest::TREE_DATA_COLUMN_NAMES);
   //Parameters used  
   TMatrix2D<double> hdf5_tree_param_data = gloop.getHDF5TreeParameterData();
-  hdf5_file.createDataSet(PGROUP+TREE_PARAMETER_DATASET_NAME,hdf5_tree_param_data.rows(),hdf5_tree_param_data.cols(),
+  hdf5_file.createDataSet(LignumForest::PGROUP+LignumForest::TREE_PARAMETER_DATASET_NAME,hdf5_tree_param_data.rows(),hdf5_tree_param_data.cols(),
 			  hdf5_tree_param_data);
-  hdf5_file.createColumnNames(PGROUP+TREE_PARAMETER_DATASET_NAME,TREE_PARAMETER_ATTRIBUTE_NAME,TREE_PARAMETER_NAMES);
+  hdf5_file.createColumnNames(LignumForest::PGROUP+LignumForest::TREE_PARAMETER_DATASET_NAME,LignumForest::TREE_PARAMETER_ATTRIBUTE_NAME,LignumForest::TREE_PARAMETER_NAMES);
   //Functions known in a tree
-  for (unsigned int i=0; i < FN_V.size();i++){ 
-    TMatrix2D<double> hdf5_tree_fn_data = gloop.getHDF5TreeFunctionData(FN_V[i]);
-    hdf5_file.createDataSet(TFGROUP+FNA_STR[i],hdf5_tree_fn_data.rows(),hdf5_tree_fn_data.cols(),hdf5_tree_fn_data);
-    hdf5_file.createColumnNames(TFGROUP+FNA_STR[i],TREE_FN_ATTRIBUTE_NAME,TREE_FN_COLUMN_NAMES);
+  for (unsigned int i=0; i < LignumForest::FN_V.size();i++){ 
+    TMatrix2D<double> hdf5_tree_fn_data = gloop.getHDF5TreeFunctionData(LignumForest::FN_V[i]);
+    hdf5_file.createDataSet(LignumForest::TFGROUP+LignumForest::FNA_STR[i],hdf5_tree_fn_data.rows(),hdf5_tree_fn_data.cols(),hdf5_tree_fn_data);
+    hdf5_file.createColumnNames(LignumForest::TFGROUP+LignumForest::FNA_STR[i],LignumForest::TREE_FN_ATTRIBUTE_NAME,LignumForest::TREE_FN_COLUMN_NAMES);
   }
   //All functions used
-  hdf5_file.createFnDataSetsFromDir("*.fun",AFGROUP,TREE_FN_ATTRIBUTE_NAME,TREE_FN_COLUMN_NAMES);
+  hdf5_file.createFnDataSetsFromDir("*.fun",LignumForest::AFGROUP,LignumForest::TREE_FN_ATTRIBUTE_NAME,LignumForest::TREE_FN_COLUMN_NAMES);
   //Command line
   vector<string> c_vec;
   std::copy( argv, argv+argc,back_inserter(c_vec));
   ostringstream cline;
   copy(c_vec.begin(),c_vec.end(),ostream_iterator<string>(cline, " "));
-  hdf5_file.createDataSet(COMMAND_LINE_DATASET_NAME,cline.str());
+  hdf5_file.createDataSet(LignumForest::COMMAND_LINE_DATASET_NAME,cline.str());
   hdf5_file.close();
   //[CollectHDF5]
   ///\endinternal
@@ -1258,12 +1097,12 @@ int main(int argc, char** argv)
   //Print  Qin and  (x,y,z)  for each  segment  of age  0,1  or 2.  In
   //addition  to Qin,  this gives  you  the idea  of the  size of  the
   //branches
-  ForEach(*pine1,PrintSegmentQin<ScotsPineSegment,ScotsPineBud>());
+  ForEach(*pine1,PrintSegmentQin<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>());
   LGMdouble wf1 = 0.0;
   cout << "Wf: " << Accumulate(*pine1,wf1,
-       		       CollectFoliageMass<ScotsPineSegment,ScotsPineBud>()) << endl;
-  summing bs;
-  bs = Accumulate(*pine1, bs, Branchmeans());
+			       CollectFoliageMass<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>()) << endl;
+  LignumForest::summing bs;
+  bs = Accumulate(*pine1, bs, LignumForest::Branchmeans());
   if(bs.d2 > 0.0)
     cout << "Averaged2 branch length, m: " << bs.d2l/bs.d2 << endl;
   else
@@ -1278,16 +1117,15 @@ int main(int argc, char** argv)
 
   int n = 0;
   cout << "Segments: " << Accumulate(*pine1,n, 
-				     CountTreeSegments<ScotsPineSegment,
-				     ScotsPineBud>()) << endl;
+				     CountTreeSegments<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>()) << endl;
   LGMdouble qabs = 0.0;
   cout << "Tree       Qabs: " 
-       <<  Accumulate(*pine1,qabs,CollectQabs<ScotsPineSegment,ScotsPineBud>())<<endl;
+       <<  Accumulate(*pine1,qabs,CollectQabs<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>())<<endl;
  
 
   //Write the tree to xml file
   if (!xmlfile.empty()){
-    XMLDomTreeWriter<ScotsPineSegment,ScotsPineBud> writer;
+    XMLDomTreeWriter<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> writer;
     writer.writeTreeToXML(*pine1,xmlfile);
   }
 
@@ -1300,7 +1138,7 @@ int main(int argc, char** argv)
     p.first.resize(age);
     //height intervals is the mean annual growth
     p.second = GetValue(*pine1,LGAH)/GetValue(*pine1,LGAage);
-    Accumulate(*pine1,p,CollectVerticalDistributionOfFip());
+    Accumulate(*pine1,p,LignumForest::CollectVerticalDistributionOfFip());
     double interval = p.second;
     double height = interval;
     //Title
@@ -1308,7 +1146,7 @@ int main(int argc, char** argv)
 	       << setw(11) << "Height" << setw(11) << "CumulFip" << setw(11) << "Mean fip" <<endl;
     for (unsigned int i = 0; i < p.first.size(); i++){
       if(p.first[i].second > 0){
-        fipstream  << setw(11) << height << setw(11) <<  p.first[i].first 
+	fipstream  << setw(11) << height << setw(11) <<  p.first[i].first 
 		   << setw(11) << p.first[i].first/p.first[i].second <<endl;
       }
       else{
@@ -1319,37 +1157,6 @@ int main(int argc, char** argv)
     }
     cout << "Done " <<endl;
   }
-
-  //Write information about the grown pine to these files
-  ForEach(*pine1, BranchInformation("branchinformation.dat"));
-  ForEach(*pine1, SegmentProductionBalance("productionbalance.dat"));
-
-  cout << "Value of Xi at the end " << GetValue(*pine1, LGPxi) << endl;
-
-  // Write information about the branches to file
-  ofstream f("branchdata.dat" , ofstream::trunc);
-  f << "Height order2 segments segs_w_fol" << endl;
-  Sum2ndOrderBranchesSegments sum_segments;
-  list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>& ls 
-    = GetTreeCompartmentList(GetAxis(*pine1));
-  list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>::iterator i_c;
-  for(i_c = ls.begin(); i_c != ls.end(); i_c++) {
-    if(BranchingPoint<ScotsPineSegment,ScotsPineBud>* bp =
-       dynamic_cast<BranchingPoint<ScotsPineSegment,ScotsPineBud>*>(*i_c)) {
-      list<Axis<ScotsPineSegment,ScotsPineBud>*>& ax_lst = GetAxisList(*bp);
-      list<Axis<ScotsPineSegment,ScotsPineBud>*>::iterator i_ax;
-      for(i_ax = ax_lst.begin(); i_ax != ax_lst.end(); i_ax++) {  //branches (axes) in whorl
-	if(GetTreeCompartmentList(**i_ax).size() > 2)  { //at least one segment
-	  Point base = GetPoint(*GetFirstTreeCompartment(**i_ax));
-	  vector<int> v(3,0);
-	  sum_segments(**i_ax,v);
-	  f << base.getZ() << " " << v[0] << " " << v[1] << " " << v[2] << endl;
-	}
-      }
-    }
-  }    //for(i_c = ls.begin(); ...
-
-  f.close(); 
 
 
   return 0;
@@ -1367,4 +1174,6 @@ int main(int argc, char** argv)
     viz.StartVisualization();
   }
 #endif
+ 
+
 }

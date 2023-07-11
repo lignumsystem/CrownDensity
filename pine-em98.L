@@ -11,12 +11,9 @@ using namespace PineTree;
 #include <lengine.h>
 
 #include <CrownDensityGlobals.h>
-double L_age, L_H;
+using namespace CrownDensity;
 
-//extern bool is_bud_view_function;
-//extern ParametricCurve bud_view_f;
-//extern int is_mode_change;
-//extern int mode_change_year;
+
 
 //Start the namespace (compiles to "namespace Pine{")
 //The matching "close" statement closes the namespace 
@@ -24,9 +21,10 @@ open Pine;
 
 //Defines the lsystem rewriting process. 
 #include <lsys.h>
-
+//Global variables
+//double L_age = L_H = 0.0;
 //a guess for the segment shortening
-const double l1 = 0.9;
+//const double l1 = 0.9;
 
 
 const double PI = 3.1415926535897932384;
@@ -207,14 +205,15 @@ B(data,omega,l,phys_age):
                    SB() Roll(7.0*rollmain8) Down(1.0) Pitch(pitch) B(data,omega+1,l1,phys_age) EB()
                    B(data,omega,l,phys_age);
     }//omega == 1
-    else if (omega >= 2 && omega <= 6){
+    else if (omega >= 2 && omega <= 100){
         //For branches start increasing physiological age
         data.phys_age += 1;
         phys_age += 1;
         if (nbuds == 0)
            produce B(data,omega,l,phys_age);
         else if ((is_architecture_change == true) && (phys_age >= architecture_change_year))
-           //Growth mode change: always only two new branches at the same plane to the opposite sides
+           //GROWTH ARCHITECTURE CHANGE IN branches: always only two new branches at the same plane to the opposite sides
+           //NOTE: this can go forever unless growth conditions and functions set the segment length to 0 
            produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
                     SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
                     Down(-1) B(data,omega,l,phys_age);
@@ -245,8 +244,8 @@ B(data,omega,l,phys_age):
    		    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
                     Down(-1) B(data,omega,l,phys_age);
         }
-    }//2 <= omega <= 6  		    
-    else{//omega>6
+    }//2 <= omega <= 10		    
+    else{//omega>8
        //No more new branches for Gravelius order > 6
        data.phys_age += 1;
        phys_age += 1;

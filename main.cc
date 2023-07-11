@@ -1,6 +1,6 @@
 ///\file main.cc
 ///\brief Main growth loop
-///
+///Main program growth loop generates now only HDF5 files for result analysis.<br>
 ///Growth loop steps
 ///+ Initialize global variables
 ///+ Read command line
@@ -66,9 +66,18 @@ namespace Pine{
 }
 using namespace LignumForest;
 
+///\brief Forest simulation with single tree.
+///
+///Single tree growing in a forest plot. The forest plot consists of copies of the tree
+///creating shadowing forest in a voxel space. Outside the voxel space
+///forest canopy is assumed to be homogenous with the heigth of tree crown length
+///at any time of simulation.
 namespace CrownDensity{
   //#include <ByBranches.h>
-  ///\section main Main program 
+  ///\section crowndensitymain Main program
+  ///Note two command line options:
+  ///+ -modeChange that reassigns new functions for growth
+  ///+ -architectureChange that changes branching behavious implemented in L-system
   ///\snippet{lineno} main.cc Usagex
   ///\internal
   // [Usagex]

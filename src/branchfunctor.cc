@@ -4,6 +4,7 @@
 ///Collect descriptive data from branches with Gravelius order == 2.
 #include <SomeFunctors.h>
 
+namespace CrownDensity{ 
 ///Branch data for Gravelius order 2
 summing& Branchmeans::operator()(summing& id,
 				 TreeCompartment<ScotsPineSegment, ScotsPineBud>*
@@ -21,9 +22,9 @@ summing& Branchmeans::operator()(summing& id,
 	  = sl.begin();
 	///\subsection lbdata Branch length
 	///Branch length as a sum of segment lengths
-	///\snippet{lineno} branchfunctor.cc LB
 	///\internal
-	//[LB]
+	///\snippet{lineno} branchfunctor.cc LB
+	// [LB]
 	while(I != sl.end()) {
 	  if (ScotsPineSegment* seg = 
 	      dynamic_cast<ScotsPineSegment*>(*I)) {
@@ -31,11 +32,11 @@ summing& Branchmeans::operator()(summing& id,
 	  }
 	  I++;
 	}
-	//[LB]
+	// [LB]
 	///\endinternal
 	///\subsection diam Diameter data
-	///\snippet{lineno} branchfunctor.cc DD
 	///\internal
+	///\snippet{lineno} branchfunctor.cc DD
 	//[DD]
 	//Diameter of the first segment 
 	double d = 2.0 * GetValue(*fs, LGAR);
@@ -54,3 +55,4 @@ summing& Branchmeans::operator()(summing& id,
   }//if (Axis....)
   return id;
 }
+}//end namespace

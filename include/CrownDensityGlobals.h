@@ -9,49 +9,75 @@
 #include <ParametricCurve.h>
 #include <Firmament.h>
 #include <VoxelSpace.h>
-
 ///\defgroup lsysglobal L-system global variables
 ///@{
-///These global variables have been declared in pine-em98.L and convey 
+///These global variables are needed in pine-em98.L and convey 
 ///tree age and height to L-system
-extern double L_age;
-extern double L_H;
+namespace Pine{
+  ///Age
+  extern double L_age;
+  ///Tree height
+  extern double L_H;
+  ///A guess for segment shortening
+  extern const double l1;  
+}
 ///@}
 
-extern int ran3_seed;
+//\defgroup lgmforest Global variables used in LignumForest
+///@{
+///Global variables used in LignumForest initialized by GrowthLoop.
+///Variables are dummy in the context of CrownDensity, needed for compilation.
+namespace LignumForest{
+  extern double H_0_ini;
+  extern double H_var_ini;
+  extern bool bud_variation;
+  extern int n_buds_ini_max;
+  extern int n_buds_ini_min;
+  extern double rel_bud;
+  extern double branch_angle;
+}
+///@}
+namespace CrownDensity{
 
-extern bool is_by_branches;          
 
-extern ParametricCurve adhoc;   
-extern bool is_adhoc;
+  extern int ran3_seed;
 
-extern int growthloop_ebh_mode;       
+  extern bool is_by_branches;          
 
-extern LGMdouble max_rueqin;
+  extern ParametricCurve adhoc;
+  extern ParametricCurve fip_mode;
+  extern ParametricCurve fgo_mode;
+  extern bool is_adhoc;
+  extern bool is_random_variation;
 
-extern bool is_mode_change;
-extern int mode_change_year;    
-extern bool is_architecture_change;
-extern int architecture_change_year;
+  extern int growthloop_ebh_mode;       
 
-extern Firmament dummy_firm;
-extern VoxelSpace space_occupancy;
+  extern LGMdouble max_rueqin;
 
-//extern double L_age, L_H;
+  extern bool is_mode_change;
+  extern int mode_change_year;    
+  extern bool is_architecture_change;
+  extern int architecture_change_year;
 
-extern double global_hcb;      
-extern double dDb;
+  extern Firmament dummy_firm;
+  extern VoxelSpace space_occupancy;
 
-extern bool space0;
-extern bool space1;
-extern bool space2;
-extern double space2_distance;
-extern bool is_forced_height;
-extern bool is_height_function;
+  //extern double L_age, L_H;
 
-extern ParametricCurve toptax; ///<function to adjust resource distn among branches
-extern double tax_share;        
+  extern double global_hcb;      
+  extern double dDb;
 
-extern ParametricCurve bud_view_f;
-extern bool is_bud_view_function;   
+  extern bool space0;
+  extern bool space1;
+  extern bool space2;
+  extern double space2_distance;
+  extern bool is_forced_height;
+  extern bool is_height_function;
+
+  extern ParametricCurve toptax; ///<function to adjust resource distn among branches
+  extern double tax_share;        
+
+  extern ParametricCurve bud_view_f;
+  extern bool is_bud_view_function;   
+}//end namespace
 #endif

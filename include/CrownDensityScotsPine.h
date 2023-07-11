@@ -5,32 +5,8 @@
 #include <Pine.h>
 #include <VoxelSpace.h>
 using namespace PineTree;
-///Scots Pine Functions
-enum SPFN {SPFAF,///<Scots pine Initial foliage m^2/kgC   
-	   SPFAD,///<Scots pine  Apical Dominance,
-	   SPFGO,///<Scots pine Gravelius Order
-	   SPFLR,///<Scots pine length - radius relationship, R = f(relative_light)*R 
-	   SPFNA,///<Scots pine Needle Angle
-	   SPFSF,///<Scots pine Specific Leaf Area
-	   SPSD,///<Scots pine Sapwood Down as a function of Gravelius order
-	   SPWD,///<Scots pine density of growth ring as function of tree age
-	   SPEBHF,///<Scots pine Extended Borcher-Honda lambda value function
-	   SPBVF///<Scots pine Bud View function
-};
 
-///Enumeration for SetValue, GetValue in ScotsPine
-enum SPAD {SPAAsDown,///<Sapwood down
-	   SPCrownRatio,///<Crown ratio: CrownL/TreeH
-	   SPHc,///<Height at crown limit
-	   SPHwStart,///<Start year of heartwood buld up
-	   SPrue ///< Radiation use efficiency
-};
-
-///Scots Pine Parameter Double SPPD
-///Extended Borchert-Honda (1 = true,  < 1 = false)
-enum SPPD {SPis_EBH ///< Extended Borchert-Honda ("boolean") 
-};
-
+namespace CrownDensity{
 /// 0  LGAplength  Path length  from the base of the  tree to a segment        
 class ScotsPineBud;
 class ScotsPineSegment;
@@ -729,6 +705,6 @@ public:
     return max_rue;
   }
 };
-
+}//end namespace
 
 #endif

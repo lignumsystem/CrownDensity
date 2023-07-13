@@ -35,14 +35,15 @@ cmake_minimum_required(VERSION 3.12)
 # cmake 3.23 for Xcode 13 recommends the policy CMP0114 (warning output)
 cmake_policy(SET CMP0114 NEW)
 project(crowndens DESCRIPTION "Single tree in homogeneous forest")
-
+message("Project " ${CMAKE_PROJECT_NAME})
 # Lignum core projects as an ExternalProject. 'lignum-core' target is compiled first
 # Note: lignum-core  has to be configured with cmake first. See lignum-core/CMakeLists.txt
+include(CMakeGraphVizOptions)
 include(ExternalProject)
+
 ExternalProject_add(lignum-core
 SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..
 DOWNLOAD_COMMAND "")
-
 # The '*.cmake' files are produced with 'cmake' configuration for 'lignum-core' (see lignum-core/CMakeLists.txt).  
 include(../c++adt/lib/cxxadt.cmake)
 include(../Firmament/lib/sky.cmake)
@@ -51,7 +52,7 @@ include(../stl-voxelspace/lib/voxel.cmake)
 include(../LEngine/lib/L.cmake)
 include(../LEngine/lib/l2c.cmake)
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-  message("Compiling Visual")
+  message("Darwin (macOS): Compiling Visual")
   include(../Graphics/lib/Visual.cmake)
 endif()
 

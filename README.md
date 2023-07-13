@@ -169,15 +169,26 @@ The result will be *refman.pdf* that can be opened with a pdf reader.
 To use Doxyfile the following three programs are needed:
 
   + doxygen: generate the document 
-  + dot: used by `doxygen` to generate graphs for class hierarchies and function calls.
-  + doxywizard: GUI to browse, edit and optionally run Doxyfile. 
+  + graphviz: generate dependency graphs for function calls and class dependencies
+  + dot: generate figures from graphviz files
+  + doxywizard: GUI to browse, edit and optionally run Doxyfile 
     
 On macOS these are easiest to install with MacPorts (or some other software package system). 
+
+### CrownDensity software architecture
+CMake allows to generate `graphviz` input file to show all library and executable dependencies of the project.
+For example in the *release* directory type:
+	
+	mkdir graphviz
+	cmake .. -DCMAKE_BUILD_TYPE=Release  --graphviz=graphviz/CrownDensity.dot
+	dot -Tpng -Kneato -Goverlap=prism  graphviz/CrownDensity.dot  -o  CrownDensity.png
+	
+The output file *CrownDensity.png* contains the visual presentation of the software architecture.
 
 ### LaTeX typesetting
 Documentation uses LaTeX typesetting for equations. To generate LaTeX equations `amsmath` package must be part of LaTeX installation.
 On macOS this can be done for example with MacPorts TeXLive full installation:
 
-   	 sudo port install texlive +full.
+	sudo port install texlive +full.
 
-Doxyfile has the necessary LaTeX `amsmath` configuration. 
+Doxyfile for CrownDensity has the necessary LaTeX `amsmath` configuration. 

@@ -1,4 +1,4 @@
-#CrownDensity
+# CrownDensity
 
 CrownDensity simulates growth of one Scots  pine tree growing in a gap
 of  a homogeneous  forest. The  density of  the surrounding  forest is

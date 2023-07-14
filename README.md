@@ -63,6 +63,9 @@ where there are two example  shell scripts to run the program:
 	run-crowndens-basic-model.sh	
 	run-crowndens.sh
 
+Command line options and their  short documentation can be obtained by
+running `./crowndens` without any parameters. See also  CrownDensity::Usage().
+
 **NB1:** To let Unix Makefile build system recognise file dependencies
 correctly  (for example  changes made  in  c++adt in  the Lignum  core
 system) clean  first the build  tree from previous software  build. In
@@ -73,6 +76,19 @@ the build directory type:
 	
 By  default Unix  Makefile build  system  tracks only  changes made  in
 the current project (i.e. CrownDensity).
+
+**NB2:** To remove all CMake  configurations and compilation work just
+remove the build  tree directory (i.e. *debug*,  *release* or *xcode*)
+and recreate the build tree directory.
+
+**NB3:**   CMake  projects   are   configured  with   *CMakeLists.txt*
+files. CMake  functionality can  be customized  with extensive  set of
+CMake variables  that can be set  in CMakeLists.txt files or  given in
+command line.   The best way to  learn CMake is by  studying examples.
+lignum-core and CrownDensity provide  CMakeLists.txt file examples how
+to create libraries, find and integrate external libraries (Qt, HDF5),
+create and use external binaries (`l2c` to compile L-system files) and
+setup the final product with its dependenices.
 
 ### Xcode build system
 
@@ -114,19 +130,6 @@ Set command  line parameters for  `crowndens` in Xcode:
 
 Divide the command line into practical parts for debugging from `Arguments -> '+'`.
 
-**NB2:** To remove all CMake  configurations and compilation work just
-remove the build  tree directory (i.e. *debug*,  *release* or *xcode*)
-and recreate the build tree directory.
-
-**NB3:**   CMake  projects   are   configured  with   *CMakeLists.txt*
-files. CMake  functionality can  be customized  with extensive  set of
-CMake variables  that can be set  in CMakeLists.txt files or  given in
-command line.   The best way to  learn CMake is by  studying examples.
-lignum-core and CrownDensity provide  CMakeLists.txt file examples how
-to create libraries, find and integrate external libraries (Qt, HDF5),
-create and use external binaries (`l2c` to compile L-system files) and
-setup the final product with its dependenices.
-
 ## CrownDensity compilation with qmake
 
 To compile CrownDensity (and lignum-core) type:
@@ -141,13 +144,6 @@ To compile with optimization on (faster, no debug) type:
     make
 
 To remove all compilation work type `make distclean`.
-
-## Running the program
-
-Command line options and their  short documentation can be obtained by
-running the program without any parameters: <CODE> ./crowndens </CODE>
-You  will   will  see  the  output   from  CrownDensity::Usage():  \sa
-CrownDensity::Usage()
 
 
 ## Documentation
@@ -184,21 +180,22 @@ To use Doxyfile the following three programs are needed:
     
 On macOS these are easiest to install with MacPorts (or some other software package system). 
 
-## CrownDensity project dependencies
-CMake allows to generate `graphviz` output file to show all library and executable dependencies of the project.
-Then with `dot` create image file with desired file format. For example in the *release* directory type:
-	
-	mkdir graphviz
-	cmake .. -DCMAKE_BUILD_TYPE=Release  --graphviz=graphviz/CrownDensity.dot
-	dot -Tpdf -Kneato -Goverlap=prism  graphviz/CrownDensity.dot  -o  CrownDensity.pdf
-	
-The output file *CrownDensity.pdf* contains the visual presentation of the target dependenices including
-external binaries and required link libraries. zThe option `-T` understands many well known image file formarts.
-
-## LaTeX typesetting
+### LaTeX typesetting
 Documentation uses LaTeX typesetting for equations. To generate LaTeX equations `amsmath` package must be part of LaTeX installation.
 On macOS this can be done for example with MacPorts TeXLive full installation:
 
 	sudo port install texlive +full.
 
 Doxyfile for CrownDensity has the necessary LaTeX `amsmath` configuration. 
+
+## CrownDensity project dependencies
+CMake allows to generate `graphviz` output file to show all library and executable dependencies of the project.
+Then with `dot` create image file with desired file format. For example in the *release* directory type:
+	
+	mkdir graphviz
+	cmake ..   --graphviz=graphviz/CrownDensity.dot
+	dot -Tpdf -Kneato -Goverlap=prism  graphviz/CrownDensity.dot  -o  CrownDensity.pdf
+	
+The output file *CrownDensity.pdf* contains the visual presentation of the target dependenices including
+external binaries and required link libraries. The option `-T` understands many well known image file formats.
+

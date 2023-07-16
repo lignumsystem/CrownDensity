@@ -144,6 +144,19 @@ Set command  line parameters for  `crowndens` in Xcode:
 
 Divide the command line into practical parts for debugging from `Arguments -> '+'`.
 
+### CMake for CrownDensity dependency graph
+
+CMake allows to generate `graphviz` output file to show all library and executable dependencies of the project.
+Then with `dot` create image file with desired file format. For example in the *release* directory type:
+	
+	mkdir graphviz
+	cmake ..   --graphviz=graphviz/CrownDensity.dot
+	dot -Tpdf -Kneato -Goverlap=prism  graphviz/CrownDensity.dot  -o  CrownDensity.pdf
+	
+The output file *CrownDensity.pdf* contains the visual presentation of the target dependenices including
+external binaries and required link libraries. The option `-T` understands many well known image file formats.
+
+
 ## CrownDensity compilation with qmake
 
 To compile CrownDensity (and lignum-core) type:
@@ -160,7 +173,7 @@ To compile with optimization on (faster, no debug) type:
 To remove all compilation work type `make distclean`.
 
 
-## Documentation
+## CrownDensity Documentation
 
 The Reference Guide for the CrownDensity will be based on comments and
 other  information  available  in  the  software.  Extraction  of  the
@@ -201,15 +214,4 @@ On macOS this can be done for example with MacPorts TeXLive full installation:
 	sudo port install texlive +full.
 
 Doxyfile for CrownDensity has the necessary LaTeX `amsmath` configuration. 
-
-## CrownDensity project dependencies
-CMake allows to generate `graphviz` output file to show all library and executable dependencies of the project.
-Then with `dot` create image file with desired file format. For example in the *release* directory type:
-	
-	mkdir graphviz
-	cmake ..   --graphviz=graphviz/CrownDensity.dot
-	dot -Tpdf -Kneato -Goverlap=prism  graphviz/CrownDensity.dot  -o  CrownDensity.pdf
-	
-The output file *CrownDensity.pdf* contains the visual presentation of the target dependenices including
-external binaries and required link libraries. The option `-T` understands many well known image file formats.
 

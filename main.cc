@@ -1,5 +1,6 @@
 ///\file main.cc
-///\brief Main growth loop
+///\brief Main growth loop.
+///
 ///Main program growth loop generates now only HDF5 files for result analysis.<br>
 ///Growth loop steps
 ///+ Initialize global variables
@@ -74,7 +75,7 @@ using namespace LignumForest;
 ///at any time of simulation.
 namespace CrownDensity{
   //#include <ByBranches.h>
-  ///\section crowndensitymain Main program
+  ///\par Main program
   ///Note two command line options:
   ///+ -modeChange that reassigns new functions for growth
   ///+ -architectureChange that changes branching behavious implemented in L-system
@@ -262,7 +263,7 @@ int main(int argc, char** argv)
     CrownDensity::space2 = true;
   }
 
-  ///\subsection growthmode Growth mode functions
+  ///\par Growth mode functions
   ///Parse parameters for f(ip) and f(go) to be used after growth mode change.
   ///\snippet{lineno} main.cc gmode
   ///\internal
@@ -291,7 +292,7 @@ int main(int argc, char** argv)
   cout <<  "GROWTH MODE FUNCTIONS END" <<endl;
   //[gmode]
   ///\endinternal
-  ///\subsection ebhsection Parse Extended Borchert-Honda (EBH) allocation of growth
+  ///\par Parse Extended Borchert-Honda (EBH) allocation of growth
   ///EBH resource distn can be in use in two ways. Both are set by command line
   ///arguments. Option `-EBH` means EBH is in use and values (of lambda parameter)
   ///are specified for all Gravelius orders. Function SPEBHF, in ScotsPine.h,
@@ -445,7 +446,7 @@ int main(int argc, char** argv)
 
   //See CL option "-EBH1 <value>" after instantiatiation of the tree
 
-  ///\subsection treefunctions  Tree functions 
+  ///\par  Tree functions 
   ///\snippet{lineno} main.cc TreeInit
   ///\internal
   //[TreeInit]
@@ -468,7 +469,7 @@ int main(int argc, char** argv)
 
   //[TreeInit]
   ///\endinternal
-  ///\subsection budview Bud view function
+  ///\par Bud view function
   ///Bud View Function to Lsystem
   ///Its use is controlled by the global variable is_bud_view_function
   ///If it is == false, bud_view_f is ignored
@@ -558,7 +559,7 @@ int main(int argc, char** argv)
 
   double Db_previous = 0.0;
   double Db_current = 0.0;
-  ///\subsection hdf5 GrowthLoop initialization
+  ///\par GrowthLoop initialization
   ///GrowthLoop from LignumForest is here to collect data to HDF5
   ///\snippet{lineno} main.cc GLoopInit
   ///\internal
@@ -574,7 +575,7 @@ int main(int argc, char** argv)
   gloop.collectDataAfterGrowth(0,false);
   //[GLoopInit]
   ///\endinternal
-  ///\subsection hdf5file HDF5 file initialization
+  ///\par HDF5 file initialization
   ///Collect to HDF5 file command line, parameters used, tree functions, all functions, simulation results and  trees in xml format
   ///\snippet{lineno} main.cc HDF5Init
   ///\internal
@@ -1066,7 +1067,7 @@ int main(int argc, char** argv)
   cout << "GROWTH DONE " << "NUMBER OF TREES " << gloop.getNumberOfTrees() << endl;
   //Unlike in LignumForest no need for clean up
   //gloop.cleanUp();
-  ///\subsection collectHDF5 Collect HDF5 data
+  ///\par Collect HDF5 data
   ///Save collected year by year tree data to an HDF5 file together with data to repeat simulation
   ///\snippet{lineno} main.cc CollectHDF5
   ///\internal

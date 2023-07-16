@@ -5,7 +5,7 @@
 #include <SomeFunctors.h>
 
 namespace CrownDensity{ 
-///Branch data for Gravelius order 2
+///Branch data for Gravelius order 2 (branches from the main trunk)
 summing& Branchmeans::operator()(summing& id,
 				 TreeCompartment<ScotsPineSegment, ScotsPineBud>*
 				 tc)const {
@@ -20,7 +20,7 @@ summing& Branchmeans::operator()(summing& id,
 	double lb = 0.0;
 	list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>::iterator I
 	  = sl.begin();
-	///\subsection lbdata Branch length
+	///\par Branch length
 	///Branch length as a sum of segment lengths
 	///\internal
 	///\snippet{lineno} branchfunctor.cc LB
@@ -34,7 +34,7 @@ summing& Branchmeans::operator()(summing& id,
 	}
 	// [LB]
 	///\endinternal
-	///\subsection diam Diameter data
+	///\par Diameter data
 	///\internal
 	///\snippet{lineno} branchfunctor.cc DD
 	//[DD]

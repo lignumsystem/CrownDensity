@@ -1018,6 +1018,9 @@ EXCLUDE_SYMBOLS        =
 # command).
 
 EXAMPLE_PATH           = . \
+                         ../c++adt/src \
+                         ../stl-lignum/include \
+                         ../LignumForest/include \
                          ../LignumForest
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
@@ -1025,7 +1028,8 @@ EXAMPLE_PATH           = . \
 # *.h) to filter out the source-files in the directories. If left blank all
 # files are included.
 
-EXAMPLE_PATTERNS       = *
+EXAMPLE_PATTERNS       = *.cc \
+                         *.h
 
 # If the EXAMPLE_RECURSIVE tag is set to YES then subdirectories will be
 # searched for input files to be used with the \include or \dontinclude commands
@@ -2562,8 +2566,8 @@ DIR_GRAPH_MAX_DEPTH    = 3
 # The default value is: png.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_IMAGE_FORMAT       = png
-
+#DOT_IMAGE_FORMAT      = png
+DOT_IMAGE_FORMAT       = svg
 # If DOT_IMAGE_FORMAT is set to svg, then this option can be set to YES to
 # enable generation of interactive SVG images that allow zooming and panning.
 #
@@ -2574,8 +2578,8 @@ DOT_IMAGE_FORMAT       = png
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INTERACTIVE_SVG        = NO
-
+#INTERACTIVE_SVG        = NO
+INTERACTIVE_SVG        = YES
 # The DOT_PATH tag can be used to specify the path where the dot tool can be
 # found. If left blank, it is assumed the dot tool can be found in the path.
 # This tag requires that the tag HAVE_DOT is set to YES.

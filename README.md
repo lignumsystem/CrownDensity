@@ -9,8 +9,11 @@ LignumForest for  tree growth. Most notably
    + LignumForest::ScotsPineSegment
    + LignumForest::SetScotsPineSegmentLength
 
-CrownDensity and LignumForest projects  must reside under *lignum-core*  directory. That
-means clone first [lignum-core](https://github.com/lignumsystem/lignum-core.git)
+## CrownDensity dependencies
+
+CrownDensity depends on Lignum core system  and [LignumForest](https://github.com/lignumsystem/LignumForest.git). 
+That means CrownDensity and LignumForest projects  must reside under *lignum-core*  project. 
+That means clone first [lignum-core](https://github.com/lignumsystem/lignum-core.git)
 repository  and  then  in  *lignum-core*  clone 
 [CrownDensity](https://github.com/lignumsystem/CrownDensity.git)
 and [LignumForest](https://github.com/lignumsystem/LignumForest.git) 
@@ -38,13 +41,23 @@ Integrated   Development  Environments   (IDE)  including   Xcode  and
 Microsoft  Visual  Studio  from   the  same  set  of  *CMakeLists.txt*
 configuration files.
 
-### macOS and Unix Makefile build system
+### CMake for macOS and Unix Makefile build system
 
-To  create Unix  Makefile build  system  with CMake  for debug  (debug
-information)  first create  the  build tree  directory  and then  with
-`cmake`  the Unix  Makefile  build system  itself. Under  CrownDensity
-type:
+To create Unix  Makefile build system with CMake for  first create the
+build tree  directory and  then with `cmake`  the Unix  Makefile build
+system itself. First, build the Lignum core system:
 
+	cd lignum-core
+	mkdir build
+	cd build 
+	cmake .. 
+	make install
+	
+See also *lignum-core* [README](https://github.com/lignumsystem/lignum-core/blob/master/README.md).
+	
+To create Makefile build system for debug for  CrownDensity type:
+
+	cd CrownDensity
     mkdir debug
     cd  debug
     cmake .. -DCMAKE_BUILD_TYPE=Debug
@@ -52,12 +65,13 @@ type:
 
 For Unix Makefile build system for Release (optimised, no debug information) type:
 
+	cd CrownDensity
     mkdir release
     cd release
     cmake .. -DCMAKE_BUILD_TYPE=Release
     make install
 
-In all cases `make install` will move `crowndens` to CrownDensity directory
+In both cases `make install` will move `crowndens` to CrownDensity directory
 where there are two example  shell scripts to run the program:
 	
 	run-crowndens-basic-model.sh	
@@ -90,7 +104,7 @@ to create libraries, find and integrate external libraries (Qt, HDF5),
 create and use external binaries (`l2c` to compile L-system files) and
 setup the final product with its dependenices.
 
-### Xcode build system
+### CMake for Xcode build system
 
 For Xcode IDE create the Xcode project file:
 
@@ -98,8 +112,8 @@ For Xcode IDE create the Xcode project file:
     cd xcode
     cmake .. -G Xcode
 
-Open  Xcode  IDE  from  Terminal  (or  open  the  Xcode  project  file
-`crowndens.xcodeproj` from XCode):
+Open  Xcode  IDE  from  Terminal. Alternatively open  the  Xcode  project  file
+`crowndens.xcodeproj` from XCode:
      
 	 open crowndens.xcodeproj
 

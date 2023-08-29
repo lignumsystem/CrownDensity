@@ -1,24 +1,24 @@
 #ifndef BYBRANCHES_H
 #define BYBRANCHES_H
 #include <Lignum.h>
-#include <ScotsPine.h>
-
-void makeTreeOfTopWhorls(ScotsPineTree& pine, ScotsPineTree* tree);
-
-void allocateByBranches(ScotsPineTree& pine);
 
 
-class CollectMainBranches {
+namespace CrownDensity{
+template <class TREE>
+void makeTreeOfTopWhorls(TREE& pine, TREE* tree);
+
+template <class TREE>
+void allocateByBranches(TREE& pine);
+
+template <class TS, class BUD> 
+class CollectMainBranches{
  public:
-  list<Axis<ScotsPineSegment,ScotsPineBud>*>&
-    operator ()(list<Axis<ScotsPineSegment,ScotsPineBud>*>& b_list,
-		TreeCompartment<ScotsPineSegment,ScotsPineBud>* tc)const {
-    if (Axis<ScotsPineSegment,ScotsPineBud>* ax =
-        dynamic_cast<Axis<ScotsPineSegment,ScotsPineBud>*>(tc)){
-      list<TreeCompartment<ScotsPineSegment,ScotsPineBud>*>& cmpls =
+  list<Axis<TS,BUD>*>& operator ()(list<Axis<TS,BUD>*>& b_list, TreeCompartment<TS,BUD>* tc)const {
+    if (Axis<TS,BUD>* ax = dynamic_cast<Axis<TS,BUD>*>(tc)){
+      list<TreeCompartment<TS,BUD>*>& cmpls =
         GetTreeCompartmentList(*ax);
       if(cmpls.size() > 1) {     //At least one TreeSegment in the Axis
-	TreeSegment<ScotsPineSegment, ScotsPineBud>* fs =  GetFirstTreeSegment(*ax);
+	TreeSegment<TS, BUD>* fs =  GetFirstTreeSegment(*ax);
 	if(!(fs == NULL)) {
 	  if((GetValue(*fs, LGAomega) == 2.0) && (GetValue(*fs,LGAage) > 2.0)) {
 	    b_list.push_back(ax);
@@ -30,12 +30,11 @@ class CollectMainBranches {
   }
 };
 
-
+template <class TS, class BUD>
 class SetScotsPineSegmentLengthZero {
  public:
-  TreeCompartment<ScotsPineSegment,ScotsPineBud>*
-    operator ()(TreeCompartment<ScotsPineSegment,ScotsPineBud>* tc)const {
-      if (ScotsPineSegment* ts = dynamic_cast<ScotsPineSegment*>(tc)){
+  TreeCompartment<TS,BUD>* operator ()(TreeCompartment<TS,BUD>* tc)const {
+      if (TS* ts = dynamic_cast<TS*>(tc)){
 	if (GetValue(*ts,LGAage) == 0.0){
 	  SetValue(*ts, LGAL, 0.0);
 	  SetValue(*ts, LGAR, 0.0);
@@ -48,10 +47,11 @@ class SetScotsPineSegmentLengthZero {
   }
 };
 
+template <class TS, class BUD>
 class CountLivingBuds {
  public:
-  int& operator ()(int& count, TreeCompartment<ScotsPineSegment,ScotsPineBud>* tc)const {
-      if (ScotsPineBud* bd = dynamic_cast<ScotsPineBud*>(tc)){
+  int& operator ()(int& count, TreeCompartment<TS,BUD>* tc)const {
+      if (BUD* bd = dynamic_cast<BUD*>(tc)){
 	if (GetValue(*bd,LGAstate) == ALIVE){
 	  count++;
 	}
@@ -60,5 +60,5 @@ class CountLivingBuds {
   }
 };
 
-
+}//End CrownDensity namespace
 #endif

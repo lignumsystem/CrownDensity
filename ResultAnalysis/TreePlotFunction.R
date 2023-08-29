@@ -140,7 +140,7 @@ plot(y,td[16,1,]*dens, ylim=c(0,1000),type="l", lwd=2,xlab="time (y)", ylab= "m3
 
 #LAI and specific leaf area
 par(mar = c(5, 4, 4, 4) + 0.3)              # Additional space for second y-axis
-plot(y,td[15,1,]*dens/1e4, ylim=c(0,20),type="l", lty=1, lwd=2,xlab="time (y)", ylab="All-sided LAI (m2/m2)",main="LAI = continuous,  specific LA = dashed") #LAI
+plot(y,td[15,1,]*dens/1e4, ylim=c(0,80),type="l", lty=1, lwd=2,xlab="time (y)", ylab="All-sided LAI (m2/m2)",main="LAI = continuous,  specific LA = dashed") #LAI
 par(new = TRUE)
 plot(y,td[15,1,]/td[37,1,],type="l", lty=2,lwd=2, axes=FALSE,xlab = "", ylab = "", ylim=c(0,32))
 axis(side = 4, at = pretty(c(0,32)))

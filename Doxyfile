@@ -541,7 +541,7 @@ RESOLVE_UNNAMED_PARAMS = YES
 # section is generated. This option has no effect if EXTRACT_ALL is enabled.
 # The default value is: NO.
 
-HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_MEMBERS     = NO
 
 # If the HIDE_UNDOC_CLASSES tag is set to YES, doxygen will hide all
 # undocumented classes that are normally visible in the class hierarchy. If set
@@ -549,7 +549,7 @@ HIDE_UNDOC_MEMBERS     = YES
 # has no effect if EXTRACT_ALL is enabled.
 # The default value is: NO.
 
-HIDE_UNDOC_CLASSES     = YES
+HIDE_UNDOC_CLASSES     = NO
 
 # If the HIDE_FRIEND_COMPOUNDS tag is set to YES, doxygen will hide all friend
 # declarations. If set to NO, these declarations will be included in the
@@ -874,7 +874,17 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = 
+INPUT                  = . \
+                         ../LEngine/include/LSystem.h \
+                         ../LignumForest/include \
+                         ../LignumForest/src \
+                         ../LignumForest \
+                         ../c++adt/include \
+                         ../c++adt/src \
+                         ../Firmament \
+                         ../stl-lignum/include \
+                         ../Pine \
+                         ../Pine
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -965,7 +975,16 @@ RECURSIVE              = YES
 
 EXCLUDE                = pine-em98.cpp \
                          pine-em98.L \
-                         pine-axiom.L
+                         pine-axiom.L \
+                         build \
+                         xcode \
+                         release \
+                         include/CrownDensityScotsPine.h \
+                         pine-em98.cpp \
+                         src/branchfunctor.cc \
+                         ../LignumForest/lignum-forest.cc \
+                         ../LignumForest/README.md \
+                         pine-em98.cpp
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -1000,14 +1019,17 @@ EXCLUDE_SYMBOLS        =
 
 EXAMPLE_PATH           = . \
                          ../c++adt/src \
-                         ../stl-lignum/
+                         ../stl-lignum/include \
+                         ../LignumForest/include \
+                         ../LignumForest
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
 # *.h) to filter out the source-files in the directories. If left blank all
 # files are included.
 
-EXAMPLE_PATTERNS       = *
+EXAMPLE_PATTERNS       = *.cc \
+                         *.h
 
 # If the EXAMPLE_RECURSIVE tag is set to YES then subdirectories will be
 # searched for input files to be used with the \include or \dontinclude commands
@@ -1890,7 +1912,7 @@ PAPER_TYPE             = a4
 # If left blank no extra packages will be included.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-EXTRA_PACKAGES         =
+EXTRA_PACKAGES         = [intlimits]{amsmath}
 
 # The LATEX_HEADER tag can be used to specify a user-defined LaTeX header for
 # the generated LaTeX document. The header should contain everything until the
@@ -2544,8 +2566,8 @@ DIR_GRAPH_MAX_DEPTH    = 3
 # The default value is: png.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_IMAGE_FORMAT       = png
-
+#DOT_IMAGE_FORMAT      = png
+DOT_IMAGE_FORMAT       = svg
 # If DOT_IMAGE_FORMAT is set to svg, then this option can be set to YES to
 # enable generation of interactive SVG images that allow zooming and panning.
 #
@@ -2556,8 +2578,8 @@ DOT_IMAGE_FORMAT       = png
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INTERACTIVE_SVG        = NO
-
+#INTERACTIVE_SVG        = NO
+INTERACTIVE_SVG        = YES
 # The DOT_PATH tag can be used to specify the path where the dot tool can be
 # found. If left blank, it is assumed the dot tool can be found in the path.
 # This tag requires that the tag HAVE_DOT is set to YES.

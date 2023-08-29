@@ -1,30 +1,13 @@
+///\file ScotsPine.h
+///\brief Scots pine segment, Scots pine bud and Scots pine tree implementations  
 #ifndef SCOTSPINE_H
 #define SCOTSPINE_H
 #include <Pine.h>
 #include <VoxelSpace.h>
+using namespace PineTree;
 
-//SPFN =  Scots Pine Functions,
-//SPFAF = Initial foliage m^2/kgC   
-//SPFAD = Scots Pine  Apical Dominance,
-//SPFGO = Scots Pine Gravelius Order
-//SPFLR = Scots Pine length - radius relationship, R = f(relative_light)*R 
-//SPFNA = Scots Pine Needle Angle
-//SPFSF = Scots Pine Specific Leaf Area
-//SPSD = Scots Pine Sapwood Down as a function of Gravelius order
-//SPEBHF = Scots Pine Extended Borcher-Honda lambda value function
-//SPBVF = Scots Pine Bud View function
-enum SPFN {SPFAF,SPFAD, SPFGO,SPFLR,SPFNA,SPFSF, SPSD, SPWD, SPEBHF, SPBVF};
-
-//Enumeration for SetValue, GetValue in ScotsPine
-//Scots Pine Attribute Double SPAD,
-//Sapwood down, Height at crown limit, start of heartwood build up 
-enum SPAD {SPAAsDown,SPCrownRatio,SPHc,SPHwStart, SPrue};
-
-//Scots Pine Parameter Double SPPD
-//Extended Borchert-Honda (1 = true,  < 1 = false)
-enum SPPD {SPis_EBH};
-
-// 0  LGAplength  Path length  from the base of the  tree to a segment        
+namespace CrownDensity{
+/// 0  LGAplength  Path length  from the base of the  tree to a segment        
 class ScotsPineBud;
 class ScotsPineSegment;
 
@@ -247,8 +230,7 @@ private:
 
 };
 
-/////ScotsPineSegment    ///////////////////////
-
+///\brief ScotsPineSegment with attributes and ParametricCurves for CrownDensity and LignumForest
 class ScotsPineSegment: public PineSegment<ScotsPineSegment,ScotsPineBud>{
   ///The SetValue  for LGPsf  changes the specific  leaf area to  be a
   ///function instead of being  single tree level parameter. That's why
@@ -617,10 +599,105 @@ public:
 
     return tc;
   }
-private:
+protected:
   double l;//Lamda to iterate segment lengths
 };
 
+///\brief Segment length model close to original single open grown Scots pine models.
+///
+///No EBH, bud view implementations or *adhoc* lengths. Segment radius and foliage mass parameters
+///are now functions of relative light.
+///\sa operator()()
+class SetScotsPineSegmentLengthBasic: public SetScotsPineSegmentLength{
+ public:
+  SetScotsPineSegmentLengthBasic(double lambda):
+    SetScotsPineSegmentLength(lambda){}
+  SetScotsPineSegmentLengthBasic(const SetScotsPineSegmentLengthBasic& sl):
+    SetScotsPineSegmentLength(sl){}
+  //No assignment operator needed, default assignment by the compiler calls the base class ScotsPineSegmentLength assignment
+  //
+  ///The basic segment length model. This is close to original single tree Scots pine models.       
+  ///The equation for segment length \f$L\f$ is:
+  /// \f[
+  /// L = \begin{cases}
+  /// \lambda\times f_{vi}(vi)\times f_{ip}(ip)\times f_{go}(go), &  L >= L_{min} \\
+  ///  0, & \mbox{otherwise}
+  /// \end{cases}
+  /// \f]
+  // \f{align}{
+  //  L &= \lambda\times f_{vi}(vi)\times f_{ip}(ip)\times f_{go}(go),  L >= L_{min} \\
+  //  L &= 0,  \mbox{otherwise} 
+  // \f}
+  ///where \f$\lambda\f$ is the carbon balance adjustment parameter, *vi* vigour index, *ip* relative incoming radiation and *go* Gravelius order.<br>
+  ///The segment radius is \f$R = f_{lr}(ip)\times L\f$.<br> The segment heartwood radius \f$R_h\f$
+  ///is determined from \f$\pi \times R_h^2 = \mbox{LGPxi}\times\mbox{LGAAs} \f$.<br>
+  ///The new foliage mass is \f$W_f = f_{af}(ip)\times L\f$.         
+  ///\param tc The tree segment
+  ///\note Segment radiuses and foliage mass are functions of relative light instead of
+  ///fixed parameter values `LGPlr` (segment length-radius ratio) and `LGPaf`
+  ///(needle mass-tree segment area ratio, \f$kgC/m^2\f$).
+  TreeCompartment<ScotsPineSegment,ScotsPineBud>* 
+    operator()(TreeCompartment<ScotsPineSegment,ScotsPineBud>* tc)const
+  {
+    if (ScotsPineSegment* ts = dynamic_cast<ScotsPineSegment*>(tc)){
+      if (GetValue(*ts,LGAage) == 0.0) {
+	///\section Sdim Scots pine segment dimensions
+	///\subsection SLen Length of a new segment
+	///\snippet{lineno} ScotsPine.h Lnew
+	///\internal
+	//[Lnew]
+	double Lnew = 0.0;
+	//Relative light
+	const ParametricCurve& fip = GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),LGMIP);
+	double B = GetValue(GetTree(*ts),TreeQinMax);
+	double qin = GetValue(*ts,LGAQin);
+	double ip = qin/B;
+	//Vigour index
+	const ParametricCurve& fvi = GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),LGMVI);
+	double vi = GetValue(*ts,LGAvi);
+	vi = fvi(vi);
+	//Gravelius order
+	const ParametricCurve& fgo = GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),SPFGO);
+	double go = GetValue(*ts,LGAomega);
+	Lnew = l*fvi(vi)*fip(ip)*fgo(go);
+	if (Lnew < GetValue(GetTree(*ts),LGPLmin)){
+	  Lnew = 0.0;
+	}
+	//[Lnew]
+	///\endinternal
+	///\subsection SRad Segment radius and heartwood radius
+	///\snippet{lineno} ScotsPine.h Rnew
+	///\internal
+	//[Rnew]
+	const ParametricCurve& flr = GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),SPFLR);
+	//LGPlr is now function of ip 
+	double Rnew = flr(ip)*Lnew;
+	SetValue(*ts,LGAR,Rnew);
+	SetValue(*ts,LGARh,0.0);
+	//Heartwood radius Rh may look complicated but simply in another way: PI_VALUE*Rhnew^2 = LGPxi*LGAAs
+	double Rhnew = sqrt((GetValue(GetTree(*ts),LGPxi)*GetValue(*ts,LGAAs))/PI_VALUE);
+	SetValue(*ts,LGARh,Rhnew);
+	//[Rnew]
+	///\endinternal
+	///\subsection SWf Segment foliage mass
+	///\snippet{lineno} ScotsPine.h Wfnew
+	///\internal
+	//[Wfnew]
+	//LGPaf is now function of ip
+	const ParametricCurve& faf = GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),SPFAF);
+	double Wfnew = faf(ip)*Lnew;
+	SetValue(*ts,LGAWf,Wfnew);
+	//Remember original foliage mass and sapwood mass values
+	SetValue(*ts,LGAWf0,GetValue(*ts,LGAWf));
+	SetValue(*ts,LGAAs0,GetValue(*ts,LGAAs));
+	//[Wfnew]
+	///\endinternal
+      }
+    }
+    return tc;
+  }
+};
+		 
 class FindMaxRueQin{
 public:
   LGMdouble&
@@ -636,6 +713,6 @@ public:
     return max_rue;
   }
 };
-
+}//end namespace
 
 #endif

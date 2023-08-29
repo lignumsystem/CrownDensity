@@ -36,11 +36,12 @@ macx:LIBS +=  -L../Graphics -lVisual  -framework GLUT -framework OpenGL
 win32:CONFIG += console
 HEADERS += 
 #include/DiameterGrowth.h \
+#           include/CrownDensityGlobals.h\
 #           include/ScotsPine.h \
 #           include/SomeFunctors.h include/RadiationCrownDens.h \
 #           include/Space.h include/Palubicki_functors.h include/ByBranches.h
            
-SOURCES +=  main.cc globalvariables.cc\
+SOURCES +=  main.cc globalvariables.cc crowndensity_globals.cc\
            ../LignumForest/branchfunctor.cc \
            ../LignumForest/src/metabolism.cc src/radiation.cc \
            ../LignumForest/src/space.cc

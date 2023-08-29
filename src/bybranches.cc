@@ -6,7 +6,7 @@
 #include <XMLTree.h>
 #include <Palubicki_functors.h>
 
-
+namespace CrownDensity{
 extern double tax_share;
 
 void allocateByBranches(ScotsPineTree& pine) {
@@ -339,3 +339,4 @@ void makeTreeOfTopWhorls(ScotsPineTree& pine, ScotsPineTree* tree) {
 
   return;
 }
+}//end namespace

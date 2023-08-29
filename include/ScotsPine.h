@@ -579,10 +579,18 @@ public:
 	  GetFunction(dynamic_cast<ScotsPineTree&>(GetTree(*ts)),SPFLR);
 
 	//don't allow segments shorter than LGPmin or very thin, less than 0.2 mm (R = flr * L)
-	if (Lnew < GetValue(GetTree(*ts),LGPLmin) || flr(ip)*Lnew < 0.0001) {
-	  Lnew = 0.0;
+	if(!is_mode_change || (!(L_age >= mode_change_year)) ) {
+	  if (Lnew < GetValue(GetTree(*ts),LGPLmin) || flr(ip)*Lnew < 0.0001) {
+	    Lnew = 0.0;
+	  }
+	} else {
+	  double rel_h = (GetPoint(*ts).getZ()-global_hcb)/(L_H - global_hcb);
+	  if (Lnew < 0.01+rel_h*(GetValue(GetTree(*ts),LGPLmin)-0.01) 
+	      || flr(ip)*Lnew < 0.0001) {	  
+	    Lnew = 0.0;
+	  }
 	}
-	//	  cout << Lnew << endl;
+	
 
 	SetValue(*ts,LGAL,Lnew);
 	//Initial radius

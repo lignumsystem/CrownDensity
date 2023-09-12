@@ -9,6 +9,10 @@
 ///+ Run the simulation
 ///+ Save simulation data to HDF5 files.
 ///\sa CrownDensity
+///\page cmakefile Compile CrownDensity
+///CMakeLists to compile CrownDensity. There are L-system files to experiment
+///with tree architecture. Check LSYSTEMFILE variable before compilation.
+///\include CMakeLists.txt
 ///\page runscript Run CrownDensity with EBH
 ///Use the following `run-crowndens.sh` script to run `crowndens` with EBH, ad_hoc etc. experiments.
 ///Create new scripts or edit `crowndens` command line according to simulation needs.
@@ -19,12 +23,27 @@
 ///The command line does not use flags for EBH, ad_hoc etc. experiments.
 ///\include run-crowndens-basic-model.sh
 ///\page lsystem L-system file
-///The following L system file defines architecture for Scots pine.
+///The following L-system file defines architecture for Scots pine.
 ///Note that now command line can define architecure change when branches
 ///will always create two subbranches unless growth conditions set the segment length
 ///to zero (see GROWTH ARCHITECTURE CHANGE comment)
 ///\include pine-em98.L
-
+///\page lsystemA L-system experiment A
+///The following L-system file experiments with tree architecture.
+///Introduce concept *physiological age* for buds. Each branch bud starts with physiological
+///age 1 and each time step increase the physiological age by 1. When the physiological age
+///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
+///In this case branching stops if and only if tree parameters and tree functions determine so.
+///\sa \ref lsystemB "L-system experiment B"
+///\include pine-em98-branch-A.L
+///\page lsystemB L-system experiment B
+///The following L-system file experiments with tree architecture.
+///Introduce concept *physiological age* for buds. Each branch bud inherits the physiological
+///age of the mother bud  and each time step increase the physiological age by 1. When the physiological age
+///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
+///In this case branching stops if and only if tree parameters and tree functions determine so.
+///\sa \ref lsystemA "L-system experiment A"
+///\include pine-em98-branch-B.L
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>

@@ -244,8 +244,8 @@ B(data,omega,l,phys_age):
    		    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
                     Down(-1) B(data,omega,l,phys_age);
         }
-    }//2 <= omega <= 10		    
-    else{//omega>8
+    }//2 <= omega <= 100		    
+    else{
        //No more new branches for Gravelius order > 6
        data.phys_age += 1;
        phys_age += 1;

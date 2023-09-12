@@ -6,7 +6,7 @@
 # mkdir debug
 # cd  debug
 # cmake .. -DCMAKE_BUILD_TYPE=Debug
-# Optionally explicitely set c++ compiler
+# Optionally explicitely set c++ compiler:
 # cmake ..  -DCMAKE_BUILD_TYPE=Debug  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS=-stdlib=libc++
 # make install
 # ------------------------------------------
@@ -16,30 +16,49 @@
 # cmake .. -DCMAKE_BUILD_TYPE=Release
 # make install
 # ---------------------------------------------
-# For Xcode IDE first create Xcode project file:
+# 1. For Xcode IDE first create Xcode project file:
 # mkdir xcode
 # cd xcode
 # cmake .. -G Xcode
-# -------------------------------------
-# Open Xcode IDE
+# Open Xcode IDE:
 # open crowndens.xcodeproj
-# -------------------------------------
-# Build the 'crowndens' Product in Xcode for debugging.
+# 2. Build the 'crowndens' Product in Xcode for debugging.
 # See also Xcode -> Product (in menu bar) -> Scheme is set to 'crowndens' to allow Run to debug.
 # Copy necessary *.fun files and *.txt parameter files to xcode/Debug where 'lignum-forest´ is located.
 # Otherwise hard coded files are not found in the program.
 # Set command line parameters for 'lignum-forest' in Product (menu bar) -> Scheme -> Edit Schmeme -> Arguments.
 # Divide the command line into practical parts for debugging from Arguments -> '+'.
-# -------------------------------------
+# -------------------------------------------------------------------------------
+# Graphviz
+# Generate Graphviz files showing the dependency graph between the targets and libraries in a project:
+# mkdir release
+# cd release
+# mkdir graphviz
+# cmake .. -DCMAKE_BUILD_TYPE=Release -graphviz release/CrownDensity.dot
+# Create pdf file of project dependencies:
+# dot -Kneato -Goverlap=scale -Tpdf -o CrownDensity.pdf graphviz/CrownDensity.dot
+# --------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.12)
 # cmake 3.23 for Xcode 13 recommends the policy CMP0114 (warning output)
 cmake_policy(SET CMP0114 NEW)
 project(crowndens DESCRIPTION "Single tree in homogeneous forest")
 message("Project " ${CMAKE_PROJECT_NAME})
+
+# CMake can generate Graphviz files showing the dependencies between the targets in a project
+include(CMakeGraphVizOptions)
+set(GRAPHVIZ_CUSTOM_TARGETS TRUE)
 # Lignum core projects as an ExternalProject. 'lignum-core' target is compiled first
 # Note: lignum-core  has to be configured with cmake first. See lignum-core/CMakeLists.txt
-include(CMakeGraphVizOptions)
 include(ExternalProject)
+
+# Uncomment L-system to be used
+# Comment out other L-systems
+#set(LSYSTEMFILE pine-em98.L)
+#set(LSYSTEMSRC  pine-em98.cpp)
+#set(LSYSTEMFILE pine-em98-branch-A.L)
+#set(LSYSTEMSRC  pine-em98-branch-A.cpp)
+set(LSYSTEMFILE pine-em98-branch-B.L)
+set(LSYSTEMSRC  pine-em98-branch-B.cpp)
 
 ExternalProject_add(lignum-core
 SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..
@@ -79,7 +98,7 @@ endif()
 set(SOURCE_FILES main.cc
   crowndensity_globals.cc
   globalvariables.cc
-  pine-em98.cpp
+  ${LSYSTEMSRC}
   ../LignumForest/branchfunctor.cc
   ../LignumForest/src/metabolism.cc
   src/radiation.cc
@@ -88,9 +107,9 @@ set(SOURCE_FILES main.cc
 
 # Rebuild L system compiler with custom command for 'l2c'
 add_custom_command(
-OUTPUT ${CMAKE_CURRENT_LIST_DIR}/pine-em98.cpp
-DEPENDS ${CMAKE_CURRENT_LIST_DIR}/pine-em98.L l2c
-COMMAND ${CMAKE_CURRENT_LIST_DIR}/../LEngine/bin/l2c ${CMAKE_CURRENT_LIST_DIR}/pine-em98.L  ${CMAKE_CURRENT_LIST_DIR}/pine-em98.cpp
+OUTPUT ${CMAKE_CURRENT_LIST_DIR}/${LSYSTEMSRC}
+DEPENDS ${CMAKE_CURRENT_LIST_DIR}/${LSYSTEMFILE} l2c
+COMMAND ${CMAKE_CURRENT_LIST_DIR}/../LEngine/bin/l2c ${CMAKE_CURRENT_LIST_DIR}/${LSYSTEMFILE} ${CMAKE_CURRENT_LIST_DIR}/${LSYSTEMSRC}
 )
 
 # Main target, the executable 'crowndens'.

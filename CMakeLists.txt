@@ -125,7 +125,7 @@ ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
 
 # This add_dependencies for crowndens seem to generate time stamp based necessary automatic rebuilds
 # of 'crowndens' and 'lignum-core' projects for Unix Makefile system, i.e. if a file is changed then
-# that file and files depending on it will be recompiled.
+# that file and files depending on it will be recompiled with 'make'.
 # Note: 'make clean' is required first before 'make'.
 #
 # Xcode project created for 'crowndens' can compile and rebuild 'crowndens' (Product in Xcode) when needed.

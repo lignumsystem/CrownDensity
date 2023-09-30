@@ -610,6 +610,7 @@ int main(int argc, char** argv)
   hdf5_file.createGroup(LignumForest::ALLMETAFILEGROUP);
   hdf5_file.createGroup(LignumForest::ALLPARAMFILEGROUP);
   hdf5_file.createGroup(LignumForest::ALLFNFILEGROUP);
+  hdf5_file.createGroup(LignumForest::FIRMAMENTGROUP);
   hdf5_trees.createGroup(LignumForest::TXMLGROUP);
   ///\sa cxxadt::LGMHDF5File and  TreeDataAfterGrowth.h in LignumForest for HDF5 file group names
   //[HDF5Init]
@@ -1116,6 +1117,7 @@ int main(int argc, char** argv)
   hdf5_file.createFileDataSetsFromDir("MetaFile*.txt",LignumForest::ALLMETAFILEGROUP);
   hdf5_file.createFileDataSetsFromDir("Tree*.txt",LignumForest::ALLPARAMFILEGROUP);
   hdf5_file.createFileDataSetsFromDir("*.fun",LignumForest::ALLFNFILEGROUP);
+  hdf5_file.createFileDataSetsFromDir("Firmament.txt",LignumForest::FIRMAMENTGROUP);
   //Command line
   vector<string> c_vec;
   std::copy( argv, argv+argc,back_inserter(c_vec));

@@ -82,7 +82,7 @@ Command line options and their  short documentation can be obtained by
 running `./crowndens`  without any  command line parameters.  See also
 CrownDensity::Usage().
 
-![IMPORTANT] To let Unix Makefile build system keep up with file dependencies
+>[!IMPORTANT] To let Unix Makefile build system keep up with file dependencies
 correctly  (for example  changes made  in  c++adt in  the Lignum  core
 system) clean  first the build  tree from previous software  build. To
 recompile `crowndens` type:
@@ -93,11 +93,11 @@ recompile `crowndens` type:
 By default Unix Makefile build system tracks only changes made
 in the current CrownDensity project.
 
-**NB2:** To remove all CMake  configurations and compilation work just
+>[!IMPORTANT] To remove all CMake  configurations and compilation work just
 remove the build  tree directory (i.e. *debug*,  *release* or *xcode*)
 and recreate the build tree directory.
 
-**NB3:**   CMake  projects   are   configured  with   *CMakeLists.txt*
+>[!IMPORTANT]  CMake  projects   are   configured  with   *CMakeLists.txt*
 files. For  this CMake  has an  extensive set  of CMake  variables and
 built-in functions that can be set in CMakeLists.txt files or given in
 command line.   The best way to  learn CMake is by  studying examples.

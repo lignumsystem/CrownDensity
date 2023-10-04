@@ -103,6 +103,7 @@ set(SOURCE_FILES main.cc
   ../LignumForest/src/metabolism.cc
   src/radiation.cc
   ../LignumForest/src/space.cc
+  ../LignumForest/src/CreateHDF5Files.cc
 )
 
 # Rebuild L system compiler with custom command for 'l2c'

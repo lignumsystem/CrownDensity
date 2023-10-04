@@ -82,10 +82,12 @@ Command line options and their  short documentation can be obtained by
 running `./crowndens`  without any  command line parameters.  See also
 CrownDensity::Usage().
 
->[!IMPORTANT] To let Unix Makefile build system keep up with file dependencies
-correctly  (for example  changes made  in  c++adt in  the Lignum  core
-system) clean  first the build  tree from previous software  build. To
-recompile `crowndens` type:
+>[!IMPORTANT]
+>To let Unix Makefile build system keep up with file dependencies
+>correctly  (for example  changes made  in  c++adt in  the Lignum  core
+>system) clean  first the build  tree from previous software  build.
+
+To recompile `crowndens` type:
 
 	make clean
 	make install
@@ -93,14 +95,18 @@ recompile `crowndens` type:
 By default Unix Makefile build system tracks only changes made
 in the current CrownDensity project.
 
->[!IMPORTANT] To remove all CMake  configurations and compilation work just
-remove the build  tree directory (i.e. *debug*,  *release* or *xcode*)
-and recreate the build tree directory.
+>[!IMPORTANT]
+>To remove all CMake  configurations and compilation work just
+>remove the build  tree directory (i.e. *debug*,  *release* or *xcode*)
+>and recreate the build tree directory.
 
->[!IMPORTANT]  CMake  projects   are   configured  with   *CMakeLists.txt*
-files. For  this CMake  has an  extensive set  of CMake  variables and
-built-in functions that can be set in CMakeLists.txt files or given in
-command line.   The best way to  learn CMake is by  studying examples.
+>[!NOTE]
+>CMake  projects   are   configured  with   *CMakeLists.txt*
+>files. For  this CMake  has an  extensive set  of CMake  variables and
+>built-in functions that can be set in CMakeLists.txt files or given in
+>command line.
+
+The best way to  learn CMake is by  studying examples.
 lignum-core and CrownDensity provide  CMakeLists.txt file examples how
 to create libraries, find and integrate external libraries (Qt, HDF5),
 create and use external binaries (`l2c` to compile L-system files) and

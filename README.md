@@ -82,7 +82,7 @@ Command line options and their  short documentation can be obtained by
 running `./crowndens`  without any  command line parameters.  See also
 CrownDensity::Usage().
 
-**NB1:** To let Unix Makefile build system keep up with file dependencies
+![IMPORTANT] To let Unix Makefile build system keep up with file dependencies
 correctly  (for example  changes made  in  c++adt in  the Lignum  core
 system) clean  first the build  tree from previous software  build. To
 recompile `crowndens` type:

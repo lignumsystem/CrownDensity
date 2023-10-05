@@ -94,8 +94,8 @@ CrownDensity::Usage().
 
 To recompile `crowndens` type:
 
-   make clean
-   make install
+	make clean
+	make install
 	
 By default Unix Makefile build system tracks only changes made
 in the current CrownDensity project.

@@ -1,3 +1,8 @@
+//EXPERIMENT with tree architecture:
+//Increase physiological age for existing branch.
+//For new branches start set physiological age to 1.
+//When existing branch reaches architectural_change_year
+//set the new branch to exisiting branch physiological age.
 #include <iostream>
 using namespace std;
 //Defines ran3 etc
@@ -84,7 +89,6 @@ Start:
    fipbud.install("fip-bud.fun");
 
   PineBudData data(ALIVE,0.0,1.0,1.0,1.0);
-  mode = 0;
   produce F(0.30) SB() Down(1.0) Pitch(pitch) B(data,2,l1,1.0) EB() 
                   SB() Roll(rollmain4) Down(1.0) Pitch(pitch)  B(data,2,1.0,1.0) EB()
 	          SB() Roll(2.0*rollmain4) Down(1.0) Pitch(pitch) B(data,2,1.0,1.0) EB()
@@ -206,44 +210,106 @@ B(data,omega,l,phys_age):
                    B(data,omega,l,phys_age);
     }//omega == 1
     else if (omega >= 2 && omega <= 100){
-        //For branches start increasing physiological age
-        data.phys_age += 1;
-        phys_age += 1;
+        //Increase physiological age for existing branch
+        //For new branches start set physiological age to 1
+        //When existing branch reaches architectural_change_year
+        //set new branch to exisiting branch physiological age
         if (nbuds == 0)
            produce B(data,omega,l,phys_age);
-        else if ((is_architecture_change == true) && (phys_age >= architecture_change_year))
+        else if ((is_architecture_change == true) && (phys_age >= architecture_change_year)){
            //GROWTH ARCHITECTURE CHANGE IN branches: always only two new branches at the same plane to the opposite sides
-           //NOTE: this can go forever unless growth conditions and functions set the segment length to 0 
+           //NOTE: this can go forever unless growth conditions and functions set the segment length to 0
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
            produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
                     SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
-                    Down(-1) B(data,omega,l,phys_age);
-        else if (nbuds == 1)
-           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
-                    Down(-1) B(data,omega,l,phys_age);
-        else if (nbuds == 2)
-           //Two new branches at the same plane to the opposite sides
-           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
-                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
-                    Down(-1) B(data,omega,l,phys_age);
-        else if (nbuds == 3)
-           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB() 
-                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
-   		    SB() Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
-                    Down(-1) B(data,omega,l,phys_age);
-        else if (nbuds == 4)
-           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age) EB() 
-                    SB() Roll(2.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age) EB()
-   		    SB() Roll(3.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,phys_age) EB()
-   		    SB() Roll(4.0*roll)  Turn(turn_branch)Down(3.0)     B(data,omega+1,l1,phys_age) EB()
-                    Down(-1) B(data,omega,l,phys_age);
-        else if (nbuds >= 5){
-           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB() 
-                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
-   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
-   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
-   		    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,phys_age) EB()
-                    Down(-1) B(data,omega,l,phys_age);
+           Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
         }
+        else if (nbuds == 1){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+        }
+        else if (nbuds == 2){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           //Two new branches at the same plane to the opposite sides
+           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,1.0) EB() 
+                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+        }
+        else if (nbuds == 3){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB() Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB() 
+                    SB() Roll(2*roll)  Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB() Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+        }
+        else if (nbuds == 4){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB() Roll(roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,1.0) EB() 
+                    SB() Roll(2.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,1.0) EB()
+   		    SB() Roll(3.0*roll)  Turn(turn_branch)Down(3.0)    B(data,omega+1,l1,1.0) EB()
+   		    SB() Roll(4.0*roll)  Turn(turn_branch)Down(3.0)     B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+        }
+        else if (nbuds == 5){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB() 
+                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+       }
+       else if (nbuds == 6){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB() 
+                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(6.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+       }
+       else if (nbuds == 7){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB() 
+                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(6.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(7.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+       }
+       else if (nbuds >= 8){
+           PineBudData mother_bud_data(data);
+           mother_bud_data.phys_age += 1.0;
+           data.phys_age = 1.0;
+           produce  SB()  Roll(roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB() 
+                    SB()  Roll(2.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(3.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+   		    SB()  Roll(4.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(5.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(6.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(7.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    SB()  Roll(8.0*roll)   Turn(turn_branch)Down(3.0)  B(data,omega+1,l1,1.0) EB()
+                    Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+      }
     }//2 <= omega <= 100		    
     else{
        //No more new branches for Gravelius order > 6

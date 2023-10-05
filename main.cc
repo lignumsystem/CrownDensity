@@ -9,6 +9,10 @@
 ///+ Run the simulation
 ///+ Save simulation data to HDF5 files.
 ///\sa CrownDensity
+///\page cmakefile Compile CrownDensity
+///CMakeLists to compile CrownDensity. There are L-system files to experiment
+///with tree architecture. Check LSYSTEMFILE variable before compilation.
+///\include CMakeLists.txt
 ///\page runscript Run CrownDensity with EBH
 ///Use the following `run-crowndens.sh` script to run `crowndens` with EBH, ad_hoc etc. experiments.
 ///Create new scripts or edit `crowndens` command line according to simulation needs.
@@ -19,12 +23,27 @@
 ///The command line does not use flags for EBH, ad_hoc etc. experiments.
 ///\include run-crowndens-basic-model.sh
 ///\page lsystem L-system file
-///The following L system file defines architecture for Scots pine.
+///The following L-system file defines architecture for Scots pine.
 ///Note that now command line can define architecure change when branches
 ///will always create two subbranches unless growth conditions set the segment length
 ///to zero (see GROWTH ARCHITECTURE CHANGE comment)
 ///\include pine-em98.L
-
+///\page lsystemA L-system experiment A
+///The following L-system file experiments with tree architecture.
+///Introduce concept *physiological age* for buds. Each branch bud starts with physiological
+///age 1 and each time step increase the physiological age by 1. When the physiological age
+///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
+///In this case branching stops if and only if tree parameters and tree functions determine so.
+///\sa \ref lsystemB "L-system experiment B"
+///\include pine-em98-branch-A.L
+///\page lsystemB L-system experiment B
+///The following L-system file experiments with tree architecture.
+///Introduce concept *physiological age* for buds. Each branch bud inherits the physiological
+///age of the mother bud  and each time step increase the physiological age by 1. When the physiological age
+///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
+///In this case branching stops if and only if tree parameters and tree functions determine so.
+///\sa \ref lsystemA "L-system experiment A"
+///\include pine-em98-branch-B.L
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
@@ -43,6 +62,7 @@
 #include <Shading.h>
 //From ../LignumForest project
 #include <TreeDataAfterGrowth.h>
+#include <CreateHDF5Files.h>
 #include <SomeFunctors.h>         //From ../LignumForest/include
 #include <DiameterGrowth.h>       //From ../LignumForest/include
 #include <RadiationCrownDens.h>   //From ../LignumForest/include
@@ -133,7 +153,6 @@ namespace CrownDensity{
 
 int main(int argc, char** argv)
 {
-  cout << "BEGIN" <<endl;
   int iterations = 0;//Number of iterations
   double x_coord = 0.0;//Location of the tree
   double y_coord = 0.0;
@@ -576,19 +595,16 @@ int main(int argc, char** argv)
   //[GLoopInit]
   ///\endinternal
   ///\par HDF5 file initialization
-  ///Collect to HDF5 file command line, parameters used, tree functions, all functions, simulation results and  trees in xml format
+  ///Collect to HDF5 file command line, parameters used, tree functions, all functions, simulation results and  trees in xml format.
+  ///Trees must be collected during the simulation to an HDF5 file. The results collected, most notably the 3D matrix for tree data for various attributes,
+  ///are saved after simulation.
   ///\snippet{lineno} main.cc HDF5Init
   ///\internal
   //[HDF5Init]
   string hdf5fname;
   ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
-  LGMHDF5File hdf5_file(hdf5fname);
   LGMHDF5File hdf5_trees(LignumForest::TREEXML_PREFIX+hdf5fname);
-  hdf5_file.createGroup(LignumForest::PGROUP);
-  hdf5_file.createGroup(LignumForest::TFGROUP);
-  hdf5_file.createGroup(LignumForest::AFGROUP);
   hdf5_trees.createGroup(LignumForest::TXMLGROUP);
-  ///\sa cxxadt::LGMHDF5File and  TreeDataAfterGrowth.h in LignumForest for HDF5 file group names
   //[HDF5Init]
   ///\endinternal
   //GROWTH LOOP BEGINS
@@ -1066,36 +1082,16 @@ int main(int argc, char** argv)
   cout << "Growth end" << endl;
   cout << "GROWTH DONE " << "NUMBER OF TREES " << gloop.getNumberOfTrees() << endl;
   //Unlike in LignumForest no need for clean up
-  //gloop.cleanUp();
-  ///\par Collect HDF5 data
+  ///\par Create HDF5 data
   ///Save collected year by year tree data to an HDF5 file together with data to repeat simulation
-  ///\snippet{lineno} main.cc CollectHDF5
+  ///\snippet{lineno} main.cc CreatetHDF5
   ///\internal
-  //[CollectHDF5]
+  //[CreateHDF5]
+  ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
   TMatrix3D<double>& hdf5_data = gloop.getHDF5TreeData();
-  hdf5_file.createDataSet(LignumForest::TREE_DATA_DATASET_NAME,hdf5_data.rows(),hdf5_data.cols(),hdf5_data.zdim(),hdf5_data);
-  hdf5_file.createColumnNames(LignumForest::TREE_DATA_DATASET_NAME,LignumForest::TREE_DATA_COLUMN_ATTRIBUTE_NAME,LignumForest::TREE_DATA_COLUMN_NAMES);
-  //Parameters used  
   TMatrix2D<double> hdf5_tree_param_data = gloop.getHDF5TreeParameterData();
-  hdf5_file.createDataSet(LignumForest::PGROUP+LignumForest::TREE_PARAMETER_DATASET_NAME,hdf5_tree_param_data.rows(),hdf5_tree_param_data.cols(),
-			  hdf5_tree_param_data);
-  hdf5_file.createColumnNames(LignumForest::PGROUP+LignumForest::TREE_PARAMETER_DATASET_NAME,LignumForest::TREE_PARAMETER_ATTRIBUTE_NAME,LignumForest::TREE_PARAMETER_NAMES);
-  //Functions known in a tree
-  for (unsigned int i=0; i < LignumForest::FN_V.size();i++){ 
-    TMatrix2D<double> hdf5_tree_fn_data = gloop.getHDF5TreeFunctionData(LignumForest::FN_V[i]);
-    hdf5_file.createDataSet(LignumForest::TFGROUP+LignumForest::FNA_STR[i],hdf5_tree_fn_data.rows(),hdf5_tree_fn_data.cols(),hdf5_tree_fn_data);
-    hdf5_file.createColumnNames(LignumForest::TFGROUP+LignumForest::FNA_STR[i],LignumForest::TREE_FN_ATTRIBUTE_NAME,LignumForest::TREE_FN_COLUMN_NAMES);
-  }
-  //All functions used
-  hdf5_file.createFnDataSetsFromDir("*.fun",LignumForest::AFGROUP,LignumForest::TREE_FN_ATTRIBUTE_NAME,LignumForest::TREE_FN_COLUMN_NAMES);
-  //Command line
-  vector<string> c_vec;
-  std::copy( argv, argv+argc,back_inserter(c_vec));
-  ostringstream cline;
-  copy(c_vec.begin(),c_vec.end(),ostream_iterator<string>(cline, " "));
-  hdf5_file.createDataSet(LignumForest::COMMAND_LINE_DATASET_NAME,cline.str());
-  hdf5_file.close();
-  //[CollectHDF5]
+  CreateHDF5Files(hdf5fname,hdf5_data,hdf5_tree_param_data,argc,argv);
+  //[CreateHDF5]
   ///\endinternal
   cout << "DATA SAVED TO HDF5 FILES AND SIMULATION DONE" <<endl;
   //Close result file if was open

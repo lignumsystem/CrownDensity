@@ -59,18 +59,18 @@ To create CrownDensity Makefile build system for debug and compile `crowndens` b
 type:
 
 	cd CrownDensity
-    mkdir debug
-    cd  debug
-    cmake .. -DCMAKE_BUILD_TYPE=Debug
+    	mkdir debug
+    	cd  debug
+   	 cmake .. -DCMAKE_BUILD_TYPE=Debug
 	make install 
 
 For CrownDensity Makefile build system for Release (optimised, no debug information) type:
 
 	cd CrownDensity
-    mkdir release
-    cd release
-    cmake .. -DCMAKE_BUILD_TYPE=Release
-    make install
+    	mkdir release
+    	cd release
+    	cmake .. -DCMAKE_BUILD_TYPE=Release
+    	make install
 
 In both cases `make install` will move `crowndens` to CrownDensity directory
 where there are two example  shell scripts to run the program:
@@ -81,6 +81,11 @@ where there are two example  shell scripts to run the program:
 Command line options and their  short documentation can be obtained by
 running `./crowndens`  without any  command line parameters.  See also
 CrownDensity::Usage().
+
+>[!IMPORTANT]
+>It is important to type `make install` to also move `crowndens` to
+>directory above to be used by the scripts to run simulatations.
+>Typing just `make` the `crowndens` program remains in the compilation directory.
 
 >[!IMPORTANT]
 >To let Unix Makefile build system keep up with file dependencies

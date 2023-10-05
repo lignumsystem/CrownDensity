@@ -58,25 +58,25 @@ See also *lignum-core* [README](https://github.com/lignumsystem/lignum-core/blob
 To create CrownDensity Makefile build system for debug and compile `crowndens` binary 
 type:
 
-	cd CrownDensity
-    	mkdir debug
-    	cd  debug
-   	 cmake .. -DCMAKE_BUILD_TYPE=Debug
-	make install 
+    cd CrownDensity
+    mkdir debug
+    cd  debug
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+    make install 
 
 For CrownDensity Makefile build system for Release (optimised, no debug information) type:
 
-	cd CrownDensity
-    	mkdir release
-    	cd release
-    	cmake .. -DCMAKE_BUILD_TYPE=Release
-    	make install
+    cd CrownDensity
+    mkdir release
+    cd release
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    make install
 
 In both cases `make install` will move `crowndens` to CrownDensity directory
 where there are two example  shell scripts to run the program:
 	
-	run-crowndens-basic-model.sh	
-	run-crowndens.sh
+    run-crowndens-basic-model.sh	
+    run-crowndens.sh
 
 Command line options and their  short documentation can be obtained by
 running `./crowndens`  without any  command line parameters.  See also
@@ -94,8 +94,8 @@ CrownDensity::Usage().
 
 To recompile `crowndens` type:
 
-	make clean
-	make install
+   make clean
+   make install
 	
 By default Unix Makefile build system tracks only changes made
 in the current CrownDensity project.

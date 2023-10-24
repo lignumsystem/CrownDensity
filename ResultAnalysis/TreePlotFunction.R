@@ -65,47 +65,34 @@ points(y,td[11,1,], type="l", lwd=2, lty=2)
 
 
 #Base diameter
-plot(y,100*td[8,1,], type="l", lwd=2, ylim=c(0,30),xlab="time (y)", ylab="Base diameter (cm)", main="Base diameter",) #mean
+plot(y,100*td[8,1,], type="l", lwd=2, ylim=c(0,30),xlab="time (y)", ylab="Base diameter (cm)", main="Base diameter")
+points(y,100*td[9,1,], type="l", lwd=2, col="brown")         #Diameter at breast height
+points(y,100*td[10,1,], type="l", lwd=2, col="darkgreen")    #Diameter at crown base
+
 # dkanto = 2 + 1,25d (Laasasenaho 1975, Folia Forestalia 233)
 # points(va27$a,0.02+1.25*va27$DgM,type="l",lwd=3,col="darkgreen")
 # points(vv$age,0.02+1.25*vv$DBH,type="l",lwd=3,col="darkgreen")
 # points(ksto$year,0.02+1.25*ksto$Dbhav,type="l",lwd=3,col="darkgreen")
 
-st = h5read(d,"AllFunctions/stemsha.fun")
-#d$AllFunctions$stemsha.fun.       #stemsha.fun function that speciefies the stand density
 
-dens <- approx(st[1,],st[2,],y)$y
-plot(y,dens, type="l", ylim=c(0,20000),lty=1, lwd=2, xlab="time (y)", ylab="No. trees / ha", main="Stand density")
-
-#Basal area
-plot(y,pi*(td[8,1,])^2*dens/4, ylim=c(0,80),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area")
-# points(va27$a,va27$G,type="l",lwd=3,col="darkgreen")
-# points(ksto$year,ksto$G,type="l",lwd=3,col="darkgreen")
+#Basal area of one tree
+plot(y,pi*(100*td[8,1,])^2/4, ylim=c(0,500),type="l", lwd=2,xlab="time (y)", ylab= "cm2", main="Basal area at base of one tree")
 
 
 #Basal area at crown base
-plot(y,pi*(td[10,1,])^2*dens/4, ylim=c(0,60),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area at crown base")
+plot(y,pi*(100*td[10,1,])^2/4, ylim=c(0,500),type="l", lwd=2,xlab="time (y)", ylab= "cm2", main="Basal area at crown base of one tree")
 
 #Stem volume
-plot(y,td[16,1,]*dens, ylim=c(0,1000),type="l", lwd=2,xlab="time (y)", ylab= "m3/ha", main="Stem volume")
-# points(va27$a,va27$V,type="l",lwd=3,col="darkgreen")
-# points(vv$age,vv$V,type="l",lwd=3,col="darkgreen")
-# points(ksto$year,ksto$V,type="l",lwd=3,col="darkgreen")
+plot(y,td[16,1,], ylim=c(0,1),type="l", lwd=2,xlab="time (y)", ylab= "m3", main="Stem volume of one tree")
 
 
-#LAI and specific leaf area
-par(mar = c(5, 4, 4, 4) + 0.3)              # Additional space for second y-axis
-plot(y,td[15,1,]*dens/1e4, ylim=c(0,80),type="l", lty=1, lwd=2,xlab="time (y)", ylab="All-sided LAI (m2/m2)",main="LAI = continuous,  specific LA = dashed") #LAI
-par(new = TRUE)
-plot(y,td[15,1,]/td[37,1,],type="l", lty=2,lwd=2, axes=FALSE,xlab = "", ylab = "", ylim=c(0,32))
-axis(side = 4, at = pretty(c(0,32)))
-mtext("Specific leaf area (m2/ kg C)", side = 4, line = 3)             # Add second axis label
+#Leaf area
+plot(y,td[15,1,], ylim=c(0,300),type="l", lty=1, lwd=2,xlab="time (y)", ylab="m2",main="All-sided needle area of one tree") 
 
-
-#Photosynthetic production and respiration
-plot(y,td[17,1,]*dens/1000,type="l", lwd=2,xlab="time (y)", ylab= "t C / ha", main="GPP and Respiration",
-ylim=c(0,20)) #   P/Af
-points(y,td[18,1,]*dens/1000, type="l", lty=2, lwd=2)   #min
+#Photosynthetic production and respiration of one tree
+plot(y,td[17,1,],type="l", lwd=2,xlab="time (y)", ylab= "kg C", main="Photosynthesis and Respiration of one tree",
+ylim=c(0,10)) #   P/Af
+points(y,td[18,1,], type="l", lty=2, lwd=2)
 
 
 #Crown ratio
@@ -128,6 +115,42 @@ plot(y,td[35,1,]/(td[37,1,]*td[32,1,]), type="l",main="Radiation capture efficie
 
 #Lambda
 plot(y,td[51,1,], type="l", lty=2, lwd=2,xlab="time (y)", ylab= expression(lambda),ylim=c(0,7), main = expression(paste(lambda," in Eq: New growth(",lambda,") = P - M")))
+
+#========================================================================
+#For stand
+st = h5read(d,"AllFunctions/stemsha.fun")
+#d$AllFunctions$stemsha.fun.       #stemsha.fun function that speciefies the stand density
+
+dens <- approx(st[1,],st[2,],y)$y
+plot(y,dens, type="l", ylim=c(0,20000),lty=1, lwd=2, xlab="time (y)", ylab="No. trees / ha", main="Stand density")
+
+#Basal area
+plot(y,pi*(td[8,1,])^2*dens/4, ylim=c(0,80),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area")
+# points(va27$a,va27$G,type="l",lwd=3,col="darkgreen")
+# points(ksto$year,ksto$G,type="l",lwd=3,col="darkgreen")
+
+#Basal area at crown base
+plot(y,pi*(td[10,1,])^2*dens/4, ylim=c(0,60),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area at crown base")
+
+#Stem volume
+plot(y,td[16,1,]*dens, ylim=c(0,1000),type="l", lwd=2,xlab="time (y)", ylab= "m3/ha", main="Stem volume")
+# points(va27$a,va27$V,type="l",lwd=3,col="darkgreen")
+# points(vv$age,vv$V,type="l",lwd=3,col="darkgreen")
+# points(ksto$year,ksto$V,type="l",lwd=3,col="darkgreen")
+
+#LAI and specific leaf area
+par(mar = c(5, 4, 4, 4) + 0.3)              # Additional space for second y-axis
+plot(y,td[15,1,]*dens/1e4, ylim=c(0,80),type="l", lty=1, lwd=2,xlab="time (y)", ylab="All-sided LAI (m2/m2)",main="LAI = continuous,  specific LA = dashed") #LAI
+par(new = TRUE)
+plot(y,td[15,1,]/td[37,1,],type="l", lty=2,lwd=2, axes=FALSE,xlab = "", ylab = "", ylim=c(0,32))
+axis(side = 4, at = pretty(c(0,32)))
+mtext("Specific leaf area (m2/ kg C)", side = 4, line = 3)             # Add second axis label
+
+#Photosynthetic production and respiration
+plot(y,td[17,1,]*dens/1000,type="l", lwd=2,xlab="time (y)", ylab= "t C / ha", main="GPP and Respiration",
+ylim=c(0,20)) #   P/Af
+points(y,td[18,1,]*dens/1000, type="l", lty=2, lwd=2)   #min
+
 
 dev.off()
 

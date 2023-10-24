@@ -1,6 +1,8 @@
 //L-SYSTEM EXPERIMENT C with the tree architecture:
 //Increase physiological age for existing branch.
 //For new branches inherit physiological age from mother bud.
+//When architecture change high branching angle for the two side branches.
+//See turn_branch_max
 #include <iostream>
 using namespace std;
 //Defines ran3 etc

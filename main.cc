@@ -10,8 +10,8 @@
 ///+ Save simulation data to HDF5 files.
 ///\sa CrownDensity
 ///\page cmakefile Compile CrownDensity
-///CMakeLists to compile CrownDensity. There are L-system files to experiment
-///with tree architecture. Check LSYSTEMFILE variable before compilation.
+///CMakeLists.txt to compile CrownDensity. There are several L-system files to experiment
+///with tree architecture. Check LSYSTEMFILE and LSYSTEMSRC variables in CMakeLists.txt before compilation.
 ///\include CMakeLists.txt
 ///\page runscript Run CrownDensity with EBH
 ///Use the following `run-crowndens.sh` script to run `crowndens` with EBH, ad_hoc etc. experiments.
@@ -21,6 +21,7 @@
 ///Use the following `run-crowndens-basic-model.sh` script to run `crowndens`
 ///with simple model for segment elongation: \f$L=\lambda \times f_{vi} \times f_{go} \times f_{ip}\f$.
 ///The command line does not use flags for EBH, ad_hoc etc. experiments.
+///
 ///\include run-crowndens-basic-model.sh
 ///\page lsystem L-system file
 ///The following L-system file defines architecture for Scots pine.
@@ -30,20 +31,32 @@
 ///\include pine-em98.L
 ///\page lsystemA L-system experiment A
 ///The following L-system file experiments with tree architecture.
-///Introduce concept *physiological age* for buds. Each branch bud starts with physiological
-///age 1 and each time step increase the physiological age by 1. When the physiological age
+///Introduce concept *physiological age* for buds. *Each branch bud starts with physiological
+///age 1 and each time step increase the physiological age by 1*. When the physiological age
 ///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
 ///In this case branching stops if and only if tree parameters and tree functions determine so.
-///\sa \ref lsystemB "L-system experiment B"
+///\sa \ref lsystemB "L-system experiment B" \ref lsystemC "L-system experiment C" 
+///
 ///\include pine-em98-branch-A.L
 ///\page lsystemB L-system experiment B
-///The following L-system file experiments with tree architecture.
+///The following L-system file experiments with tree architecture. Based on pine-em98-branch-A.L.
+///Introduce concept *physiological age* for buds. *Each branch bud inherits the physiological
+///age of the mother bud  and each time step increase the physiological age by 1*. When the physiological age
+///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
+///Only Turn, no Roll along mother axis. In this case branching stops if and only if tree parameters
+///and tree functions determine so. \sa \ref lsystemA "L-system experiment A"  \ref lsystemC "L-system experiment C"
+///
+///\include pine-em98-branch-B.L
+///\page lsystemC L-system experiment C
+///The following L-system file experiments with tree architecture. Based on  pine-em98-branch-B.L.
 ///Introduce concept *physiological age* for buds. Each branch bud inherits the physiological
 ///age of the mother bud  and each time step increase the physiological age by 1. When the physiological age
 ///reaches  CrownDensity::architecture_change_year the terminating bud genererates *always* two side branches.
+///Only Turn, no Roll along mother axis. *These side branches have high branching angle*. See `Pine::turn_branch_max` value in pine-em98-branch-C.L.
 ///In this case branching stops if and only if tree parameters and tree functions determine so.
-///\sa \ref lsystemA "L-system experiment A"
-///\include pine-em98-branch-B.L
+///\sa \ref lsystemA "L-system experiment A"  \ref lsystemB "L-system experiment B" 
+///
+///\include pine-em98-branch-C.L
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>

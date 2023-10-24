@@ -1,4 +1,4 @@
-//L-SYSTEM EXPERIMENT B with the tree architecture:
+//L-SYSTEM EXPERIMENT C with the tree architecture:
 //Increase physiological age for existing branch.
 //For new branches inherit physiological age from mother bud.
 #include <iostream>
@@ -34,6 +34,7 @@ const double PI = 3.1415926535897932384;
 const double pitch = 45.0*PI/180.0; //the angle of branching in the main axis    = 45
 const double roll  = 137.5*PI/180.0; //137.5 is convenient to distribute buds (137.5*N never overlaps)
 const double turn_branch = 30.0*PI/180.0;//the angle of branching in branches  = 30
+const double turn_branch_max = 80.0*PI/180.0;//the angle of branching after architecture change
 const double pitch_down = 2.0*PI/180.0;//branches bending down annually
 const double max_pitch_down = 90.0*PI/180.0;//horizontal branches
 const double hupdir = 85.0*PI/180.0; //if a bud points down make it N degrees upwards from horizontal
@@ -219,8 +220,8 @@ B(data,omega,l,phys_age):
            //NOTE: this can go forever unless growth conditions and functions set the segment length to 0
            PineBudData mother_bud_data(data);
            mother_bud_data.phys_age += 1.0;
-           produce  SB() Turn(turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
-                    SB() Turn(-turn_branch)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
+           produce  SB() Turn(turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
+                    SB() Turn(-turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
            Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
         }
         else if (nbuds == 1){

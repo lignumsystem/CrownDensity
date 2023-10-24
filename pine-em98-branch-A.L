@@ -1,4 +1,4 @@
-//EXPERIMENT with tree architecture:
+//L_SYSTEM EXPERIMENT A with tree architecture:
 //Increase physiological age for existing branch.
 //For new branches start set physiological age to 1.
 //When existing branch reaches architectural_change_year

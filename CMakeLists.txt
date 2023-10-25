@@ -57,9 +57,10 @@ include(ExternalProject)
 #set(LSYSTEMSRC  pine-em98.cpp)
 #set(LSYSTEMFILE pine-em98-branch-A.L)
 #set(LSYSTEMSRC  pine-em98-branch-A.cpp)
-set(LSYSTEMFILE pine-em98-branch-B.L)
-set(LSYSTEMSRC  pine-em98-branch-B.cpp)
-
+#set(LSYSTEMFILE pine-em98-branch-B.L)
+#set(LSYSTEMSRC  pine-em98-branch-B.cpp)
+set(LSYSTEMFILE pine-em98-branch-C.L)
+set(LSYSTEMSRC  pine-em98-branch-C.cpp)
 ExternalProject_add(lignum-core
 SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..
 DOWNLOAD_COMMAND "")

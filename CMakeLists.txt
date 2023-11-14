@@ -77,10 +77,11 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 endif()
 
 find_package(HDF5 COMPONENTS C CXX HL REQUIRED)
-if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-  message("SYSTEM: Apple platform")
-  #find_package(Qt4 COMPONENTS QtOpenGL QtXml QtGui QtCore REQUIRED)
-  find_package(Qt5 COMPONENTS Xml Core  REQUIRED)
+  message("SYSTEM: Apple Darwin platform")
+# The following line finds Qt4 headers and libraries, qmake must be in PATH
+# find_package(Qt4 COMPONENTS QtOpenGL QtXml QtGui QtCore REQUIRED)
+# The following line finds Qt5 headers and libraries, qmake must be in PATH
+  find_package(Qt5 COMPONENTS Xml Core  REQUIRED)	    
   find_package(OpenGL REQUIRED) 
   # cmake 3.23 output erroneusly prints 'glut not found'. It is found. 
   find_package(GLUT REQUIRED)
@@ -138,7 +139,11 @@ add_dependencies(crowndens lignum-core)
 
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
   target_link_libraries(crowndens
+<<<<<<< HEAD
     #HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore
+=======
+#    HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore
+>>>>>>> 8bf5498a49b620bf15d97552c4dad9f03fcb8609
     HDF5::HDF5 Qt5::Xml Qt5::Core
     GLUT::GLUT OpenGL::GLU OpenGL::GL
     Visual L voxel sky LGM cxxadt

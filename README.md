@@ -13,11 +13,18 @@ LignumForest for  tree growth. Most notably
 
 CrownDensity depends on Lignum core system  and [LignumForest](https://github.com/lignumsystem/LignumForest.git). 
 CrownDensity and LignumForest projects  must reside under *lignum-core*  project. 
-Clone first [lignum-core](https://github.com/lignumsystem/lignum-core.git)
-repository  and  then  in  *lignum-core*  clone 
-[CrownDensity](https://github.com/lignumsystem/CrownDensity.git)
-and [LignumForest](https://github.com/lignumsystem/LignumForest.git) 
+Clone first [lignum-core](https://github.com/lignumsystem/lignum-core.git) repository  and  then  in  *lignum-core*  clone 
+[CrownDensity](https://github.com/lignumsystem/CrownDensity.git) and [LignumForest](https://github.com/lignumsystem/LignumForest.git) 
 repositories.
+
+>[!IMPORTANT]
+>Qt4 seems to be ever more difficult to maintain in MacPorts. 
+
+Apple Silicon processors (M1, M2, etc.), macOS Ventura and later require Qt5  with XMLTree. *qt-workbench* cannot be compiled 
+and used with Qt5 because of the backward incompatibilites between the Qt4 and Qt5 versions. To install Qt5 Toolkit 
+from MacPorts type:
+
+    sudo port install qt5
 
 ## CMake build system
 

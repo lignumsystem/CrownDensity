@@ -1097,7 +1097,7 @@ int main(int argc, char** argv)
   //Unlike in LignumForest no need for clean up
   ///\par Create HDF5 data
   ///Save collected year by year tree data to an HDF5 file together with data to repeat simulation
-  ///\snippet{lineno} main.cc CreatetHDF5
+  ///\snippet{lineno} main.cc CreateHDF5
   ///\internal
   //[CreateHDF5]
   ParseCommandLine(argc,argv,"-hdf5", hdf5fname);

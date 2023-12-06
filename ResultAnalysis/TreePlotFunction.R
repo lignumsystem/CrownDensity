@@ -65,7 +65,8 @@ points(y,td[11,1,], type="l", lwd=2, lty=2)
 
 
 #Base diameter
-plot(y,100*td[8,1,], type="l", lwd=2, ylim=c(0,30),xlab="time (y)", ylab="Base diameter (cm)", main="Base diameter")
+plot(y,100*td[8,1,], type="l", lwd=2, ylim=c(0,30),xlab="time (y)", ylab="Base diameter (cm)",
+main="Diameter at base (black), breast height (brown), crown base (green)")
 points(y,100*td[9,1,], type="l", lwd=2, col="brown")         #Diameter at breast height
 points(y,100*td[10,1,], type="l", lwd=2, col="darkgreen")    #Diameter at crown base
 
@@ -90,10 +91,12 @@ plot(y,td[16,1,], ylim=c(0,1),type="l", lwd=2,xlab="time (y)", ylab= "m3", main=
 plot(y,td[15,1,], ylim=c(0,300),type="l", lty=1, lwd=2,xlab="time (y)", ylab="m2",main="All-sided needle area of one tree") 
 
 #Photosynthetic production and respiration of one tree
-plot(y,td[17,1,],type="l", lwd=2,xlab="time (y)", ylab= "kg C", main="Photosynthesis and Respiration of one tree",
+plot(y,td[17,1,],type="l", lwd=2,xlab="time (y)", ylab= "kg C", main="Photos. (solid), Resp. (dashed), P - R (green) of one tree",
 ylim=c(0,10)) #   P/Af
 points(y,td[18,1,], type="l", lty=2, lwd=2)
+points(y,td[17,1,]-td[18,1,], type="l", col="darkgreen", lwd=2)
 
+#"GPP (solid), Respiration (dashed), GPP - Resp (green)"
 
 #Crown ratio
 plot(y,1-td[11,1,]/td[7,1,], ylim=c(0,1), type="l", main="Crown ratio", ylab="Crown ratio",xlab="time (y)",xlim=c(0,ymax))
@@ -147,9 +150,10 @@ axis(side = 4, at = pretty(c(0,32)))
 mtext("Specific leaf area (m2/ kg C)", side = 4, line = 3)             # Add second axis label
 
 #Photosynthetic production and respiration
-plot(y,td[17,1,]*dens/1000,type="l", lwd=2,xlab="time (y)", ylab= "t C / ha", main="GPP and Respiration",
-ylim=c(0,20)) #   P/Af
+plot(y,td[17,1,]*dens/1000,type="l", lwd=2,xlab="time (y)", ylab= "t C / ha", main="GPP (solid), Respiration (dashed), GPP - Resp (green)",ylim=c(0,15)) #   P/Af
 points(y,td[18,1,]*dens/1000, type="l", lty=2, lwd=2)   #min
+points(y,td[17,1,]*dens/1000-td[18,1,]*dens/1000, type="l", col="darkgreen", lwd=2)   #min
+
 
 
 dev.off()

@@ -4,3 +4,4 @@ Parameters:
     Tree: Tree1.txt 
 Functions:
     LGMIP: fip1.fun
+    LGMNB: fnbuds1.fun

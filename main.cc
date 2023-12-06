@@ -621,6 +621,8 @@ int main(int argc, char** argv)
   //[HDF5Init]
   ///\endinternal
   //GROWTH LOOP BEGINS
+
+  Pine::l_fnbuds = GetFunction(*pine1, LGMNB);  //-------
   cout << "GROWTH LOOP BEGINS" <<endl;
   for (int iter = 0; iter < iterations; iter++){
     cout << "Iter: " << iter << endl;
@@ -642,6 +644,9 @@ int main(int argc, char** argv)
       //... but not fgo
       ParametricCurve fgo1("fgo1.fun");
       SetFunction(*pine1, fgo1, SPFGO);
+
+      Pine::l_fnbuds = GetFunction(*pine1, LGMNB);  //This for L-System----------
+
     }
 
     if(CrownDensity::is_height_function) {

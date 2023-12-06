@@ -19,7 +19,9 @@ namespace Pine{
   ///Tree height
   extern double L_H;
   ///A guess for segment shortening
-  extern const double l1;  
+  extern const double l1;
+  extern ParametricCurve l_fnbuds;           //---------------
+
 }
 ///@}
 
@@ -47,6 +49,7 @@ namespace CrownDensity{
   extern ParametricCurve adhoc;
   extern ParametricCurve fip_mode;
   extern ParametricCurve fgo_mode;
+
   extern bool is_adhoc;
   extern bool is_random_variation;
 

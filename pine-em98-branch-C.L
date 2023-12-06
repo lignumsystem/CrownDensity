@@ -60,7 +60,7 @@ const double rollmain8  =(360.0/8.0)*PI/180.0;
 int mode = 0; //0 = new segment, 1 = new buds
 
 //Number of buds as the function of foliage mass
-ParametricCurve fnbuds("fnbuds.fun");
+extern ParametricCurve l_fnbuds;             //
 
 //Adjust the number of buds, more light more buds, less light less buds
 ParametricCurve fnbudslight("fnbudslight.fun");
@@ -85,7 +85,7 @@ Start:
 {
 // If L-system is initilized several times in one program, the functions
 // are read in with every initilization
-   fnbuds.install("fnbuds.fun");
+   //fnbuds.install("fnbuds.fun");   ********************
    fnbudslight.install("fnbudslight.fun"); 
    fipbud.install("fip-bud.fun");
 
@@ -126,7 +126,9 @@ B(data,omega,l,phys_age):
     //tiheyden funktio modifioi silmujen lukumaaraa
 	
     //first, use the fnbuds for the number of buds
-    int nbuds = static_cast<int>(fnbuds(data.fm));
+    //int nbuds = static_cast<int>(fnbuds(data.fm));     *******************
+    int nbuds = static_cast<int>(l_fnbuds(data.fm));
+
     //then adjust the number of buds with relative light  
     //nbuds = static_cast<int>(max(nbuds+fnbudslight(data.ip),0.0));
     //cout << "ip " << data.ip << " fip(ip) " << fip(data.ip) 

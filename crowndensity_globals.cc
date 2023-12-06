@@ -1,10 +1,15 @@
 #include <CrownDensityGlobals.h>
 
+
+
 namespace Pine{
   double L_age = 0.0;
   double L_H = 0.0;
   const double l1 = 0.9;
+  ParametricCurve l_fnbuds("fnbuds.fun");   //---------------
+
 }
+
 
 namespace CrownDensity{  
   ///Random number generator e.g. in L-system
@@ -22,6 +27,8 @@ namespace CrownDensity{
   ///Random component in segment length in branches.
   ///If true then the effect is on from the throughout the simulation  
   bool is_random_variation=false;
+
+
   ///@}
 
   ///This global variable is needed e.g. in bybranches.cc

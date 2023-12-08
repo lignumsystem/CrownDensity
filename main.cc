@@ -295,35 +295,6 @@ int main(int argc, char** argv)
     CrownDensity::space2 = true;
   }
 
-  ///\par Growth mode functions
-  ///Parse parameters for f(ip) and f(go) to be used after growth mode change.
-  ///\snippet{lineno} main.cc gmode
-  ///\internal
-  //[gmode]
-  string fipmodefile,fgomodefile;
-  cout<< "GROWTH MODE FUNCTIONS BEGIN" <<endl;
-  ParametricCurve fipmode, fgomode;
-  if (ParseCommandLine(argc,argv,"-fipmode",clarg)){
-    fipmodefile = clarg;
-    fipmode = ParametricCurve(fipmodefile);
-    clarg.clear();
-    if (!fipmode.ok()){
-      cerr << "f(ip) for after growth mode change not defined" <<endl;
-      exit(0);
-    }
-  }
-  if (ParseCommandLine(argc,argv,"-fgomode",clarg)){
-    fgomodefile = clarg;
-    fgomode = ParametricCurve(fgomodefile);
-    clarg.clear();
-    if (!fgomode.ok()){
-      cerr << "f(go) for after growth mode change not defined" <<endl;
-      exit(0);
-    }
-  }
-  cout <<  "GROWTH MODE FUNCTIONS END" <<endl;
-  //[gmode]
-  ///\endinternal
   ///\par Parse Extended Borchert-Honda (EBH) allocation of growth
   ///EBH resource distn can be in use in two ways. Both are set by command line
   ///arguments. Option `-EBH` means EBH is in use and values (of lambda parameter)
@@ -471,8 +442,8 @@ int main(int argc, char** argv)
   clarg.clear();
   //is_architecture_change and architecture_change_year are global variables
   if (ParseCommandLine(argc,argv,"-architectureChange",clarg)){
-    CrownDensity::is_architecture_change = true;
-    CrownDensity::architecture_change_year = atoi(clarg.c_str());
+    Pine::is_architecture_change = true;
+    Pine::architecture_change_year = atoi(clarg.c_str());
   }
   //See CL argument "-EBH" after instantiatiation of the tree
 
@@ -537,6 +508,12 @@ int main(int argc, char** argv)
   // global tree created above
   InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1(metafile,VERBOSE);
   init_pine1.initialize(*pine1);
+
+  //The functions for the L-system (they are global variables)
+
+  Pine::fnbuds.install("fnbuds.fun");
+  Pine::fnbudslight.install("fnbudslight.fun");
+  Pine::fipbud.install("fip-bud.fun");
 
   
   //    Tämä on hack ---------------------------------------!
@@ -622,7 +599,6 @@ int main(int argc, char** argv)
   ///\endinternal
   //GROWTH LOOP BEGINS
 
-  Pine::l_fnbuds = GetFunction(*pine1, LGMNB);  //-------
   cout << "GROWTH LOOP BEGINS" <<endl;
   for (int iter = 0; iter < iterations; iter++){
     cout << "Iter: " << iter << endl;
@@ -645,7 +621,7 @@ int main(int argc, char** argv)
       ParametricCurve fgo1("fgo1.fun");
       SetFunction(*pine1, fgo1, SPFGO);
 
-      Pine::l_fnbuds = GetFunction(*pine1, LGMNB);  //This for L-System----------
+      Pine::fnbuds = GetFunction(*pine1, LGMNB);  //This for L-System----------
 
     }
 
@@ -914,6 +890,12 @@ int main(int argc, char** argv)
     //Initialize calculation of thickness growth induced by adding new shoots.
     double alku = 1.0;    //= Gravelius order of main axis
     PropagateUp(*pine1,alku,LignumForest::SetSapwoodDemandAtJunction());
+
+
+
+    // REMOVE THESE WHEN YOU REMOVE fgomode,fipmode FROM LGMGrowthAllocator2 !!!!!!!!!!!!!!!!!!
+    ParametricCurve fipmode = GetFunction(*pine1, LGMIP);
+    ParametricCurve fgomode = GetFunction(*pine1, SPFGO);
 
     DiameterGrowthData data;
     LGMGrowthAllocator2<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud,LignumForest::SetScotsPineSegmentLength,

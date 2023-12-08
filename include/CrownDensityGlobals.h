@@ -11,8 +11,7 @@
 #include <VoxelSpace.h>
 ///\defgroup lsysglobal L-system global variables
 ///@{
-///These global variables are needed in pine-em98.L and convey 
-///tree age and height to L-system
+///These global variables are needed in pine-em98.L 
 namespace Pine{
   ///Age
   extern double L_age;
@@ -20,8 +19,11 @@ namespace Pine{
   extern double L_H;
   ///A guess for segment shortening
   extern const double l1;
-  extern ParametricCurve l_fnbuds;           //---------------
-
+  extern ParametricCurve fnbuds;
+  extern ParametricCurve fnbudslight;
+  extern ParametricCurve fipbud;
+  extern bool is_architecture_change;
+  extern int architecture_change_year;
 }
 ///@}
 
@@ -59,8 +61,6 @@ namespace CrownDensity{
 
   extern bool is_mode_change;
   extern int mode_change_year;    
-  extern bool is_architecture_change;
-  extern int architecture_change_year;
 
   extern Firmament dummy_firm;
   extern VoxelSpace space_occupancy;

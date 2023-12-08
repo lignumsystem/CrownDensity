@@ -26,10 +26,16 @@ open Pine;
 
 //Defines the lsystem rewriting process. 
 #include <lsys.h>
+
+//
 //Global variables
 //double L_age = L_H = 0.0;
 //a guess for the segment shortening
 //const double l1 = 0.9;
+
+//Global variables, defined in
+//Number of buds as the function of foliage mass
+
 
 
 const double PI = 3.1415926535897932384;
@@ -59,13 +65,11 @@ const double rollmain8  =(360.0/8.0)*PI/180.0;
 //explicit call to l[i].endEach() after each l[i].derive() in pine-forest.cc that resets the mode.
 int mode = 0; //0 = new segment, 1 = new buds
 
-//Number of buds as the function of foliage mass
-extern ParametricCurve l_fnbuds;             //
 
 //Adjust the number of buds, more light more buds, less light less buds
-ParametricCurve fnbudslight("fnbudslight.fun");
+//ParametricCurve fnbudslight("fnbudslight.fun");
 //Fipi for buds, the death zone
-ParametricCurve fipbud("fip-bud.fun");
+//ParametricCurve fipbud("fip-bud.fun");
 module F(double);
 //With this implementation side branches start physiological aging, i.e. increments of physiological age.
 //When physiological age reaches mode_change_year the side branches create only two new side branches
@@ -83,12 +87,6 @@ derivation length: 9;
 
 Start:
 {
-// If L-system is initilized several times in one program, the functions
-// are read in with every initilization
-   //fnbuds.install("fnbuds.fun");   ********************
-   fnbudslight.install("fnbudslight.fun"); 
-   fipbud.install("fip-bud.fun");
-
   PineBudData data(ALIVE,0.0,1.0,1.0,1.0);
   produce F(0.30) SB() Down(1.0) Pitch(pitch) B(data,2,l1,1.0) EB() 
                   SB() Roll(rollmain4) Down(1.0) Pitch(pitch)  B(data,2,1.0,1.0) EB()
@@ -126,8 +124,7 @@ B(data,omega,l,phys_age):
     //tiheyden funktio modifioi silmujen lukumaaraa
 	
     //first, use the fnbuds for the number of buds
-    //int nbuds = static_cast<int>(fnbuds(data.fm));     *******************
-    int nbuds = static_cast<int>(l_fnbuds(data.fm));
+    int nbuds = static_cast<int>(fnbuds(data.fm));
 
     //then adjust the number of buds with relative light  
     //nbuds = static_cast<int>(max(nbuds+fnbudslight(data.ip),0.0));

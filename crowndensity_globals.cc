@@ -6,8 +6,11 @@ namespace Pine{
   double L_age = 0.0;
   double L_H = 0.0;
   const double l1 = 0.9;
-  ParametricCurve l_fnbuds("fnbuds.fun");   //---------------
-
+  ParametricCurve fnbuds;
+  ParametricCurve fnbudslight;
+  ParametricCurve fipbud;
+  bool is_architecture_change = false;
+  int architecture_change_year = INT_MAX;
 }
 
 
@@ -48,10 +51,8 @@ namespace CrownDensity{
   ///INT_MAX means default is off and must be explicitly set in command line.
   int mode_change_year = INT_MAX;
   ///This global variable denotes change in architecture development
-  bool is_architecture_change = false;
-  ///This global variable denotes year for change in architecture development
+   ///This global variable denotes year for change in architecture development
   ///MAX_INT default means off and must be explicitly set in command line.
-  int architecture_change_year = INT_MAX;
   ///@}
   ///\defgroup vsoccupance VoxelSpace for space occupancy
   ///@{

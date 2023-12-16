@@ -107,7 +107,6 @@ using namespace LignumForest;
 ///forest canopy is assumed to be homogenous with the heigth of tree crown length
 ///at any time of simulation.
 namespace CrownDensity{
-  //#include <ByBranches.h>
   ///\par Main program
   ///Note two command line options:
   ///+ -modeChange that reassigns new functions for growth
@@ -123,14 +122,14 @@ namespace CrownDensity{
     cout << "[-fipdistrib <filename>] [-writeInterval interval]" << endl;
     cout << "-[-seed <num>] [-selfThinning] [-increaseXi <year>]" <<endl;
     cout << "[-treeFile <filename>] [-voxelCalculation <year>]" << endl;
-    cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc] [-random_variation]" << endl;
+    cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc]" << endl;
     cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
-    cout << "[-space2Distance <Value>] [-byBranches] [-forcedHeight]" << endl;
-    cout << "[-heightFun] [-modeChange <year>] [-architectureChange <year>] [-kBorderConifer]" << endl;
-    cout << "-fipmode <file> -fgomode <file> f(ip) and f(go) after growth mode change" <<endl;
+    cout << "[-EBHREDUCTION <value>] [-EBHFINAL <value>] [-EBHInput <int>] [-RUE <value>]" << endl;
+    cout << "[-space2Distance <Value>] [-minLeaderLen <value>]" << endl;
+    cout << "[-modeChange <year> [-fgomode <file> ] ] [-architectureChange <year>] [-kBorderConifer]" << endl;
+
     cout << endl;
-    cout << "-adhoc             Increase growth in lower parts of the crown." <<endl;
-    cout << "-random_variation Random component in segment length in branches." <<endl;
+    cout << "-adHoc             Increase growth in lower parts of the crown." <<endl;
     cout << "EBH resource distn can be in use in two ways. Both are set by command line arguments." << endl;
     cout << "-EBH               means EBH is in use and values (of lambda parameter) are" << endl;
     cout << "                   specified for all Gravelius orders (function SPEBHF, ScotsPine.h, function" << endl;
@@ -150,13 +149,14 @@ namespace CrownDensity{
     cout << "-RUE <value>       The radiation use effeciency (rue) varies as a function of TreeSegments initial radiation" << endl;
     cout << "                   conditions. Photosynthetic production of TreeSegment = rue * LGApr * Qabs. <value> = degree of" << endl;
     cout << "                   increase of rue as a function of shadiness (0 < <value> < 2)." << endl;
-    cout << "-heightFun         If length of stem apical shoot is derived from relative crown length (params. LGPe1, LGPe2)." << endl;
     cout << "-modeChange <year> If the mode of morphological development changes in year <year>" << endl;
     cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
     cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
-    cout << "-architectureChange <year> If the mode of architectural development changes in year <year> this is implemented in the L system." <<endl;
-    cout << "                           See the global variables is_architecure_change and architecture_change_year" <<endl;                    
+    cout << "-architectureChange <year> If the mode of architectural development changes in year <year>," << endl;
+    cout << "                    this is implemented in the L system." <<endl;
+    cout << "                    See the global variables is_architecure_change and architecture_change_year" <<endl;       
     cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
+    cout << "-minLeaderLen <value>     Leader length (= height increment) is forced to be at least <value> m" << endl;
     cout << endl;
   }
   //[Usagex]
@@ -261,10 +261,11 @@ int main(int argc, char** argv)
 
   //Initialize ran3 with some negative integer
   CrownDensity::ran3_seed = -3924678;
+
   clarg.clear();
   if (ParseCommandLine(argc,argv,"-seed", clarg)){
-    CrownDensity::ran3_seed = atoi(clarg.c_str());
-    CrownDensity::ran3_seed = -abs(CrownDensity::ran3_seed);
+       CrownDensity::ran3_seed = atoi(clarg.c_str());
+      CrownDensity::ran3_seed = -abs(CrownDensity::ran3_seed);
   }
   ran3(&CrownDensity::ran3_seed);
 
@@ -295,6 +296,19 @@ int main(int argc, char** argv)
     CrownDensity::space2 = true;
   }
 
+  string fgomodefile;
+  ParametricCurve fgomode;
+  clarg.clear();
+  if (ParseCommandLine(argc,argv,"-fgomode",clarg)){
+    fgomodefile = clarg;
+    fgomode = ParametricCurve(fgomodefile);
+    clarg.clear();
+    if (!fgomode.ok()){
+      cerr << "-fgomode file for after growth mode change not defined" <<endl;
+      exit(0);
+    }
+  }
+  
   ///\par Parse Extended Borchert-Honda (EBH) allocation of growth
   ///EBH resource distn can be in use in two ways. Both are set by command line
   ///arguments. Option `-EBH` means EBH is in use and values (of lambda parameter)
@@ -405,19 +419,10 @@ int main(int argc, char** argv)
   if(CheckCommandLine(argc,argv,"-adHoc")) {
     CrownDensity::is_adhoc = true;
   }
-  CrownDensity::is_random_variation=false;
-  if(CheckCommandLine(argc,argv,"-random_variation")) {
-    CrownDensity::is_random_variation = true;
-  }
   
   CrownDensity::is_bud_view_function = false;
   if(CheckCommandLine(argc,argv,"-budViewFunction")) {
     CrownDensity::is_bud_view_function = true;
-  }
-
-  //  bool is_by_branches = false;
-  if(CheckCommandLine(argc,argv,"-byBranches")) {
-    CrownDensity::is_by_branches = true;
   }
 
   clarg.clear();
@@ -425,9 +430,6 @@ int main(int argc, char** argv)
     CrownDensity::space2_distance = atof(clarg.c_str());
   }
 
-  if(CheckCommandLine(argc,argv,"-forcedHeight")) {
-    CrownDensity::is_forced_height = true;
-  }
 
   if(CheckCommandLine(argc,argv,"-heightFun")) {
     CrownDensity::is_height_function = true;
@@ -445,8 +447,19 @@ int main(int argc, char** argv)
     Pine::is_architecture_change = true;
     Pine::architecture_change_year = atoi(clarg.c_str());
   }
-  //See CL argument "-EBH" after instantiatiation of the tree
 
+  bool is_min_leader_length = false;
+  double minLeader = 0.0;
+  clarg.clear();
+  if(ParseCommandLine(argc,argv,"-minLeaderLen", clarg)) {
+    is_min_leader_length = true;
+    minLeader = atof(clarg.c_str()); 
+  }
+
+
+
+  
+  //See CL argument "-EBH" after instantiatiation of the tree
   //See CL option "-EBH1 <value>" after instantiatiation of the tree
 
   ///\par  Tree functions 
@@ -516,9 +529,6 @@ int main(int argc, char** argv)
   Pine::fipbud.install("fip-bud.fun");
 
   
-  //    Tämä on hack ---------------------------------------!
-  CrownDensity::tax_share = GetValue(*pine1, LGPq);   
-
   //Read the amount of incoming radiation (from all directions, no
   // cosine correction) from Firmament instance of the tree and set that
   // as the value of max radiation to the tree
@@ -903,25 +913,6 @@ int main(int argc, char** argv)
       G(*pine1,data,LignumForest::PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),GetFunction(*pine1,SPFGO),GetFunction(*pine1,LGMIP),fgomode,fipmode);   
 
 
-    if(CrownDensity::is_by_branches && iter > 4) {
-      //      allocateByBranches(*pine1);
-
-      if(CrownDensity::is_height_function) {
-	//Here length of leader at tree level, if height function
-	Axis<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>& stem =  GetAxis(*pine1);
-	TreeSegment<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>* last = 
-	  GetLastTreeSegment(stem);
-	double e1 = GetValue(*pine1,LGPe1);
-	double e2 = GetValue(*pine1,LGPe2);
-	double Lnew = 0.0;
-	if (Pine::L_H > R_EPSILON)
-	  double Lnew = (e1 + e2*global_hcb/Pine::L_H) * CrownDensity::dDb;
-	if(Lnew < 0.1)           //safeguarding against losing top
-	  Lnew = 0.1;
-	SetValue(*last, LGAL, Lnew);
-      }
-    } 
-    else {   //Normal allocation
       //Testing the implementation where the sapwood area is passed down
       //as such  between segments that are  in the same  axis.  Only the
       //segments  of higher gravelius  order require  less sapwood  in a
@@ -946,15 +937,16 @@ int main(int argc, char** argv)
 	exit(0);
       }
 
-      Axis<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>& stem =  GetAxis(*pine1);
-      TreeSegment<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>* last =
-	GetLastTreeSegment(stem);
-      double lnew = GetValue(*last, LGAL);
-      if(lnew < 0.1)
-	SetValue(*last, LGAL, 0.1);
-
-    }
-
+      if(is_min_leader_length) {
+	Axis<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>& stem =  GetAxis(*pine1);
+	TreeSegment<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud>* last =
+	  GetLastTreeSegment(stem);
+	double lnew = GetValue(*last, LGAL);
+	if(lnew < minLeader) {
+	  SetValue(*last, LGAL, minLeader);
+	}
+      }
+  
     //Calculate  the  LGAsf  for   newly  created  segments,  sf  in  P
     //Kaitaniemi data depens on segment length
     ForEach(*pine1,LignumForest::SetScotsPineSegmentSf());

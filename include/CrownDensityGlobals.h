@@ -41,19 +41,13 @@ namespace LignumForest{
   extern double branch_angle;
 }
 ///@}
-namespace CrownDensity{
 
+namespace CrownDensity{
 
   extern int ran3_seed;
 
-  extern bool is_by_branches;          
-
   extern ParametricCurve adhoc;
-  extern ParametricCurve fip_mode;
-  extern ParametricCurve fgo_mode;
-
   extern bool is_adhoc;
-  extern bool is_random_variation;
 
   extern int growthloop_ebh_mode;       
 
@@ -74,11 +68,7 @@ namespace CrownDensity{
   extern bool space1;
   extern bool space2;
   extern double space2_distance;
-  extern bool is_forced_height;
   extern bool is_height_function;
-
-  extern ParametricCurve toptax; ///<function to adjust resource distn among branches
-  extern double tax_share;        
 
   extern ParametricCurve bud_view_f;
   extern bool is_bud_view_function;   

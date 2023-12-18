@@ -54,16 +54,12 @@ namespace CrownDensity{
   ///\brief Random seed
   extern int ran3_seed;
 
-  extern bool is_by_branches;          
-
+  extern bool is_adhoc;
   extern ParametricCurve adhoc;
   ///\brief Fip function after mode change
   extern ParametricCurve fip_mode;
   ///\brief Gravelius order function after mode change
   extern ParametricCurve fgo_mode;
-
-  extern bool is_adhoc;
-  extern bool is_random_variation;
 
   extern int growthloop_ebh_mode;       
 
@@ -86,11 +82,7 @@ namespace CrownDensity{
   extern bool space1;
   extern bool space2;
   extern double space2_distance;
-  extern bool is_forced_height;
   extern bool is_height_function;
-
-  extern ParametricCurve toptax; ///<function to adjust resource distn among branches
-  extern double tax_share;        
 
   extern ParametricCurve bud_view_f;
   extern bool is_bud_view_function;   

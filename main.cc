@@ -122,11 +122,11 @@ namespace CrownDensity{
     cout << "[-fipdistrib <filename>] [-writeInterval interval]" << endl;
     cout << "-[-seed <num>] [-selfThinning] [-increaseXi <year>]" <<endl;
     cout << "[-treeFile <filename>] [-voxelCalculation <year>]" << endl;
-    cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc]" << endl;
+    cout << "[-space0] [-space1] [-space2] [-standFromFile] [-adHoc] [-randomLength]" << endl;
     cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
     cout << "[-EBHREDUCTION <value>] [-EBHFINAL <value>] [-EBHInput <int>] [-RUE <value>]" << endl;
     cout << "[-space2Distance <Value>] [-minLeaderLen <value>]" << endl;
-    cout << "[-modeChange <year> [-fgomode <file> ] ] [-architectureChange <year>] [-kBorderConifer]" << endl;
+    cout << "[-modeChange <year> ] [-architectureChange <year>] [-kBorderConifer]" << endl;
 
     cout << endl;
     cout << "-adHoc             Increase growth in lower parts of the crown." <<endl;
@@ -152,6 +152,7 @@ namespace CrownDensity{
     cout << "-modeChange <year> If the mode of morphological development changes in year <year>" << endl;
     cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
     cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
+    cout << "-randomLength      Use explicitely random component in segment length." << endl;
     cout << "-architectureChange <year> If the mode of architectural development changes in year <year>," << endl;
     cout << "                    this is implemented in the L system." <<endl;
     cout << "                    See the global variables is_architecure_change and architecture_change_year" <<endl;       
@@ -295,19 +296,6 @@ int main(int argc, char** argv)
   if(CheckCommandLine(argc,argv,"-space2")) {
     CrownDensity::space2 = true;
   }
-
-  string fgomodefile;
-  ParametricCurve fgomode;
-  clarg.clear();
-  if (ParseCommandLine(argc,argv,"-fgomode",clarg)){
-    fgomodefile = clarg;
-    fgomode = ParametricCurve(fgomodefile);
-    clarg.clear();
-    if (!fgomode.ok()){
-      cerr << "-fgomode file for after growth mode change not defined" <<endl;
-      exit(0);
-    }
-  }
   
   ///\par Parse Extended Borchert-Honda (EBH) allocation of growth
   ///EBH resource distn can be in use in two ways. Both are set by command line
@@ -419,7 +407,14 @@ int main(int argc, char** argv)
   if(CheckCommandLine(argc,argv,"-adHoc")) {
     CrownDensity::is_adhoc = true;
   }
-  
+
+  //Use random compoment in segment length
+  CrownDensity::is_random_length = false;
+  if(CheckCommandLine(argc,argv,"-randomLength")) {
+    cout << "Random  component in segment length in use" <<endl;
+    CrownDensity::is_random_length = true;
+  }
+
   CrownDensity::is_bud_view_function = false;
   if(CheckCommandLine(argc,argv,"-budViewFunction")) {
     CrownDensity::is_bud_view_function = true;
@@ -621,15 +616,15 @@ int main(int argc, char** argv)
 
       SetValue(*pine1, SPis_EBH, 0.0);     // --- now FGO or vigor index
       growthloop_is_EBH_reduction = false;
-      is_adhoc = false;                   //No ad hoc lengthening of shoots at crown base
+      CrownDensity::is_adhoc = false;                   //No ad hoc lengthening of shoots at crown base
 
       //This changes parameter values and functions
       InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
       init_pine1.initialize(*pine1);
 
-      //... but not fgo
-      ParametricCurve fgo1("fgo1.fun");
-      SetFunction(*pine1, fgo1, SPFGO);
+      //fgo.fun in Tree functions, i.e. in MetaFile. REMOVE these two lines when ready
+      //ParametricCurve fgo1("fgo1.fun");
+      //Lignum::SetFunction(*pine1, fgo1, Lignum::LGMGO);
 
       Pine::fnbuds = GetFunction(*pine1, LGMNB);  //This for L-System----------
 
@@ -904,13 +899,13 @@ int main(int argc, char** argv)
 
 
     // REMOVE THESE WHEN YOU REMOVE fgomode,fipmode FROM LGMGrowthAllocator2 !!!!!!!!!!!!!!!!!!
-    ParametricCurve fipmode = GetFunction(*pine1, LGMIP);
-    ParametricCurve fgomode = GetFunction(*pine1, SPFGO);
+    //ParametricCurve fipmode = GetFunction(*pine1, LGMIP);
+    //ParametricCurve fgomode = Lignum::GetFunction(*pine1, Lignum::LGMGO);
 
     DiameterGrowthData data;
     LGMGrowthAllocator2<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud,LignumForest::SetScotsPineSegmentLength,
 			LignumForest::PartialSapwoodAreaDown,LignumForest::ScotsPineDiameterGrowth2,DiameterGrowthData>
-      G(*pine1,data,LignumForest::PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)),GetFunction(*pine1,SPFGO),GetFunction(*pine1,LGMIP),fgomode,fipmode);   
+      G(*pine1,data,LignumForest::PartialSapwoodAreaDown(GetFunction(*pine1,SPSD)));   
 
 
       //Testing the implementation where the sapwood area is passed down

@@ -22,6 +22,8 @@ namespace CrownDensity{
   bool is_adhoc = false;
    ///@}
 
+  ///Explicitely use random component in segment length.
+  bool is_random_length = false;
   ///This global variable is needed e.g. in bybranches.cc
   int growthloop_ebh_mode = 0;          
 

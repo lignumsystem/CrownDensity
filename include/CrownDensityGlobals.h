@@ -54,7 +54,11 @@ namespace CrownDensity{
   ///\brief Random seed
   extern int ran3_seed;
 
+  ///\brief Random component in segment length (use to apply conditionally any function implementing segment elongation)
+  extern bool is_random_length;
+  ///\brief Ad hoc lengthening of shoots at crown base. \sa CrownDensity::adoc
   extern bool is_adhoc;
+  ///\brief Function for ad hoc lengthening of shoots at crown base. \sa CrownDensity::is_adhoc
   extern ParametricCurve adhoc;
   ///\brief Fip function after mode change
   extern ParametricCurve fip_mode;

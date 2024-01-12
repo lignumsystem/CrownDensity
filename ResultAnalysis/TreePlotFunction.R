@@ -23,7 +23,7 @@
 #Then source "TreePlotFunction.R"
 #source("TreePlotFunction.R")
 #Finally run the TreePlot function, e.g.:
-#ForestPlot("CrownDensity147.h5")
+#TreePlot("CrownDensity147.h5")
 #The figures will appear in "CrownDensity147.h5.pdf"
 
 #NOTE! Three data files are are used: Va27.txt, VVV-40.txt, and ksto-mt.dat (in LignumForest/Resultanalysis).

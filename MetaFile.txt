@@ -8,3 +8,4 @@ Functions:
     LGMIP: fip.fun
     LGMVI: fvigorindex.fun
     LGMNB: fnbuds.fun
+    LGMGO: fgo.fun

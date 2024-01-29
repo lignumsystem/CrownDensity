@@ -622,12 +622,7 @@ int main(int argc, char** argv)
       InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
       init_pine1.initialize(*pine1);
 
-      //fgo.fun in Tree functions, i.e. in MetaFile. REMOVE these two lines when ready
-      //ParametricCurve fgo1("fgo1.fun");
-      //Lignum::SetFunction(*pine1, fgo1, Lignum::LGMGO);
-
       Pine::fnbuds = GetFunction(*pine1, LGMNB);  //This for L-System----------
-
     }
 
     if(CrownDensity::is_height_function) {

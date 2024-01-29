@@ -7,5 +7,5 @@ Functions:
     LGMFM: fm.fun
     LGMIP: fip.fun
     LGMVI: fvigorindex.fun
-    LGMNB: fnbuds.fun
     LGMGO: fgo.fun
+    LGMNB: fnbuds.fun

@@ -127,7 +127,7 @@ points(y2,td2[16,1,]*dens2,type="l", lwd=2, col="blue")
 
 #LAI and specific leaf area
 #par(mar = c(5, 4, 4, 4) + 0.3)              # Additional space for second y-axis
-plot(y1,td1[15,1,]*dens1/1e4, ylim=c(0,30),type="l", lty=1, lwd=2,xlab="time (y)", ylab="All-sided LAI (m2/m2)",main="LAI",col="darkblue") #LAI
+plot(y1,td1[15,1,]*dens1/1e4, ylim=c(0,30),type="l", lty=1, lwd=2,xlab="time (y)", ylab="All-sided LAI (m2/m2)",main="LAI",col="darkgreen") #LAI
 points(y2,td2[15,1,]*dens2/1e4,type="l",lty=1,lwd=2,col="blue")
 # par(new = TRUE)
 # plot(y,td[15,1,]/td[37,1,],type="l", lty=2,lwd=2, axes=FALSE,xlab = "", ylab = "", ylim=c(0,32))

@@ -2,12 +2,17 @@
 
 CrownDensity simulates growth of one Scots  pine tree growing in a gap
 of  a homogeneous  forest. The  density of  the surrounding  forest is
-input from file *stemsha.fun*.   CrownDensity uses components from the
-LignumForest for  tree growth. Most notably
+input from file *stemsha.fun*.   
+
+CrownDensity uses components from the LignumForest for  tree growth. Most notably:
    
    + LignumForest::ScotsPineTree
    + LignumForest::ScotsPineSegment
    + LignumForest::SetScotsPineSegmentLength
+
+>[!IMPORTANT]
+>LignumForest will be detached from CrownDensity dependency. The last LignumForest version that can (and must) be used
+>with CrownDensity has the tag `crowndensity-compatible`.
 
 ## CrownDensity dependencies
 

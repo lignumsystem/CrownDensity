@@ -89,7 +89,9 @@ namespace CrownDensity{
   extern bool is_height_function;
 
   extern ParametricCurve bud_view_f;
-  extern bool is_bud_view_function;   
+  extern bool is_bud_view_function;
+
+  extern int a_change_start;
 }//end namespace
 ///@}
 #endif

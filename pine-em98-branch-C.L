@@ -216,11 +216,23 @@ B(data,omega,l,phys_age):
         //For new branches inherit physiological age from mother bud
         //When existing branch reaches architectural_change_year
         //set new branch to exisiting branch physiological age
-        if (nbuds == 0)
-           produce B(data,omega,l,phys_age);
+        if (nbuds == 0){
+           if ((is_architecture_change == true) && (phys_age >= architecture_change_year)){
+             //GROWTH ARCHITECTURE CHANGE IN BRANCHES: always only two new branches at the same plane to the opposite sides
+             //NOTE: this can go "forever" (up to 100 branchings)  unless growth conditions and functions set the segment length to 0
+             PineBudData mother_bud_data(data);
+              mother_bud_data.phys_age += 1.0;
+              produce  SB() Turn(turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
+                       SB() Turn(-turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
+                       Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
+	   }
+	   else{
+               produce B(data,omega,l,phys_age);
+	   }
+        }
         else if ((is_architecture_change == true) && (phys_age >= architecture_change_year)){
            //GROWTH ARCHITECTURE CHANGE IN BRANCHES: always only two new branches at the same plane to the opposite sides
-           //NOTE: this can go forever unless growth conditions and functions set the segment length to 0
+           //NOTE: this can go  "forever"  (up to 100 brancings) unless growth conditions and functions set the segment length to 0
            PineBudData mother_bud_data(data);
            mother_bud_data.phys_age += 1.0;
            produce  SB() Turn(turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 

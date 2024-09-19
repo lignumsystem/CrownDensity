@@ -92,6 +92,7 @@ namespace CrownDensity{
   extern bool is_bud_view_function;
   ///The angle of branching after architecture change. Set in L system.
   extern double max_turn_in_architecture_change;
+  extern int a_change_start;
 }//end namespace
 ///@}
 #endif

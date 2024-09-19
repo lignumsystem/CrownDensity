@@ -126,7 +126,8 @@ namespace CrownDensity{
     cout << "[-budViewFunction] [-EBH] -EBH1 <value>]" << endl;
     cout << "[-EBHREDUCTION <value>] [-EBHFINAL <value>] [-EBHInput <int>] [-RUE <value>]" << endl;
     cout << "[-space2Distance <Value>] [-minLeaderLen <value>]" << endl;
-    cout << "[-modeChange <year> ] [-architectureChange <year>] [-kBorderConifer]" << endl;
+    cout << "[-modeChange <year> ] [-architectureChange <year> [-aChangeStart <year>]]" << endl;
+    cout << "[-kBorderConifer]" << endl;
 
     cout << endl;
     cout << "-adHoc             Increase growth in lower parts of the crown." <<endl;
@@ -153,8 +154,13 @@ namespace CrownDensity{
     cout << "                   In this case morphology changes to fip.fun and fgo.fun (may be e.g. EBH before)" << endl;
     cout << "                   and new functions for fip (fip1.fun) and fgo (fgo1.fun) are read in." << endl;
     cout << "-randomLength      Use explicitely random component in segment length." << endl;
-    cout << "-architectureChange <year> If the mode of architectural development changes in year <year>," << endl;
-    cout << "                    this is implemented in the L system." <<endl;
+    cout << "-architectureChange <year> If the mode of architectural development in a shoot (Segment) changes" << endl;
+    cout << "                   when it is <year> years old. This is implemented in the L system." <<endl;
+    cout << "-aChangeStart <year>    If -architectureChange the time when -architectureChange starts to work. Default" << endl;
+    cout << "                    value is 0. Note that -architectureChange will" << endl;
+    cout << "                    affect morphological development when a shoot (Segment) is <year> years old. In order" << endl;
+    cout << "                    to start the change in morphology in year tm, <year> in -aChangeStart must be set as" << endl;
+    cout << "                    tm - <year> of -architectureChange." << endl;
     cout << "                    See the global variables is_architecure_change and architecture_change_year" <<endl;       
     cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
     cout << "-minLeaderLen <value>     Leader length (= height increment) is forced to be at least <value> m" << endl;
@@ -436,11 +442,20 @@ int main(int argc, char** argv)
     CrownDensity::is_mode_change = true;
     CrownDensity::mode_change_year = atoi(clarg.c_str());
   }
+  
+  int architecture_change_start_year = 0;   //-architectureChange <year> works after this year
+  bool architecture_change_is_coming = false;
   clarg.clear();
   //is_architecture_change and architecture_change_year are global variables
   if (ParseCommandLine(argc,argv,"-architectureChange",clarg)){
-    Pine::is_architecture_change = true;
+    Pine::is_architecture_change = false;
+    architecture_change_is_coming = true;
     Pine::architecture_change_year = atoi(clarg.c_str());
+    architecture_change_start_year = 0;
+    clarg.clear();
+    if (ParseCommandLine(argc,argv,"-aChangeStart",clarg)){
+      architecture_change_start_year = atoi(clarg.c_str());
+    }   
   }
 
   if (ParseCommandLine(argc,argv,"-Lmaxturn",clarg)){
@@ -617,7 +632,7 @@ int main(int argc, char** argv)
     Pine::L_age = GetValue(*pine1,LGAage);
     Pine::L_H =  GetValue(*pine1,LGAH);
 
-    if(is_mode_change && (iter == mode_change_year)) {     // Change the mode of crown development
+    if(is_mode_change && (iter == mode_change_year)) {     // Change the mode of tree growth
       cout << "Change of morphological mode mode at L_age " << Pine::L_age << endl;
 
       SetValue(*pine1, SPis_EBH, 0.0);     // --- now FGO or vigor index
@@ -628,7 +643,12 @@ int main(int argc, char** argv)
       InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
       init_pine1.initialize(*pine1);
 
-      Pine::fnbuds = GetFunction(*pine1, LGMNB);  //This for L-System----------
+      Pine::fnbuds = GetFunction(*pine1,LGMNB);  //This for L-System----------     
+    }
+
+    //Pine::is_architecture_change influences how morphological development by the L-system works
+    if(architecture_change_is_coming && (iter == architecture_change_start_year)) {
+      Pine::is_architecture_change = true;
     }
 
     if(CrownDensity::is_height_function) {

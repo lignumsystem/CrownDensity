@@ -75,6 +75,10 @@ points(y,100*td[10,1,], type="l", lwd=2, col="darkgreen")    #Diameter at crown 
 # points(vv$age,0.02+1.25*vv$DBH,type="l",lwd=3,col="darkgreen")
 # points(ksto$year,0.02+1.25*ksto$Dbhav,type="l",lwd=3,col="darkgreen")
 
+#Height vs base diameter
+plot(100*td[8,1,],td[7,1,], type="l", xlim=c(0,30), ylim=c(0,30), lwd=2, xlab="Base diameter (cm)", ylab="Tree height (m)", main="Height vs base diameter")
+abline(0,1,col="blue",lwd=2)
+
 
 #Basal area of one tree
 plot(y,pi*(100*td[8,1,])^2/4, ylim=c(0,500),type="l", lwd=2,xlab="time (y)", ylab= "cm2", main="Basal area at base of one tree")
@@ -101,9 +105,6 @@ points(y,td[17,1,]-td[18,1,], type="l", col="darkgreen", lwd=2)
 #Crown ratio
 plot(y,1-td[11,1,]/td[7,1,], ylim=c(0,1), type="l", main="Crown ratio", ylab="Crown ratio",xlab="time (y)",xlim=c(0,ymax))
 
-#Height vs diameter
-plot(100*td[8,1,],td[7,1,], ylim=c(0,30), xlim=c(0,30), type="l",main="Height vs diameter at base" ,xlab="Tree diameter (m)", ylab="Tree height (cm)")
-abline(0,1,lwd=2)
 
 #Foliage mass vs cross-sectional area at crown base
 plot((pi/4)*100^2*td[10,1,]^2,2*td[37,1,], ylim=c(0,10), xlim=c(0,150), type="l",main="Fol.mass vs stem cross sec. area",xlab="Stem cross section area at crown b.  (cm2)", ylab="Foliage mass (kg DM)")

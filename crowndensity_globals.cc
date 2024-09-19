@@ -75,6 +75,11 @@ namespace CrownDensity{
   ///\defgroup budview Bud view experiment
   ///@{
   ParametricCurve bud_view_f("bvf.fun");
-  bool is_bud_view_function = false;   
+  bool is_bud_view_function = false;
   ///@}
+
+  
+  int a_change_start = 0;
+
+ 
 }//end namespace

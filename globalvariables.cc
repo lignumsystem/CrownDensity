@@ -24,3 +24,7 @@ namespace LignumForest{
   ///\deprecated Variation in branch angle. Set in \sa pine-em98.L
   double branch_angle = 45.0 * PI_VALUE / 180.0;
 }
+
+namespace CrownDensity{
+  double  max_turn_in_architecture_change = 80.0*PI_VALUE/180.0;
+}

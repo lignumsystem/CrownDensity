@@ -443,6 +443,12 @@ int main(int argc, char** argv)
     Pine::architecture_change_year = atoi(clarg.c_str());
   }
 
+  if (ParseCommandLine(argc,argv,"-Lmaxturn",clarg)){
+    //Change degrees to radians used
+    double turn_angle = atof(clarg.c_str())*PI_VALUE/180.0;
+    CrownDensity::max_turn_in_architecture_change = turn_angle;
+  }
+  
   bool is_min_leader_length = false;
   double minLeader = 0.0;
   clarg.clear();

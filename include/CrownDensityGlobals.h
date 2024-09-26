@@ -68,12 +68,12 @@ namespace CrownDensity{
   extern int growthloop_ebh_mode;       
 
   extern LGMdouble max_rueqin;
-
+  ///\brief MetaFiles from the command line
+  extern deque<string> metafile_q;
   ///\brief Set mode change on/off
   extern bool is_mode_change;
-  ///\brief Set mode change year
-  extern int mode_change_year;    
-
+  ///\brief Comma separated list of Mode Change Years from the command line
+  extern deque<int> modechange_year_q;
   extern Firmament dummy_firm;
   extern VoxelSpace space_occupancy;
 

@@ -106,6 +106,7 @@ set(SOURCE_FILES main.cc
   ../LignumForest/branchfunctor.cc
   ../LignumForest/src/metabolism.cc
   src/radiation.cc
+  src/modechangefunctions.cc
   ../LignumForest/src/space.cc
   ../LignumForest/src/CreateHDF5Files.cc
 )

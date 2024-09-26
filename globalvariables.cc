@@ -1,4 +1,5 @@
 #include <mathsym.h>
+#include <deque>
 ///\file globalvariables.cc
 ///\brief Global variables
 ///
@@ -27,4 +28,6 @@ namespace LignumForest{
 
 namespace CrownDensity{
   double  max_turn_in_architecture_change = 80.0*PI_VALUE/180.0;
+  deque<string> metafile_q;
+  deque<int> modechange_year_q;
 }

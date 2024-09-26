@@ -70,6 +70,7 @@
 //Include the implementation of the tree segment and bud
 #include <ScotsPine.h>
 #include <CrownDensityGlobals.h>
+#include<ModeChangeFunctions.h>
 //From ../LignumForest/
 #include <GrowthLoop.h> 
 #include <Shading.h>
@@ -192,6 +193,7 @@ int main(int argc, char** argv)
   else{
     iterations = atoi(argv[1]);
     metafile = string(argv[2]);  //< `metafile`, file containing actual parameter files etc.
+    InsertMetaFiles(argv[2],CrownDensity::metafile_q);
   }
 
   //Check possible command line arguments
@@ -440,9 +442,13 @@ int main(int argc, char** argv)
   clarg.clear();
   if(ParseCommandLine(argc,argv,"-modeChange", clarg)) {
     CrownDensity::is_mode_change = true;
-    CrownDensity::mode_change_year = atoi(clarg.c_str());
+    InsertModeChangeYears(clarg,CrownDensity::modechange_year_q);
+    //Consistency check between number of MetaFiles and Growth mode change years 
+    if (!ModeChangeConsistency(CrownDensity::metafile_q,CrownDensity::modechange_year_q)){
+      exit(0);
+    }
   }
-  
+  exit(0);
   int architecture_change_start_year = 0;   //-architectureChange <year> works after this year
   bool architecture_change_is_coming = false;
   clarg.clear();
@@ -535,6 +541,8 @@ int main(int argc, char** argv)
 
   // Create an instance of intialization class for tree and initialize the
   // global tree created above
+  metafile = CrownDensity::metafile_q.front();
+  CrownDensity::metafile_q.pop_front();
   InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1(metafile,VERBOSE);
   init_pine1.initialize(*pine1);
 
@@ -632,7 +640,7 @@ int main(int argc, char** argv)
     Pine::L_age = GetValue(*pine1,LGAage);
     Pine::L_H =  GetValue(*pine1,LGAH);
 
-    if(is_mode_change && (iter == mode_change_year)) {     // Change the mode of tree growth
+    if(is_mode_change && (iter == modechange_year_q.front())) {     // Change the mode of tree growth
       cout << "Change of morphological mode mode at L_age " << Pine::L_age << endl;
 
       SetValue(*pine1, SPis_EBH, 0.0);     // --- now FGO or vigor index
@@ -640,7 +648,11 @@ int main(int argc, char** argv)
       CrownDensity::is_adhoc = false;                   //No ad hoc lengthening of shoots at crown base
 
       //This changes parameter values and functions
-      InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1("MetaFile1.txt",VERBOSE);
+      //Update the queues for MetaFiles and Growth Mode Change years
+      metafile = CrownDensity::metafile_q.front();
+      CrownDensity::metafile_q.pop_front();
+      CrownDensity::modechange_year_q.pop_front();
+      InitializeTree<LignumForest::ScotsPineSegment,LignumForest::ScotsPineBud> init_pine1(metafile,VERBOSE);
       init_pine1.initialize(*pine1);
 
       Pine::fnbuds = GetFunction(*pine1,LGMNB);  //This for L-System----------     

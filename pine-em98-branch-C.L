@@ -222,8 +222,8 @@ B(data,omega,l,phys_age):
              //NOTE: this can go "forever" (up to 100 branchings)  unless growth conditions and functions set the segment length to 0
              PineBudData mother_bud_data(data);
               mother_bud_data.phys_age += 1.0;
-              produce  SB() Turn(turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
-                       SB() Turn(-turn_branch_max)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
+              produce  SB() Turn(CrownDensity::max_turn_in_architecture_change)Down(3.0)   B(data,omega+1,l1,phys_age) EB() 
+                       SB() Turn(-CrownDensity::max_turn_in_architecture_change)Down(3.0)   B(data,omega+1,l1,phys_age) EB()
                        Down(-1) B(mother_bud_data,omega,l,phys_age+1.0);
 	   }
 	   else{

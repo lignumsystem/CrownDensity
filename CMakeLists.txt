@@ -100,8 +100,8 @@ endif()
 #find_package(GLUT REQUIRED)
 
 set(SOURCE_FILES main.cc
-  crowndensity_globals.cc
-  globalvariables.cc
+  src/crowndensity_globals.cc
+  src/globalvariables.cc
   ${LSYSTEMSRC}
   ../LignumForest/branchfunctor.cc
   ../LignumForest/src/metabolism.cc
@@ -156,5 +156,8 @@ else()
   message(${CMAKE_HOST_SYSTEM_NAME} " not supported")
   message(FATAL_ERROR "Exiting cmake")
 endif()
-
+add_custom_command(TARGET crowndens
+  POST_BUILD
+  COMMENT "REMEMBER to type \"make install\" to install \"crowndens\" into the working directory above."
+  )
 install(TARGETS crowndens DESTINATION "${CMAKE_CURRENT_LIST_DIR}")

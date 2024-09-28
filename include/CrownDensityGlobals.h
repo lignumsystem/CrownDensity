@@ -3,7 +3,7 @@
 ///\file CrownDensityGlobals.h
 ///\brief Global varables in CrownDensity
 ///\sa crowndensity_globals.cc
-
+#include <deque>
 #include <LGMSymbols.h>
 #include <Point.h>
 #include <ParametricCurve.h>
@@ -92,6 +92,7 @@ namespace CrownDensity{
   extern bool is_bud_view_function;
   ///The angle of branching after architecture change. Set in L system.
   extern double max_turn_in_architecture_change;
+  ///Adjustment (delay) when actually to start or trigger the architecture change 
   extern int a_change_start;
 }//end namespace
 ///@}

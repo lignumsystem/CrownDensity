@@ -80,6 +80,10 @@ namespace CrownDensity{
 
   
   int a_change_start = 0;
+  double  max_turn_in_architecture_change = 80.0*PI_VALUE/180.0;
+  deque<string> metafile_q;
+  deque<int> modechange_year_q;
+  
 
  
 }//end namespace

@@ -448,7 +448,7 @@ int main(int argc, char** argv)
       exit(0);
     }
   }
-  exit(0);
+  //  exit(0);
   int architecture_change_start_year = 0;   //-architectureChange <year> works after this year
   bool architecture_change_is_coming = false;
   clarg.clear();
@@ -1110,7 +1110,10 @@ int main(int argc, char** argv)
   ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
   TMatrix3D<double>& hdf5_data = gloop.getHDF5TreeData();
   TMatrix2D<double> hdf5_tree_param_data = gloop.getHDF5TreeParameterData();
+  cout << "HEP" << endl;
   CreateLignumHDF5File(hdf5fname,hdf5_data,hdf5_tree_param_data,argc,argv);
+  cout << "HEP" << endl;
+
   //[CreateHDF5]
   ///\endinternal
   cout << "DATA SAVED TO HDF5 FILES AND SIMULATION DONE" <<endl;

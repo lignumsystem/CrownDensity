@@ -1110,10 +1110,8 @@ int main(int argc, char** argv)
   ParseCommandLine(argc,argv,"-hdf5", hdf5fname);
   TMatrix3D<double>& hdf5_data = gloop.getHDF5TreeData();
   TMatrix2D<double> hdf5_tree_param_data = gloop.getHDF5TreeParameterData();
-  cout << "HEP" << endl;
   CreateLignumHDF5File(hdf5fname,hdf5_data,hdf5_tree_param_data,argc,argv);
-  cout << "HEP" << endl;
-
+  
   //[CreateHDF5]
   ///\endinternal
   cout << "DATA SAVED TO HDF5 FILES AND SIMULATION DONE" <<endl;

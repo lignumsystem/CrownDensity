@@ -18,8 +18,9 @@ LGPss 0.07
 LGPapical 0.9
 LGPxi 0.6
 LGPaf 2
-LGPq 0.95
+LGPq 0.002
 LGPsr 1.33
 LGPlen_random 0.5
 LGPe1 112.872
 LGPe2 30
+

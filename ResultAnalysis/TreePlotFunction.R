@@ -36,17 +36,17 @@
 # in LignumForest/Resultanalysis (getwd() == LignumForest/Resultanalysis)
 #----------------------------------------------------------------------------
 
-TreePlot <- function(infile) {
+TreePlot <- function(infile, GYdata="") {
 
 d <- H5Fopen(infile)
 
-# va27 <- read.table("Va27.txt",header=FALSE)
-# colnames(va27) <- c("a", "Hd",   "HgM",    "DgM",   "V",  "Hc", "G")
+ va27 <- read.table(paste(GYdata,"Va27.txt",sep=""),header=FALSE)
+ colnames(va27) <- c("a", "Hd",   "HgM",    "DgM",   "V",  "Hc", "G")
 
-# vv <- read.table("VVV-40.txt",header=FALSE)
-# colnames(vv) <- c("age",    "DBH",		"H",		"Hcb",		"Wf", "V")
+ vv <- read.table(paste(GYdata,"VVV-40.txt",sep=""),header=FALSE)
+ colnames(vv) <- c("age",    "DBH",		"H",		"Hcb",		"Wf", "V")
 
-# ksto <- read.table("ksto-mt.dat", header=TRUE)
+ ksto <- read.table(paste(GYdata,"ksto-mt.dat",sep=""), header=TRUE)
 
 pdf_file <- paste(infile,".pdf",sep="")
 pdf(pdf_file)
@@ -56,32 +56,33 @@ ymax <- length(td[1,1,]) - 1     #Maximum year
 y <- 0:ymax                      #Simulation years
 
 #Height
-plot(y,td[7,1,], type="l", ylim=c(0,30), lwd=2, xlab="time (y)", ylab="Tree height (m)", main="Tree height")
+plot(y,td[7,1,], type="l", ylim=c(0,30), lwd=2, xlab="time (y)", ylab="Tree height (m)", main="Tree height\nGreen = BH diam Koivisto, Varmola, Vuok&V:o")
 points(y,td[11,1,], type="l", lwd=2, lty=2)
 
-# points(va27$a,va27$HgM,type="l",lwd=3,col="darkgreen")
-# points(vv$age,vv$H,type="l",lwd=3,col="darkgreen")
-# points(ksto$year,ksto$Hav,type="l",lwd=3,col="darkgreen")
+points(va27$a,va27$HgM,type="l",lwd=3,col="darkgreen")
+points(vv$age,vv$H,type="l",lwd=3,col="darkgreen")
+points(ksto$year,ksto$Hav,type="l",lwd=3,col="darkgreen")
 
 
-#Base diameter
-plot(y,100*td[8,1,], type="l", lwd=2, ylim=c(0,30),xlab="time (y)", ylab="Base diameter (cm)",
-main="Diameter at base (black), breast height (brown), crown base (green)")
+#Diameter
+plot(y,100*td[8,1,], type="l", lwd=2, ylim=c(0,30),xlab="time (y)", ylab="Diameter (cm)",
+main="Diameter at base (black), breast height (brown), crown base (blue)\nGreen = BH diam Koivisto, Varmola, Vuok&V:o")
 points(y,100*td[9,1,], type="l", lwd=2, col="brown")         #Diameter at breast height
-points(y,100*td[10,1,], type="l", lwd=2, col="darkgreen")    #Diameter at crown base
+points(y,100*td[10,1,], type="l", lwd=2, col="darkblue")    #Diameter at crown base
 
-# dkanto = 2 + 1,25d (Laasasenaho 1975, Folia Forestalia 233)
-# points(va27$a,0.02+1.25*va27$DgM,type="l",lwd=3,col="darkgreen")
-# points(vv$age,0.02+1.25*vv$DBH,type="l",lwd=3,col="darkgreen")
-# points(ksto$year,0.02+1.25*ksto$Dbhav,type="l",lwd=3,col="darkgreen")
+points(va27$a,0.02+1.25*va27$DgM,type="l",lwd=3,col="darkgreen")
+points(vv$age,0.02+1.25*vv$DBH,type="l",lwd=3,col="darkgreen")
+points(ksto$year,0.02+1.25*ksto$Dbhav,type="l",lwd=3,col="darkgreen")
 
-#Height vs base diameter
-plot(100*td[8,1,],td[7,1,], type="l", xlim=c(0,30), ylim=c(0,30), lwd=2, xlab="Base diameter (cm)", ylab="Tree height (m)", main="Height vs base diameter")
+#Height vs breast height diameter
+plot(100*td[9,1,],td[7,1,], type="l", xlim=c(0,30), ylim=c(0,30), lwd=2, xlab="BH diameter (cm)", ylab="Tree height (m)", main="Height vs breast height diameter\nGreen = Koivisto, Varmola, Vuok&V:o")
 abline(0,1,col="blue",lwd=2)
+points(ksto$Dbhav,ksto$Hav,type="l",lwd=2,col="darkgreen")
+points(va27$DgM,va27$HgM, type="l",lwd=2,col="darkgreen")
+points(vv$DBH,vv$H, type="l",lwd=2,col="darkgreen")
 
-
-#Basal area of one tree
-plot(y,pi*(100*td[8,1,])^2/4, ylim=c(0,500),type="l", lwd=2,xlab="time (y)", ylab= "cm2", main="Basal area at base of one tree")
+#Basal area of one tree at BH
+plot(y,pi*(100*td[9,1,])^2/4, ylim=c(0,500),type="l", lwd=2,xlab="time (y)", ylab= "cm2", main="Basal area at BH of one tree")
 
 
 #Basal area at crown base
@@ -107,7 +108,7 @@ plot(y,1-td[11,1,]/td[7,1,], ylim=c(0,1), type="l", main="Crown ratio", ylab="Cr
 
 
 #Foliage mass vs cross-sectional area at crown base
-plot((pi/4)*100^2*td[10,1,]^2,2*td[37,1,], ylim=c(0,10), xlim=c(0,150), type="l",main="Fol.mass vs stem cross sec. area",xlab="Stem cross section area at crown b.  (cm2)", ylab="Foliage mass (kg DM)")
+plot((pi/4)*100^2*td[10,1,]^2,2*td[37,1,], ylim=c(0,10), xlim=c(0,150), type="l",main="Fol.mass vs stem cross sec. area",xlab="Stem cross section area at crown base (cm2)", ylab="Foliage mass (kg DM)")
 abline(0,0.055,col="blue",lwd=2)
 
 
@@ -128,19 +129,29 @@ st = h5read(d,"AllFunctions/stemsha.fun")
 dens <- approx(st[1,],st[2,],y)$y
 plot(y,dens, type="l", ylim=c(0,20000),lty=1, lwd=2, xlab="time (y)", ylab="No. trees / ha", main="Stand density")
 
+#Self thinning plot
+
+plot(log(td[9,1,]),log(dens), xlim=c(log(0.005),log(0.8)),ylim=c(log(100),log(20000)),type="l", lty=1, lwd=2, xlab="log(BH diameter)", ylab="log(No. trees / ha)", main="Self-thinning curve\nGreen = Koivisto")
+p1 <- c(max(log(td[9,1,ymax]))+1,min(log(dens[ymax]))-0.5)
+p22 <- log(dens[1])+0.5
+p21 <- (p22-p1[2])/(-3/2)+p1[1]
+points(c(p1[1],p21),c(p1[2],p22),type="l",lwd=2,col="red")
+legend(p1[1]-0.5,p1[2]+1,"-3/2",box.lty=0,text.col="red")
+points(log((0.02+1.25*ksto$Dbhav)/100),log(ksto$N),type="l",lwd=3,col="darkgreen")
+
 #Basal area
-plot(y,pi*(td[8,1,])^2*dens/4, ylim=c(0,80),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area")
-# points(va27$a,va27$G,type="l",lwd=3,col="darkgreen")
-# points(ksto$year,ksto$G,type="l",lwd=3,col="darkgreen")
+plot(y,pi*(td[9,1,])^2*dens/4, ylim=c(0,80),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area\nGreen = Koivisto, Varmola")
+points(va27$a,va27$G,type="l",lwd=2,col="darkgreen")
+points(ksto$year,ksto$G,type="l",lwd=2,col="darkgreen")
 
 #Basal area at crown base
 plot(y,pi*(td[10,1,])^2*dens/4, ylim=c(0,60),type="l", lwd=2,xlab="time (y)", ylab= "m2/ha", main="Basal area at crown base")
 
 #Stem volume
-plot(y,td[16,1,]*dens, ylim=c(0,1000),type="l", lwd=2,xlab="time (y)", ylab= "m3/ha", main="Stem volume")
-# points(va27$a,va27$V,type="l",lwd=3,col="darkgreen")
-# points(vv$age,vv$V,type="l",lwd=3,col="darkgreen")
-# points(ksto$year,ksto$V,type="l",lwd=3,col="darkgreen")
+plot(y,td[16,1,]*dens, ylim=c(0,1000),type="l", lwd=2,xlab="time (y)", ylab= "m3/ha", main="Stem volume\nGreen = Koivisto, Varmola, Vuok&V:o")
+points(va27$a,va27$V,type="l",lwd=2,col="darkgreen")
+points(vv$age,vv$V,type="l",lwd=2,col="darkgreen")
+points(ksto$year,ksto$V,type="l",lwd=2,col="darkgreen")
 
 #LAI and specific leaf area
 par(mar = c(5, 4, 4, 4) + 0.3)              # Additional space for second y-axis

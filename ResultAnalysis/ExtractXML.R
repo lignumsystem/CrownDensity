@@ -13,10 +13,13 @@
 #           /TreeXML/5  Tree_0 H5I_DATASET STRING   1
 #This example shows the xml data at time (year) 5
 
-#In order to run ForestPlot in R a suitable package is needed. ForestPlot has been tested using
+#In order to run ExtractXML in R a suitable package is needed. ExtractXML has been tested using
 #Biomanager package (https://www.rdocumentation.org/packages/BiocManager/versions/1.30.17):
 #install.packages("BiocManager")
 #BiocManager::install("rhdf5")
+#Library rhdf5
+#library("rhdf5")
+
 
 
 

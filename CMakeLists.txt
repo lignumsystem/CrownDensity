@@ -38,11 +38,12 @@
 # Create pdf file of project dependencies:
 # dot -Kneato -Goverlap=scale -Tpdf -o CrownDensity.pdf graphviz/CrownDensity.dot
 # --------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.30)
 # cmake 3.23 for Xcode 13 recommends the policy CMP0114 (warning output)
-cmake_policy(SET CMP0114 NEW)
+#cmake_policy(SET CMP0114 NEW)
 project(crowndens DESCRIPTION "Single tree in homogeneous forest")
-message("Project " ${CMAKE_PROJECT_NAME})
+message("Project  ${CMAKE_PROJECT_NAME}: ${crowndens_DESCRIPTION}")
+message("-----------------------------------------------------")
 
 # CMake can generate Graphviz files showing the dependencies between the targets in a project
 include(CMakeGraphVizOptions)
@@ -140,6 +141,10 @@ ${CMAKE_CURRENT_LIST_DIR}/../LEngine/include
 add_dependencies(crowndens lignum-core)
 
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+  message("CrownDensity")
+  message("------------")
+  message("Apple macOS (Darwin) libraries")
+  message("NOTE! The compatible LignumForest project required has the Git tag \"crowndensity-compatible\"")
   target_link_libraries(crowndens
     #HDF5::HDF5 Qt4::QtOpenGL Qt4::QtXml Qt4::QtGui Qt4::QtCore
     HDF5::HDF5 Qt5::Xml Qt5::Core
@@ -147,6 +152,11 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     Visual L voxel sky LGM cxxadt
   )
 elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+  message("CrownDensity")
+  message("------------")
+  message("Linux libraries")
+  message("NOTE: The compatible LignumForest project")
+  message("with the Git tag \"crowndensity-compatible\" required")
   target_link_libraries(crowndens
     HDF5::HDF5 Qt5::Xml Qt5::Core
     L voxel sky LGM cxxadt
@@ -157,6 +167,7 @@ else()
   message(FATAL_ERROR "Exiting cmake")
 endif()
 add_custom_command(TARGET crowndens
+  COMMAND echo "Compiled CrownDensity done"
   POST_BUILD
   COMMENT "REMEMBER to type \"make install\" to install \"crowndens\" into the working directory above."
   )

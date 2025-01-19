@@ -4,6 +4,9 @@
 ///
 ///Global variables used in LignumForest initialized by GrowthLoop.
 ///Variables are dummy in the context of CrownDensity, needed for compilation.
+///Except butt_swell_coeff and butt_swell_start that are used in
+///LignumForest/src/metabolism.
+
 namespace LignumForest{
   ///\defgroup spaceb Global variables to set heights and lengths
   ///@{
@@ -23,5 +26,7 @@ namespace LignumForest{
   double rel_bud = 0.0;
   ///\deprecated Variation in branch angle. Set in \sa pine-em98.L
   double branch_angle = 45.0 * PI_VALUE / 180.0;
+  double butt_swell_coeff = 0.0015;
+  int butt_swell_start = 1000;
 }
 

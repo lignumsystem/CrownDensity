@@ -36,6 +36,9 @@ namespace Pine{
 ///@{
 ///Global variables used in LignumForest initialized by GrowthLoop.
 ///Variables are dummy in the context of CrownDensity, needed for compilation.
+///Except butt_swell_coeff and butt_swell_start that are used in
+///LignumForest/src/metabolism.
+
 namespace LignumForest{
   extern double H_0_ini;
   extern double H_var_ini;
@@ -44,6 +47,8 @@ namespace LignumForest{
   extern int n_buds_ini_min;
   extern double rel_bud;
   extern double branch_angle;
+  extern double butt_swell_coeff;
+  extern int butt_swell_start;
 }
 ///@}
 ///\defgroup crowndensityglobals Global variables in CrownDensity

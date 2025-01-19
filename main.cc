@@ -128,7 +128,7 @@ namespace CrownDensity{
     cout << "[-EBHREDUCTION <value>] [-EBHFINAL <value>] [-EBHInput <int>] [-RUE <value>]" << endl;
     cout << "[-space2Distance <Value>] [-minLeaderLen <value>]" << endl;
     cout << "[-modeChange <year> ] [-architectureChange <year> [-aChangeStart <year>]]" << endl;
-    cout << "[-kBorderConifer]" << endl;
+    cout << "[-kBorderConifer] [-butt_swell_coeff <value>] [-butt_swell_start <int>]" << endl;
 
     cout << endl;
     cout << "-adHoc             Increase growth in lower parts of the crown." <<endl;
@@ -165,11 +165,17 @@ namespace CrownDensity{
     cout << "                    See the global variables is_architecure_change and architecture_change_year" <<endl;       
     cout << "-kBorderConifer <value>   Extinction coefficient of border forest. Default = 0.11" << endl;
     cout << "-minLeaderLen <value>     Leader length (= height increment) is forced to be at least <value> m" << endl;
+    cout << "-butt_swell_coeff    Adjustment coefficient for the butt swell model." << endl;
+    cout << "-butt_swell_start    Tree age to start butt swell." <<endl;                                          
+
     cout << endl;
   }
   //[Usagex]
   ///\endinternal
 }//end namespace CrownDensity
+
+extern double LignumForest::butt_swell_coeff;
+extern int LignumForest::butt_swell_start;
 
 
 int main(int argc, char** argv)
@@ -478,9 +484,23 @@ int main(int argc, char** argv)
     minLeader = atof(clarg.c_str()); 
   }
 
+  ///---
+  ///\par Parse butt swell coefficent
+  clarg.clear();
+  LignumForest::butt_swell_coeff = 0.0015;
+  if (ParseCommandLine(argc,argv,"-butt_swell_coeff",clarg)){
+    LignumForest::butt_swell_coeff = atof(clarg.c_str());
+  }
 
+  ///---
+  ///\par Parse butt swell start year
+  clarg.clear();
+  LignumForest::butt_swell_start = INT_MAX;
+  if (ParseCommandLine(argc,argv,"-butt_swell_start",clarg)){
+      LignumForest::butt_swell_start = atoi(clarg.c_str());
+    }
 
-  
+ 
   //See CL argument "-EBH" after instantiatiation of the tree
   //See CL option "-EBH1 <value>" after instantiatiation of the tree
 

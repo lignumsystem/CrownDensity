@@ -8,4 +8,4 @@
 #NOTE: Consistency check is made: Number of MetaFiles must be number of ModeChange years + 1
 #      (The first Metafile is consumed in the first initialization).
 #REMEMBER: Set -hdf5 <filename> !!!!!!!
-./crowndens 80 '{MetaFile,MetaFile1}.txt' -metafile MetaFile.txt -iter 80  -voxelspace VoxelSpace.txt -voxelCalculation 5 -numParts 2 -hw 5 -kBorderConifer 0.14 -modeChange 10 -architectureChange 10 -aChangeStart 1 -Lmaxturn 80 -writeInterval 5 -increaseXi 15 -dumpSelf -n_buds_ini_min 3 -n_buds_ini_max 3 -verbose -butt_swell_coeff 1.0 -butt_swell_start 0 -hdf5 koe13.h5
+./crowndens 80 '{MetaFile,MetaFile1}.txt' -metafile MetaFile.txt -iter 80  -voxelspace VoxelSpace.txt -voxelCalculation 5 -numParts 2 -hw 5 -kBorderConifer 0.14 -modeChange 10 -architectureChange 10 -aChangeStart 1 -Lmaxturn 80 -writeInterval 5 -increaseXi 15 -dumpSelf -n_buds_ini_min 3 -n_buds_ini_max 3 -verbose -butt_swell_coeff 0.0015 -butt_swell_start 0 -hdf5 koe21.h5

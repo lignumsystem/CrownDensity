@@ -54,12 +54,12 @@ const double rollmain8  =(360.0/8.0)*PI/180.0;
 int mode = 0; //0 = new segment, 1 = new buds
 
 //Number of buds as the function of foliage mass
-ParametricCurve fnbuds("fnbuds.fun");
+//ParametricCurve fnbuds("fnbuds.fun");
 
 //Adjust the number of buds, more light more buds, less light less buds
-ParametricCurve fnbudslight("fnbudslight.fun");
+//ParametricCurve fnbudslight("fnbudslight.fun");
 //Fipi for buds, the death zone
-ParametricCurve fipbud("fip-bud.fun");
+//ParametricCurve fipbud("fip-bud.fun");
 module F(double);
 //With this implementation side branches start physiological aging, i.e. increments of physiological age.
 //When physiological age reaches mode_change_year the side branches create only two new side branches
